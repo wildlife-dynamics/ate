@@ -17,7 +17,8 @@ yq = "*"
 hatch = "*"
 
 [feature.compile.dependencies]
-ecoscope-workflows-ext-ate = "*"
+# Include this if you add new tasks and the package has been built
+# ecoscope-workflows-ext-ate = "*"
 
 ecoscope-workflows-core = "0.3.1.*"
 # Here we don't specify the channel on purpose, as we want to use the local channel if it exists,

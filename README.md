@@ -114,7 +114,7 @@ or pytest-311/pytest-312 depending on your desired python version.
    ```
 
 6. Update the version in spec.yaml
-   ```toml
+   ```yaml
    - name: ecoscope-workflows-ext-ate
      version: '0.0.2'
      channel: https://repo.prefix.dev/ecoscope-workflows-custom/
