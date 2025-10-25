@@ -10,15 +10,10 @@ from statsmodels.formula.api import ols
 from ecoscope.base.utils import hex_to_rgba
 from ecoscope_workflows_core.decorators import task
 from ecoscope_workflows_core.tasks.io import persist_text
-from ecoscope_workflows_ext_ecoscope.tasks import preprocessing
-from ecoscope_workflows_core.tasks.filter._filter import TimeRange
 from typing import Iterable, Optional, Union,List,Dict,Literal,Annotated
-from ecoscope_workflows_core.tasks.transformation._extract import FieldType
-from ecoscope_workflows_core.annotations import AnyGeoDataFrame,AnyDataFrame
-from ecoscope_workflows_ext_ecoscope.connections import EarthRangerConnection
+from ecoscope_workflows_core.annotations import AnyDataFrame
 from ecoscope_workflows_ext_ecoscope.tasks.results._ecoplot import ExportArgs
-from ecoscope_workflows_ext_ecoscope.tasks.transformation import normalize_column
-from ecoscope_workflows_core.tasks.transformation._mapping import map_columns,map_values
+from ecoscope_workflows_core.tasks.transformation._mapping import map_values
 from ecoscope_workflows_ext_ecoscope.tasks.results._ecoplot import (
     draw_pie_chart, PlotStyle, 
     LayoutStyle,draw_bar_chart,
@@ -997,12 +992,28 @@ def calculate_elephant_sentiment_score(
         df_scored[col] = df_scored[col].astype('Int64')  
     
     df_scored['elephant_sentiment_score'] = df_scored['elephant_sentiment_score'].round(2)
+    def map_overall_attitude(score):
+        if pd.isna(score):
+            return None
+        elif score <= 1.5:
+            return "Strongly disagree"
+        elif score <= 2.5:
+            return "Disagree"
+        elif score <= 3.5:
+            return "Neutral"
+        elif score <= 4.5:
+            return "Agree"
+        else:
+            return "Strongly agree"
+    
+    df_scored['overall_attitude'] = df_scored['elephant_sentiment_score'].apply(map_overall_attitude)
+    df_scored = df_scored.sort_values(by="elephant_sentiment_score")
     return df_scored
 
 @task
 def merge_dataframes(
     left_df: AnyDataFrame,
-    right_df: pd.DataFrame,
+    right_df: AnyDataFrame,
     on: str | list[str],
     how: Literal["left", "right", "inner", "outer"] = "left",
 ) -> AnyDataFrame:
@@ -1120,24 +1131,6 @@ def draw_boxplot(
         ),
     ] = None,
 ) -> Annotated[str, Field()]:
-    """
-    Generates a box plot from the provided params
-
-    Args:
-        dataframe (pd.DataFrame): The input dataframe.
-        y_column (str): The name of the dataframe column to use for box plot values.
-        x_column (str): The name of the dataframe column to group boxes by (categories).
-        color_column (str): The name of the dataframe column to color boxes with.
-        orientation (str): Orientation of the box plot ('v' for vertical, 'h' for horizontal).
-        boxmode (str): How to display multiple boxes ('group' or 'overlay').
-        show_points (str|bool): Whether to show data points ('all', 'outliers', 'suspectedoutliers', or False).
-        plot_style (PlotStyle): Additional style kwargs passed to go.Box().
-        layout_style (LayoutStyle): Additional kwargs passed to plotly.go.Figure(layout).
-        widget_id (str): The id of the dashboard widget that this tile layer belongs to.
-
-    Returns:
-        The generated chart html as a string
-    """
     import plotly.graph_objects as go
 
     layout_kwargs = layout_style.model_dump(exclude_none=True) if layout_style else {}
@@ -1303,24 +1296,6 @@ def draw_scatter_chart(
         ),
     ] = None,
 ) -> Annotated[str, Field()]:
-    """
-    Generates a scatter plot from the provided params with optional trendline
-
-    Args:
-        dataframe (pd.DataFrame): The input dataframe.
-        x_column (str): The name of the dataframe column for x-axis values.
-        y_column (str): The name of the dataframe column for y-axis values.
-        color_column (str): The name of the dataframe column to color points with.
-        size_column (str): The name of the dataframe column to size points with.
-        category_column (str): The name of the dataframe column to group points by.
-        scatter_style (ScatterStyle): Style configuration for scatter points.
-        trendline_style (TrendlineStyle): Configuration for adding trendline.
-        layout_style (LayoutStyle): Additional kwargs passed to plotly.go.Figure(layout).
-        widget_id (str): The id of the dashboard widget that this tile layer belongs to.
-
-    Returns:
-        The generated chart html as a string
-    """
     import plotly.graph_objects as go
     import numpy as np
 
@@ -1518,20 +1493,6 @@ def draw_tukey_plot(
         ),
     ] = None,
 ) -> Annotated[str, Field()]:
-    """
-    Generates a Tukey HSD (Honestly Significant Difference) plot showing pairwise group comparisons
-
-    Args:
-        dataframe (pd.DataFrame): The input dataframe.
-        value_column (str): The name of the dataframe column containing continuous values.
-        group_column (str): The name of the dataframe column containing group categories.
-        tukey_style (TukeyPlotStyle): Style configuration for the Tukey plot.
-        layout_style (LayoutStyle): Additional kwargs passed to plotly.go.Figure(layout).
-        widget_id (str): The id of the dashboard widget that this tile layer belongs to.
-
-    Returns:
-        The generated chart html as a string
-    """
     import plotly.graph_objects as go
     from scipy import stats
     from itertools import combinations
@@ -1719,3 +1680,108 @@ def draw_tukey_plots_and_persist(
             continue  
     return tukey_dir_list
 
+@task
+def map_married_cols(df:AnyDataFrame, col:str)->AnyDataFrame:
+    df= map_values(
+        df=df,
+        column_name=col,
+        value_map={
+        # --- Married (monogamous or generic) ---
+        'Married': 'Married',
+        'Married ': 'Married',
+        'Married.': 'Married',
+        ' married ': 'Married',
+        'Maried': 'Married',
+        'Marriage': 'Married',
+        'Marriage ':'Married',
+        'Married (eamishe)': 'Married',
+        'Married ( eamishe)': 'Married',
+        'Married ( eamishe ': 'Married',
+        'Married (eamishe )': 'Married',
+        'Married eamishe': 'Married',
+        'Married eamishe ': 'Married',
+        'Eamishe ': 'Married',
+        'aiema(married)': 'Married',
+        'Iama': 'Married',
+        'Iama ': 'Married',
+        'Iams': 'Married',
+        'iamishe': 'Married',
+        'iamishe ': 'Married',
+        'Iamishiee': 'Married',
+        'Iamishe': 'Married',
+        'Iamishe ': 'Married',
+        '1amishe': 'Married',
+        'yes': 'Married',
+        'Yes': 'Married',
+        'Yes ': 'Married',
+        'Eeeh': 'Married',
+        'Married eamaki': 'Married',
+        'Married (eamaki)': 'Married',
+        'Married (eamaki) ': 'Married',
+        'Married monogamous ': 'Married',
+        'married (eamishe)':'Married', 
+        'Married ( eamishe) ':'Married',
+        'married ':'Married', 
+        'Married (eamishe) ':'Married',
+            
+        # --- Married Polygamous ---
+        'Married polygamous ': 'Married Polygamous',
+        'Married poligamy ': 'Married Polygamous',
+        'Married polygamously': 'Married Polygamous',
+        'Polygamous ': 'Married Polygamous',
+        'Poligamy ': 'Married Polygamous',
+        'Marriage poligamy ': 'Married Polygamous',
+        'Married polygamously ':'Married Polygamous',
+
+        # --- Separated / Divorced ---
+        'Separated': 'Separated/Divorced',
+        'Separated ': 'Separated/Divorced',
+        'Divorced': 'Separated/Divorced',
+        'Divorced ': 'Separated/Divorced',
+        'Married but separated ': 'Separated/Divorced',
+
+        # --- Widowed ---
+        'Widow': 'Widowed',
+        'Widow ': 'Widowed',
+        'Widowed': 'Widowed',
+        'Widowed ': 'Widowed',
+        'Widower ': 'Widowed',
+
+        # --- Single / Not Married ---
+        'Single': 'Single',
+        'Single ': 'Single',
+        'single': 'Single',
+        'single ': 'Single',
+        'single(itu)': 'Single',
+        'Single (itu)': 'Single',
+        'Single ( itu aemisho)': 'Single',
+        'Single mother': 'Single',
+        'Single mother.': 'Single',
+        'Single mother ': 'Single',
+        'Single parent': 'Single',
+        'Single parent ': 'Single',
+        'Not married': 'Single',
+        'Not Married': 'Single',
+        'Not married ': 'Single',
+        'Notmarried ': 'Single',
+        ' Not Married': 'Single',
+        'Not Married ': 'Single',
+        'No married ': 'Single',
+        'Not. Married ': 'Single',
+        'Not married as': 'Single',
+        'No': 'Single',
+        'Not ': 'Single',
+        'No( itu)': 'Single',
+        'None ': 'Single',
+        'Itu': 'Single',
+        'iti': 'Single',
+        'Iti': 'Single',
+        'Left wife and kids': 'Single',
+        
+        # --- Unknown / Invalid ---
+        '57': 'Unspecified',
+        'iama':'Unspecified'},
+        missing_values="preserve"
+    )
+    
+    return df

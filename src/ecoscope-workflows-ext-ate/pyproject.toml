@@ -66,8 +66,8 @@ shapely = "*"
 docxtpl="*"
 playwright="*"
 statsmodels="*"
-ecoscope-workflows-core = ">=0.7.2"
-ecoscope-workflows-ext-ecoscope=">=0.7.2"
+ecoscope-workflows-core =">=0.14.0"
+ecoscope-workflows-ext-ecoscope=">=0.14.0"
 
 # additional dependencies added by this extension
 

@@ -1,0 +1,26 @@
+workflow_details:
+  name: "ATE Survey"
+  description: "Workflow intended to analyse ATE survey carried in 2024"
+
+# Desired time range
+time_range:
+  since: "2024-01-01T00:00:00Z"
+  until: "2025-01-01T23:59:59Z"
+
+# Connect to EarthRanger
+er_client_name:
+  data_source:
+    name: "ate"
+
+groupers:
+  groupers: []
+
+
+configure_base_maps:
+  base_maps:
+    - url: "https://server.arcgisonline.com/arcgis/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}"
+      opacity: 0.7
+    - url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}"
+      opacity: 0.2
+      max_zoom: 15
+      min_zoom: null

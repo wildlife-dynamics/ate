@@ -1,0 +1,1426 @@
+{
+  "properties": {
+    "workflow_details": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "title": "Workflow Name",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "title": "Workflow Description",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object",
+      "description": "Add information that will help to differentiate this workflow from another.",
+      "title": "Set workflow details"
+    },
+    "time_range": {
+      "additionalProperties": false,
+      "properties": {
+        "since": {
+          "format": "date-time",
+          "title": "Since",
+          "type": "string",
+          "description": "The start time"
+        },
+        "until": {
+          "format": "date-time",
+          "title": "Until",
+          "type": "string",
+          "description": "The end time"
+        },
+        "timezone": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/TimezoneInfo"
+            }
+          ],
+          "default": null,
+          "title": "Timezone"
+        }
+      },
+      "required": [
+        "since",
+        "until"
+      ],
+      "type": "object",
+      "description": "Choose the period of time to analyze.",
+      "title": "Set time range"
+    },
+    "groupers": {
+      "additionalProperties": false,
+      "properties": {
+        "groupers": {
+          "default": null,
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ValueGrouper"
+              },
+              {
+                "$ref": "#/$defs/TemporalGrouper"
+              }
+            ],
+            "title": "Group by"
+          },
+          "title": " ",
+          "type": "array",
+          "description": "            Specify how the data should be grouped to create the views for your dashboard.\n            This field is optional; if left blank, all the data will appear in a single view.\n            "
+        }
+      },
+      "type": "object",
+      "required": [],
+      "title": "Set groupers"
+    },
+    "er_client_name": {
+      "additionalProperties": false,
+      "properties": {
+        "data_source": {
+          "$ref": "#/$defs/EarthRangerConnection",
+          "title": "",
+          "description": "Select one of your configured data sources."
+        }
+      },
+      "required": [
+        "data_source"
+      ],
+      "type": "object",
+      "title": "Connect to ER"
+    },
+    "configure_base_maps": {
+      "additionalProperties": false,
+      "properties": {
+        "base_maps": {
+          "default": [
+            {
+              "url": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
+              "opacity": 1
+            },
+            {
+              "url": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+              "opacity": 0.5
+            }
+          ],
+          "items": {
+            "title": "Base Layer",
+            "anyOf": [
+              {
+                "properties": {
+                  "url": {
+                    "default": "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                    "title": "Preset Layer URL",
+                    "type": "string",
+                    "const": "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                    "enum": [
+                      "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    ]
+                  },
+                  "opacity": {
+                    "default": 1,
+                    "description": "Set layer transparency from 1 (fully visible) to 0 (hidden).",
+                    "maximum": 1.0,
+                    "minimum": 0.0,
+                    "title": "Layer Opacity",
+                    "type": "number"
+                  }
+                },
+                "title": "Open Street Map",
+                "type": "object"
+              },
+              {
+                "properties": {
+                  "url": {
+                    "default": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
+                    "title": "Preset Layer URL",
+                    "type": "string",
+                    "const": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
+                    "enum": [
+                      "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}"
+                    ]
+                  },
+                  "opacity": {
+                    "default": 1,
+                    "description": "Set layer transparency from 1 (fully visible) to 0 (hidden).",
+                    "maximum": 1.0,
+                    "minimum": 0.0,
+                    "title": "Layer Opacity",
+                    "type": "number"
+                  }
+                },
+                "title": "Roadmap",
+                "type": "object"
+              },
+              {
+                "properties": {
+                  "url": {
+                    "default": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+                    "title": "Preset Layer URL",
+                    "type": "string",
+                    "const": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+                    "enum": [
+                      "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                    ]
+                  },
+                  "opacity": {
+                    "default": 1,
+                    "description": "Set layer transparency from 1 (fully visible) to 0 (hidden).",
+                    "maximum": 1.0,
+                    "minimum": 0.0,
+                    "title": "Layer Opacity",
+                    "type": "number"
+                  }
+                },
+                "title": "Satellite",
+                "type": "object"
+              },
+              {
+                "properties": {
+                  "url": {
+                    "default": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
+                    "title": "Preset Layer URL",
+                    "type": "string",
+                    "const": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
+                    "enum": [
+                      "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"
+                    ]
+                  },
+                  "opacity": {
+                    "default": 1,
+                    "description": "Set layer transparency from 1 (fully visible) to 0 (hidden).",
+                    "maximum": 1.0,
+                    "minimum": 0.0,
+                    "title": "Layer Opacity",
+                    "type": "number"
+                  }
+                },
+                "title": "Terrain",
+                "type": "object"
+              },
+              {
+                "properties": {
+                  "url": {
+                    "default": "https://tiles.arcgis.com/tiles/POUcpLYXNckpLjnY/arcgis/rest/services/landDx_basemap_tiles_mapservice/MapServer/tile/{z}/{y}/{x}",
+                    "title": "Preset Layer URL",
+                    "type": "string",
+                    "const": "https://tiles.arcgis.com/tiles/POUcpLYXNckpLjnY/arcgis/rest/services/landDx_basemap_tiles_mapservice/MapServer/tile/{z}/{y}/{x}",
+                    "enum": [
+                      "https://tiles.arcgis.com/tiles/POUcpLYXNckpLjnY/arcgis/rest/services/landDx_basemap_tiles_mapservice/MapServer/tile/{z}/{y}/{x}"
+                    ]
+                  },
+                  "opacity": {
+                    "default": 1,
+                    "description": "Set layer transparency from 1 (fully visible) to 0 (hidden).",
+                    "maximum": 1.0,
+                    "minimum": 0.0,
+                    "title": "Layer Opacity",
+                    "type": "number"
+                  }
+                },
+                "title": "LandDx",
+                "type": "object"
+              },
+              {
+                "properties": {
+                  "url": {
+                    "default": "https://server.arcgisonline.com/arcgis/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}",
+                    "title": "Preset Layer URL",
+                    "type": "string",
+                    "const": "https://server.arcgisonline.com/arcgis/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}",
+                    "enum": [
+                      "https://server.arcgisonline.com/arcgis/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}"
+                    ]
+                  },
+                  "opacity": {
+                    "default": 1,
+                    "description": "Set layer transparency from 1 (fully visible) to 0 (hidden).",
+                    "maximum": 1.0,
+                    "minimum": 0.0,
+                    "title": "Layer Opacity",
+                    "type": "number"
+                  }
+                },
+                "title": "USGS Hillshade",
+                "type": "object"
+              },
+              {
+                "properties": {
+                  "url": {
+                    "default": "https://example.tiles.com/{z}/{x}/{y}.png",
+                    "description": "The URL of a publicly accessible tiled raster service.",
+                    "pattern": "https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}([-a-zA-Z0-9()@:%_\\+.~#?&//=\\{\\}]*)",
+                    "title": "Custom Layer URL",
+                    "type": "string"
+                  },
+                  "opacity": {
+                    "default": 1,
+                    "description": "Set layer transparency from 1 (fully visible) to 0 (hidden).",
+                    "maximum": 1.0,
+                    "minimum": 0.0,
+                    "title": "Custom Layer Opacity",
+                    "type": "number"
+                  },
+                  "max_zoom": {
+                    "default": null,
+                    "description": "Set the maximum zoom level to fetch tiles for.",
+                    "title": "Custom Layer Max Zoom",
+                    "type": "integer"
+                  },
+                  "min_zoom": {
+                    "default": null,
+                    "description": "Set the minimum zoom level to fetch tiles for.",
+                    "title": "Custom Layer Min Zoom",
+                    "type": "integer"
+                  }
+                },
+                "title": "Custom Layer (Advanced)",
+                "type": "object"
+              }
+            ]
+          },
+          "title": " ",
+          "type": "array",
+          "description": "Select tile layers to use as base layers in map outputs. The first layer in the list will be the bottommost layer displayed.",
+          "ecoscope:advanced": true
+        }
+      },
+      "type": "object",
+      "required": [],
+      "title": "Configure basemap layers"
+    },
+    "download_ate_tpt": {
+      "additionalProperties": false,
+      "properties": {
+        "retries": {
+          "default": 3,
+          "minimum": 0,
+          "title": "Retries",
+          "type": "integer",
+          "description": "Number of retries on failure"
+        },
+        "unzip": {
+          "default": false,
+          "title": "Unzip",
+          "type": "boolean",
+          "description": "Whether to unzip the file if it's a zip archive"
+        }
+      },
+      "required": [],
+      "type": "object",
+      "title": "Download ATE survey template"
+    },
+    "get_survey_events_data": {
+      "additionalProperties": false,
+      "properties": {
+        "include_null_geometry": {
+          "default": true,
+          "title": "Include Events Without a Geometry (point or polygon)",
+          "type": "boolean"
+        }
+      },
+      "required": [],
+      "type": "object",
+      "title": "Retrieve ate survey events"
+    },
+    "map_agree_disagree": {
+      "additionalProperties": false,
+      "properties": {
+        "inplace": {
+          "default": false,
+          "title": "Inplace",
+          "type": "boolean"
+        }
+      },
+      "required": [],
+      "type": "object",
+      "title": "Map Agree/Disagree columns"
+    },
+    "map_yes_no": {
+      "additionalProperties": false,
+      "properties": {
+        "inplace": {
+          "default": false,
+          "title": "Inplace",
+          "type": "boolean"
+        }
+      },
+      "required": [],
+      "type": "object",
+      "title": "Map Yes/No columns"
+    },
+    "map_true_false": {
+      "additionalProperties": false,
+      "properties": {
+        "inplace": {
+          "default": false,
+          "title": "Inplace",
+          "type": "boolean"
+        }
+      },
+      "required": [],
+      "type": "object",
+      "title": "Map True/False columns"
+    },
+    "map_no_effect": {
+      "additionalProperties": false,
+      "properties": {
+        "inplace": {
+          "default": false,
+          "title": "Inplace",
+          "type": "boolean"
+        }
+      },
+      "required": [],
+      "type": "object",
+      "title": "Map effective/not effective columns"
+    },
+    "map_part_age": {
+      "additionalProperties": false,
+      "properties": {
+        "column_name": {
+          "title": "Column Name",
+          "type": "string",
+          "description": "The column name to map."
+        },
+        "replacement": {
+          "default": null,
+          "title": "Replacement",
+          "type": "string",
+          "description": "The replacement for values not in value_map."
+        }
+      },
+      "required": [
+        "column_name"
+      ],
+      "type": "object",
+      "title": "Map participant age column"
+    },
+    "map_house_size": {
+      "additionalProperties": false,
+      "properties": {
+        "column_name": {
+          "title": "Column Name",
+          "type": "string",
+          "description": "The column name to map."
+        },
+        "replacement": {
+          "default": null,
+          "title": "Replacement",
+          "type": "string",
+          "description": "The replacement for values not in value_map."
+        }
+      },
+      "required": [
+        "column_name"
+      ],
+      "type": "object",
+      "title": "Map household size column"
+    },
+    "map_pat_tribe": {
+      "additionalProperties": false,
+      "properties": {
+        "column_name": {
+          "title": "Column Name",
+          "type": "string",
+          "description": "The column name to map."
+        },
+        "replacement": {
+          "default": null,
+          "title": "Replacement",
+          "type": "string",
+          "description": "The replacement for values not in value_map."
+        }
+      },
+      "required": [
+        "column_name"
+      ],
+      "type": "object",
+      "title": "Map participant tribe"
+    },
+    "map_part_gender": {
+      "additionalProperties": false,
+      "properties": {
+        "column_name": {
+          "title": "Column Name",
+          "type": "string",
+          "description": "The column name to map."
+        },
+        "replacement": {
+          "default": null,
+          "title": "Replacement",
+          "type": "string",
+          "description": "The replacement for values not in value_map."
+        }
+      },
+      "required": [
+        "column_name"
+      ],
+      "type": "object",
+      "title": "Map participant gender"
+    },
+    "map_part_age_group": {
+      "additionalProperties": false,
+      "properties": {
+        "column_name": {
+          "title": "Column Name",
+          "type": "string",
+          "description": "The column name to map."
+        },
+        "replacement": {
+          "default": null,
+          "title": "Replacement",
+          "type": "string",
+          "description": "The replacement for values not in value_map."
+        }
+      },
+      "required": [
+        "column_name"
+      ],
+      "type": "object",
+      "title": "Map participant age group"
+    },
+    "map_years_lived": {
+      "additionalProperties": false,
+      "properties": {
+        "column_name": {
+          "title": "Column Name",
+          "type": "string",
+          "description": "The column name to map."
+        },
+        "replacement": {
+          "default": null,
+          "title": "Replacement",
+          "type": "string",
+          "description": "The replacement for values not in value_map."
+        }
+      },
+      "required": [
+        "column_name"
+      ],
+      "type": "object",
+      "title": "Map years living in area"
+    },
+    "map_overall_col": {
+      "additionalProperties": false,
+      "properties": {
+        "column_name": {
+          "title": "Column Name",
+          "type": "string",
+          "description": "The column name to map."
+        },
+        "replacement": {
+          "default": null,
+          "title": "Replacement",
+          "type": "string",
+          "description": "The replacement for values not in value_map."
+        }
+      },
+      "required": [
+        "column_name"
+      ],
+      "type": "object",
+      "title": "Map overall feelings about wildlife"
+    },
+    "map_opinion_ele_col": {
+      "additionalProperties": false,
+      "properties": {
+        "column_name": {
+          "title": "Column Name",
+          "type": "string",
+          "description": "The column name to map."
+        },
+        "replacement": {
+          "default": null,
+          "title": "Replacement",
+          "type": "string",
+          "description": "The replacement for values not in value_map."
+        }
+      },
+      "required": [
+        "column_name"
+      ],
+      "type": "object",
+      "title": "Map opinions on having elephants in the area"
+    },
+    "map_how_often": {
+      "additionalProperties": false,
+      "properties": {
+        "column_name": {
+          "title": "Column Name",
+          "type": "string",
+          "description": "The column name to map."
+        },
+        "replacement": {
+          "default": null,
+          "title": "Replacement",
+          "type": "string",
+          "description": "The replacement for values not in value_map."
+        }
+      },
+      "required": [
+        "column_name"
+      ],
+      "type": "object",
+      "title": "Map How often seen elephants in the last year"
+    },
+    "map_what_foot": {
+      "additionalProperties": false,
+      "properties": {
+        "column_name": {
+          "title": "Column Name",
+          "type": "string",
+          "description": "The column name to map."
+        },
+        "replacement": {
+          "default": null,
+          "title": "Replacement",
+          "type": "string",
+          "description": "The replacement for values not in value_map."
+        }
+      },
+      "required": [
+        "column_name"
+      ],
+      "type": "object",
+      "title": "Map What do you do when you encounter elephants on foot"
+    },
+    "map_react_column": {
+      "additionalProperties": false,
+      "properties": {
+        "column_name": {
+          "title": "Column Name",
+          "type": "string",
+          "description": "The column name to map."
+        },
+        "replacement": {
+          "default": null,
+          "title": "Replacement",
+          "type": "string",
+          "description": "The replacement for values not in value_map."
+        }
+      },
+      "required": [
+        "column_name"
+      ],
+      "type": "object",
+      "title": "Map Reaction to hearing about elephants being harmed"
+    },
+    "map_high_ed_col": {
+      "additionalProperties": false,
+      "properties": {
+        "column_name": {
+          "title": "Column Name",
+          "type": "string",
+          "description": "The column name to map."
+        },
+        "replacement": {
+          "default": null,
+          "title": "Replacement",
+          "type": "string",
+          "description": "The replacement for values not in value_map."
+        }
+      },
+      "required": [
+        "column_name"
+      ],
+      "type": "object",
+      "title": "Map Highest level of education"
+    },
+    "map_threat_col": {
+      "additionalProperties": false,
+      "properties": {
+        "column_name": {
+          "title": "Column Name",
+          "type": "string",
+          "description": "The column name to map."
+        },
+        "replacement": {
+          "default": null,
+          "title": "Replacement",
+          "type": "string",
+          "description": "The replacement for values not in value_map."
+        }
+      },
+      "required": [
+        "column_name"
+      ],
+      "type": "object",
+      "title": "Map Greatest threat to your livestock"
+    },
+    "map_crop_threat": {
+      "additionalProperties": false,
+      "properties": {
+        "column_name": {
+          "title": "Column Name",
+          "type": "string",
+          "description": "The column name to map."
+        },
+        "replacement": {
+          "default": null,
+          "title": "Replacement",
+          "type": "string",
+          "description": "The replacement for values not in value_map."
+        }
+      },
+      "required": [
+        "column_name"
+      ],
+      "type": "object",
+      "title": "Map Greatest threat to crop production"
+    },
+    "map_future_col": {
+      "additionalProperties": false,
+      "properties": {
+        "column_name": {
+          "title": "Column Name",
+          "type": "string",
+          "description": "The column name to map."
+        },
+        "replacement": {
+          "default": null,
+          "title": "Replacement",
+          "type": "string",
+          "description": "The replacement for values not in value_map."
+        }
+      },
+      "required": [
+        "column_name"
+      ],
+      "type": "object",
+      "title": "Map Which intervention would help you in future"
+    },
+    "map_marital_status": {
+      "additionalProperties": false,
+      "properties": {
+        "col": {
+          "title": "Col",
+          "type": "string"
+        }
+      },
+      "required": [
+        "col"
+      ],
+      "type": "object",
+      "title": "Map Marital status"
+    },
+    "map_land_tenure": {
+      "additionalProperties": false,
+      "properties": {
+        "column_name": {
+          "title": "Column Name",
+          "type": "string",
+          "description": "The column name to map."
+        },
+        "replacement": {
+          "default": null,
+          "title": "Replacement",
+          "type": "string",
+          "description": "The replacement for values not in value_map."
+        }
+      },
+      "required": [
+        "column_name"
+      ],
+      "type": "object",
+      "title": "Map Land tenure"
+    },
+    "convt_to_int": {
+      "additionalProperties": false,
+      "properties": {
+        "errors": {
+          "default": "coerce",
+          "title": "Errors",
+          "type": "string"
+        },
+        "fill_value": {
+          "default": 0,
+          "title": "Fill Value",
+          "type": "integer"
+        },
+        "inplace": {
+          "default": false,
+          "title": "Inplace",
+          "type": "boolean"
+        }
+      },
+      "required": [],
+      "type": "object",
+      "title": "Convert columns to int"
+    },
+    "persist_demo_df": {
+      "additionalProperties": false,
+      "properties": {
+        "filetype": {
+          "default": "csv",
+          "enum": [
+            "csv",
+            "gpkg",
+            "geoparquet"
+          ],
+          "title": "Filetype",
+          "type": "string",
+          "description": "The output format"
+        }
+      },
+      "required": [],
+      "type": "object",
+      "title": "Persist demographic table to disk"
+    },
+    "bin_survey_cols": {
+      "additionalProperties": false,
+      "properties": {
+        "bins": {
+          "default": 5,
+          "title": "Bins",
+          "type": "integer"
+        },
+        "suffix": {
+          "default": " bins",
+          "title": "Suffix",
+          "type": "string"
+        },
+        "inplace": {
+          "default": false,
+          "title": "Inplace",
+          "type": "boolean"
+        }
+      },
+      "required": [],
+      "type": "object",
+      "title": "Bin columns on survey"
+    },
+    "filter_elephant_qs": {
+      "additionalProperties": false,
+      "properties": {
+        "errors": {
+          "default": "raise",
+          "title": "Errors",
+          "type": "string"
+        }
+      },
+      "required": [],
+      "type": "object",
+      "title": "Filter elephant relevant questions"
+    },
+    "draw_likert_chart": {
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "default": null,
+          "title": "Title",
+          "type": "string"
+        },
+        "height_per_question": {
+          "default": 60,
+          "title": "Height Per Question",
+          "type": "integer"
+        },
+        "min_height": {
+          "default": 400,
+          "title": "Min Height",
+          "type": "integer"
+        },
+        "width": {
+          "default": 1200,
+          "title": "Width",
+          "type": "integer"
+        },
+        "show_percentages": {
+          "default": true,
+          "title": "Show Percentages",
+          "type": "boolean"
+        },
+        "sort_questions": {
+          "default": false,
+          "title": "Sort Questions",
+          "type": "boolean"
+        },
+        "sort_by": {
+          "default": "positive",
+          "title": "Sort By",
+          "type": "string"
+        }
+      },
+      "required": [],
+      "type": "object",
+      "title": "Draw likert chart"
+    },
+    "filter_eff_noeff": {
+      "additionalProperties": false,
+      "properties": {
+        "errors": {
+          "default": "raise",
+          "title": "Errors",
+          "type": "string"
+        }
+      },
+      "required": [],
+      "type": "object",
+      "title": "Filter effective / not effective df"
+    },
+    "draw_likert_eff": {
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "default": null,
+          "title": "Title",
+          "type": "string"
+        },
+        "height_per_question": {
+          "default": 60,
+          "title": "Height Per Question",
+          "type": "integer"
+        },
+        "min_height": {
+          "default": 400,
+          "title": "Min Height",
+          "type": "integer"
+        },
+        "width": {
+          "default": 1200,
+          "title": "Width",
+          "type": "integer"
+        },
+        "show_percentages": {
+          "default": true,
+          "title": "Show Percentages",
+          "type": "boolean"
+        },
+        "sort_questions": {
+          "default": false,
+          "title": "Sort Questions",
+          "type": "boolean"
+        },
+        "sort_by": {
+          "default": "positive",
+          "title": "Sort By",
+          "type": "string"
+        }
+      },
+      "required": [],
+      "type": "object",
+      "title": "Draw likert chart"
+    },
+    "filter_attitude_cols": {
+      "additionalProperties": false,
+      "properties": {
+        "errors": {
+          "default": "raise",
+          "title": "Errors",
+          "type": "string"
+        }
+      },
+      "required": [],
+      "type": "object",
+      "title": "Filter attitude score columns"
+    },
+    "persist_attitude_df": {
+      "additionalProperties": false,
+      "properties": {
+        "filetype": {
+          "default": "csv",
+          "enum": [
+            "csv",
+            "gpkg",
+            "geoparquet"
+          ],
+          "title": "Filetype",
+          "type": "string",
+          "description": "The output format"
+        }
+      },
+      "required": [],
+      "type": "object",
+      "title": "Persist attitude scores df"
+    },
+    "filter_stat_qs": {
+      "additionalProperties": false,
+      "properties": {
+        "errors": {
+          "default": "raise",
+          "title": "Errors",
+          "type": "string"
+        }
+      },
+      "required": [],
+      "type": "object",
+      "title": "Filter stat relevant questions"
+    },
+    "persist_anova_df": {
+      "additionalProperties": false,
+      "properties": {
+        "filetype": {
+          "default": "csv",
+          "enum": [
+            "csv",
+            "gpkg",
+            "geoparquet"
+          ],
+          "title": "Filetype",
+          "type": "string",
+          "description": "The output format"
+        }
+      },
+      "required": [],
+      "type": "object",
+      "title": "Persist anova df to disk"
+    },
+    "generate_att_layers": {
+      "additionalProperties": false,
+      "properties": {
+        "legend": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/LegendDefinition"
+            }
+          ],
+          "default": null,
+          "title": "Legend",
+          "description": "If present, includes this layer in the map legend",
+          "ecoscope:advanced": true
+        },
+        "tooltip_columns": {
+          "default": null,
+          "items": {
+            "type": "string"
+          },
+          "title": "Tooltip Columns",
+          "type": "array",
+          "description": "If present, only the listed dataframe columns will display in the layer's picking info",
+          "ecoscope:advanced": true
+        }
+      },
+      "required": [
+        "geodataframe"
+      ],
+      "type": "object",
+      "title": "Generate attitude score point layers"
+    },
+    "generate_gn_layers": {
+      "additionalProperties": false,
+      "properties": {
+        "legend": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/LegendDefinition"
+            }
+          ],
+          "default": null,
+          "title": "Legend",
+          "description": "If present, includes this layer in the map legend",
+          "ecoscope:advanced": true
+        },
+        "tooltip_columns": {
+          "default": null,
+          "items": {
+            "type": "string"
+          },
+          "title": "Tooltip Columns",
+          "type": "array",
+          "description": "If present, only the listed dataframe columns will display in the layer's picking info",
+          "ecoscope:advanced": true
+        }
+      },
+      "required": [
+        "geodataframe"
+      ],
+      "type": "object",
+      "title": "Generate gender point layers"
+    },
+    "generate_ov_layers": {
+      "additionalProperties": false,
+      "properties": {
+        "legend": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/LegendDefinition"
+            }
+          ],
+          "default": null,
+          "title": "Legend",
+          "description": "If present, includes this layer in the map legend",
+          "ecoscope:advanced": true
+        },
+        "tooltip_columns": {
+          "default": null,
+          "items": {
+            "type": "string"
+          },
+          "title": "Tooltip Columns",
+          "type": "array",
+          "description": "If present, only the listed dataframe columns will display in the layer's picking info",
+          "ecoscope:advanced": true
+        }
+      },
+      "required": [
+        "geodataframe"
+      ],
+      "type": "object",
+      "title": "Generate overall point layers"
+    }
+  },
+  "$defs": {
+    "TimezoneInfo": {
+      "properties": {
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "tzCode": {
+          "title": "Tzcode",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "utc": {
+          "title": "Utc",
+          "type": "string"
+        }
+      },
+      "required": [
+        "label",
+        "tzCode",
+        "name",
+        "utc"
+      ],
+      "title": "TimezoneInfo",
+      "type": "object"
+    },
+    "TemporalGrouper": {
+      "oneOf": [
+        {
+          "const": "%Y",
+          "title": "Year (example: 2024)"
+        },
+        {
+          "const": "%B",
+          "title": "Month (example: September)"
+        },
+        {
+          "const": "%Y-%m",
+          "title": "Year and Month (example: 2023-01)"
+        },
+        {
+          "const": "%j",
+          "title": "Day of the year as a number (example: 365)"
+        },
+        {
+          "const": "%d",
+          "title": "Day of the month as a number (example: 31)"
+        },
+        {
+          "const": "%A",
+          "title": "Day of the week (example: Sunday)"
+        },
+        {
+          "const": "%H",
+          "title": "Hour (24-hour clock) as number (example: 22)"
+        },
+        {
+          "const": "%Y-%m-%d",
+          "title": "Date (example: 2025-01-31)"
+        }
+      ],
+      "title": "Time",
+      "type": "string"
+    },
+    "ValueGrouper": {
+      "oneOf": [],
+      "title": "Category",
+      "type": "string"
+    },
+    "EarthRangerConnection": {
+      "properties": {
+        "name": {
+          "title": "Data Source",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "EarthRangerConnection",
+      "type": "object"
+    },
+    "LegendDefinition": {
+      "properties": {
+        "label_column": {
+          "default": null,
+          "ecoscope:advanced": true,
+          "title": "Label Column",
+          "type": "string"
+        },
+        "color_column": {
+          "default": null,
+          "ecoscope:advanced": true,
+          "title": "Color Column",
+          "type": "string"
+        },
+        "labels": {
+          "default": null,
+          "items": {
+            "type": "string"
+          },
+          "title": "Labels",
+          "type": "array"
+        },
+        "colors": {
+          "default": null,
+          "items": {
+            "type": "string"
+          },
+          "title": "Colors",
+          "type": "array"
+        },
+        "sort": {
+          "anyOf": [
+            {
+              "enum": [
+                "ascending",
+                "descending"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "ecoscope:advanced": true,
+          "title": "Sort"
+        },
+        "label_suffix": {
+          "default": null,
+          "ecoscope:advanced": true,
+          "title": "Label Suffix",
+          "type": "string"
+        }
+      },
+      "title": "LegendDefinition",
+      "type": "object"
+    }
+  },
+  "uiSchema": {
+    "workflow_details": {
+      "ui:order": [
+        "name",
+        "description"
+      ]
+    },
+    "time_range": {
+      "ui:order": [
+        "since",
+        "until",
+        "timezone"
+      ]
+    },
+    "download_ate_tpt": {
+      "ui:order": [
+        "retries",
+        "unzip"
+      ]
+    },
+    "map_part_age": {
+      "ui:order": [
+        "column_name",
+        "replacement"
+      ]
+    },
+    "map_house_size": {
+      "ui:order": [
+        "column_name",
+        "replacement"
+      ]
+    },
+    "map_pat_tribe": {
+      "ui:order": [
+        "column_name",
+        "replacement"
+      ]
+    },
+    "map_part_gender": {
+      "ui:order": [
+        "column_name",
+        "replacement"
+      ]
+    },
+    "map_part_age_group": {
+      "ui:order": [
+        "column_name",
+        "replacement"
+      ]
+    },
+    "map_years_lived": {
+      "ui:order": [
+        "column_name",
+        "replacement"
+      ]
+    },
+    "map_overall_col": {
+      "ui:order": [
+        "column_name",
+        "replacement"
+      ]
+    },
+    "map_opinion_ele_col": {
+      "ui:order": [
+        "column_name",
+        "replacement"
+      ]
+    },
+    "map_how_often": {
+      "ui:order": [
+        "column_name",
+        "replacement"
+      ]
+    },
+    "map_what_foot": {
+      "ui:order": [
+        "column_name",
+        "replacement"
+      ]
+    },
+    "map_react_column": {
+      "ui:order": [
+        "column_name",
+        "replacement"
+      ]
+    },
+    "map_high_ed_col": {
+      "ui:order": [
+        "column_name",
+        "replacement"
+      ]
+    },
+    "map_threat_col": {
+      "ui:order": [
+        "column_name",
+        "replacement"
+      ]
+    },
+    "map_crop_threat": {
+      "ui:order": [
+        "column_name",
+        "replacement"
+      ]
+    },
+    "map_future_col": {
+      "ui:order": [
+        "column_name",
+        "replacement"
+      ]
+    },
+    "map_land_tenure": {
+      "ui:order": [
+        "column_name",
+        "replacement"
+      ]
+    },
+    "convt_to_int": {
+      "ui:order": [
+        "errors",
+        "fill_value",
+        "inplace"
+      ]
+    },
+    "bin_survey_cols": {
+      "ui:order": [
+        "bins",
+        "suffix",
+        "inplace"
+      ]
+    },
+    "draw_likert_chart": {
+      "ui:order": [
+        "title",
+        "height_per_question",
+        "min_height",
+        "width",
+        "show_percentages",
+        "sort_questions",
+        "sort_by"
+      ]
+    },
+    "draw_likert_eff": {
+      "ui:order": [
+        "title",
+        "height_per_question",
+        "min_height",
+        "width",
+        "show_percentages",
+        "sort_questions",
+        "sort_by"
+      ]
+    },
+    "generate_att_layers": {
+      "ui:order": [
+        "legend",
+        "tooltip_columns"
+      ]
+    },
+    "generate_gn_layers": {
+      "ui:order": [
+        "legend",
+        "tooltip_columns"
+      ]
+    },
+    "generate_ov_layers": {
+      "ui:order": [
+        "legend",
+        "tooltip_columns"
+      ]
+    },
+    "ui:order": [
+      "workflow_details",
+      "time_range",
+      "groupers",
+      "er_client_name",
+      "configure_base_maps",
+      "download_ate_tpt",
+      "get_survey_events_data",
+      "map_agree_disagree",
+      "map_yes_no",
+      "map_true_false",
+      "map_no_effect",
+      "map_part_age",
+      "map_house_size",
+      "map_pat_tribe",
+      "map_part_gender",
+      "map_part_age_group",
+      "map_years_lived",
+      "map_overall_col",
+      "map_opinion_ele_col",
+      "map_how_often",
+      "map_what_foot",
+      "map_react_column",
+      "map_high_ed_col",
+      "map_threat_col",
+      "map_crop_threat",
+      "map_future_col",
+      "map_marital_status",
+      "map_land_tenure",
+      "convt_to_int",
+      "persist_demo_df",
+      "bin_survey_cols",
+      "filter_elephant_qs",
+      "draw_likert_chart",
+      "filter_eff_noeff",
+      "draw_likert_eff",
+      "filter_attitude_cols",
+      "persist_attitude_df",
+      "filter_stat_qs",
+      "persist_anova_df",
+      "generate_att_layers",
+      "generate_gn_layers",
+      "generate_ov_layers"
+    ]
+  },
+  "additionalProperties": false
+}

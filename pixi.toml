@@ -3,7 +3,7 @@ name = "ate"
 channels = [
     # Uncomment the following lines to use local channels for development.
     # "file:///tmp/ecoscope-workflows/release/artifacts/",
-    # "file:///tmp/ecoscope-workflows-custom/release/artifacts/",
+    "file:///tmp/ecoscope-workflows-custom/release/artifacts/",
     'https://repo.prefix.dev/ecoscope-workflows/',
     'https://repo.prefix.dev/ecoscope-workflows-custom/',
     'conda-forge',
@@ -15,12 +15,13 @@ curl = "*"
 rattler-build = "*"
 yq = "*"
 hatch = "*"
+pip="*"
 
 [feature.compile.dependencies]
 # Include this if you add new tasks and the package has been built
-# ecoscope-workflows-ext-ate = "*"
+ecoscope-workflows-ext-ate = "*"
 
-ecoscope-workflows-core = "0.7.2.*"
+ecoscope-workflows-core = "0.14.0.*"
 # Here we don't specify the channel on purpose, as we want to use the local channel if it exists,
 # otherwise we fall back to the remote channel.
 # If you want to ensure a specific channel to incorporate your local changes, you can uncomment the line below.
@@ -52,3 +53,12 @@ depends-on = ["build-release"]
 [feature.compile.tasks.recompile-bull-analysis]
 cmd = './dev/recompile.sh bull-analysis --update'
 depends-on = ["build-release"]
+
+[feature.compile.tasks.compile-ate_survey]
+cmd = './dev/recompile.sh ate_survey --install'
+depends-on = ["build-release"]
+
+[feature.compile.tasks.recompile-ate_survey]
+cmd = './dev/recompile.sh ate_survey --update'
+depends-on = ["build-release"]
+

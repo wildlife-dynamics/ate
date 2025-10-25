@@ -20,10 +20,35 @@ from ._survey import (
    draw_scatter_chart,
    draw_ols_scatterplot_and_persist,
    draw_tukey_plot,
-   draw_tukey_plots_and_persist
+   draw_tukey_plots_and_persist,
+   map_married_cols
 )
-
+from ._zip import zip_grouped_by_key ,flatten_tuple
+from ._inspect import print_output,view_df
+from ._download_file import  download_file_and_persist
+from ._map_utils import (
+    download_land_dx,
+    load_landdx_aoi,
+    create_map_layers,
+    combine_map_layers,
+    detect_geometry_type,
+    load_geospatial_files,
+    create_layer_from_gdf,
+    build_landdx_style_config,
+    remove_invalid_geometries,
+    create_view_state_from_gdf,
+    annotate_gdf_dict_with_geometry_type,
+    create_map_layers_from_annotated_dict,
+)
+from ._zhtml import zhtml_to_png
 __all__ = [
+    "zhtml_to_png",
+    "map_married_cols",
+    "download_file_and_persist",
+    "zip_grouped_by_key",
+    "flatten_tuple",
+    "print_output",
+    "view_df",
     "add_one_thousand",
     "convert_object_to_value",
     "convert_object_to_string",
@@ -46,4 +71,18 @@ __all__ = [
     "draw_ols_scatterplot_and_persist",
     "draw_tukey_plot",
     "draw_tukey_plots_and_persist",
+
+    # New additions
+    "download_land_dx",
+    "load_landdx_aoi",
+    "create_map_layers",
+    "combine_map_layers",
+    "detect_geometry_type",
+    "load_geospatial_files",
+    "create_layer_from_gdf",
+    "build_landdx_style_config",
+    "remove_invalid_geometries",
+    "create_view_state_from_gdf",
+    "annotate_gdf_dict_with_geometry_type",
+    "create_map_layers_from_annotated_dict",
 ]
