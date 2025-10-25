@@ -280,7 +280,6 @@ rename_survey_columns = (
         drop_columns=[
             "event_type",
             "event_category",
-            "priority",
             "reported_by",
             "event_details__updates",
             "event_details__end_time",
