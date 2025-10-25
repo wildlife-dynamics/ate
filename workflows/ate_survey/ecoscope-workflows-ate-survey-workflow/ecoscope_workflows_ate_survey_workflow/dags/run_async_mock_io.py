@@ -401,7 +401,6 @@ def main(params: Params):
             partial={
                 "df": DependsOn("rename_survey_columns"),
                 "columns": [
-                    "index",
                     "Participant age",
                     "Number of cows",
                     "Household size",
@@ -499,7 +498,6 @@ def main(params: Params):
                 "numeric_fill_value": 0,
                 "categorical_fill_value": "Unspecified",
                 "numeric_columns": [
-                    "index",
                     "Participant age",
                     "Number of cows",
                     "Household size",

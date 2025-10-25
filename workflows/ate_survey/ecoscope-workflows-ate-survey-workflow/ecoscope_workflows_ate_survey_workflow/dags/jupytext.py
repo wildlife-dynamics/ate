@@ -424,7 +424,6 @@ convert_obj_to_num = (
     .partial(
         df=rename_survey_columns,
         columns=[
-            "index",
             "Participant age",
             "Number of cows",
             "Household size",
@@ -554,7 +553,6 @@ fill_values = (
         numeric_fill_value=0,
         categorical_fill_value="Unspecified",
         numeric_columns=[
-            "index",
             "Participant age",
             "Number of cows",
             "Household size",

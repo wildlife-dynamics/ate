@@ -200,7 +200,6 @@ workflow:
     partial:
       df: ${{ workflow.rename_survey_columns.return }}
       columns:
-        - index
         - Participant age
         - Number of cows
         - Household size
@@ -289,7 +288,6 @@ workflow:
       numeric_fill_value: 0
       categorical_fill_value: Unspecified
       numeric_columns: 
-        - index
         - Participant age
         - Number of cows
         - Household size
