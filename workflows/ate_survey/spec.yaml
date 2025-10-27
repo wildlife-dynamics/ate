@@ -40,7 +40,7 @@ workflow:
     id: download_ate_tpt
     task: download_file_and_persist
     partial:
-      url: https://www.dropbox.com/scl/fi/8eig0iyg2uu76eghi2sd4/ate_survey_template.docx?rlkey=pe5dpqnskj60v0b5uchocdpy1&st=zdokeegg&dl=0
+      url: https://www.dropbox.com/scl/fi/2sepiim1sswiesq0fj4ry/ate_survey_template_v4.docx?rlkey=67atuk1qeh9e7joreb5hli5t5&st=eg37qvf9&dl=0
       output_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
       overwrite_existing: false
 
@@ -96,48 +96,49 @@ workflow:
       file_dict: ${{ workflow.load_local_shapefiles.return }}
       style_config:
         styles:
-          amboseli_ecosystem:
-            get_elevation: 1000
-            get_fill_color: '#FFFFFF00' # transparent fill
-            get_line_color: '#696969'
-            get_line_width: 3
-            opacity: 0.75
-            stroked: true
+          # amboseli_ecosystem:
+          #   get_elevation: 1000
+          #   get_fill_color: '#FFFFFF00' # transparent fill
+          #   get_line_color: '#696969'
+          #   get_line_width: 3
+          #   opacity: 0.75
+          #   stroked: true
           
           amboseli_ranch_boundaries:
             get_elevation: 1000
-            get_fill_color: '#FFFFFF00' # transparent fill
+            get_fill_color: "#FFFFFF00" # transparent fill
             get_line_color: "#000000"
             get_line_width: 2
             stroked: true
-            opacity: 0.25
+            opacity: 0.45
           
           amboseli_swamps:
             get_elevation: 1000
-            get_fill_color: '#609cb5' 
+            get_fill_color: "#609cb5" 
             get_line_color: "#609cb5"
             get_line_width: 2
             stroked: true
-            opacity: 0.25
+            opacity: 0.45
 
           national_parks:
-            fill_color: "#4c8c2b"
-            line_color: "#4c8c2b"
-            line_width: 2
+            get_elevation: 1000
+            get_fill_color: "#4c8c2b"
+            get_line_color: "#4c8c2b"
+            get_line_width: 2
             stroked: true
-            fill_opacity: 0.25
+            opacity: 0.45
 
         legend:
           labels:
-            - Amboseli Ecosystem
+            #- Amboseli Ecosystem
             - Amboseli Ranch Boundaries
             - Amboseli Swamps
             - National Parks
           colors:
-            - "#41b6c4"
-            - "#f03b20"
-            - "#006d2c"
-            - "#6a51a3"
+            #- "#41b6c4"
+            - "#000000"
+            - "#609cb5"
+            - "#4c8c2b"
 
 # -- Retrieve ate survey events 
   - name: Retrieve ate survey events
@@ -1025,9 +1026,9 @@ workflow:
       input_column_name: Participant gender
       output_column_name: gender_colors
       colormap: 
-        - "#0000FF"
         - "#FFC0CB"
-        - "#f8f8ff"
+        - "#0000FF"
+        - "#dc143c"
       df: ${{ workflow.remove_geom_gn_outliers.return }}
   
   - name: Generate gender point layers  
@@ -1238,10 +1239,18 @@ workflow:
 
       output_dir: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
       config:
-        wait_for_timeout: 20000
+        wait_for_timeout: 25000
 
 
 # -- Create context for word doc
+  - name: Persist word doc context
+    id: persist_survey_context
+    task: persist_survey_word
+    partial:
+      template_path: ${{ workflow.download_ate_tpt.return }}
+      output_dir: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      time_period: ${{ workflow.time_range.return }}
+
 
   - name: Create survey dashboard
     id: survey_dashboard

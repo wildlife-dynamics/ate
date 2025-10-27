@@ -1,16 +1,21 @@
 import os 
+import uuid
 import warnings
 import numpy as np
 import pandas as pd
 from pathlib import Path
-import statsmodels.api as sm   
+from docx.shared import Cm
+import statsmodels.api as sm
+from datetime import datetime
 import plotly.graph_objects as go
 from typing_extensions import Literal
 from statsmodels.formula.api import ols
 from ecoscope.base.utils import hex_to_rgba
+from docxtpl import DocxTemplate, InlineImage
 from ecoscope_workflows_core.decorators import task
 from ecoscope_workflows_core.tasks.io import persist_text
 from ecoscope_workflows_core.annotations import AnyDataFrame
+from ecoscope_workflows_core.tasks.filter._filter import TimeRange
 from typing import Iterable, Optional, Union,List,Dict,Annotated,cast
 from ecoscope_workflows_core.tasks.transformation._mapping import map_values
 from ecoscope_workflows_ext_ecoscope.tasks.results._ecoplot import ExportArgs
@@ -28,7 +33,10 @@ from ecoscope_workflows_core.annotations import (
     JsonSerializableDataFrameModel,
 )
 
+IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".gif", ".bmp", ".tiff"}
+
 warnings.filterwarnings("ignore")
+
 class TukeyPlotStyle(BaseModel):
     significant_color: Annotated[
         str | SkipJsonSchema[None], AdvancedField(default="#ff6b6b")
@@ -41,7 +49,6 @@ class TukeyPlotStyle(BaseModel):
     confidence_level: Annotated[
         float | SkipJsonSchema[None], AdvancedField(ge=0.0, le=1.0, default=0.95)
     ] = 0.95
-
 
 class ScatterStyle(BaseModel):
     marker_size: Annotated[
@@ -60,7 +67,6 @@ class ScatterStyle(BaseModel):
         str | SkipJsonSchema[None], AdvancedField(default="markers")
     ] = "markers"
 
-
 class TrendlineStyle(BaseModel):
     enabled: Annotated[bool, AdvancedField(default=False)] = False
     type: Annotated[
@@ -78,9 +84,28 @@ class TrendlineStyle(BaseModel):
         str | SkipJsonSchema[None], AdvancedField(default="solid")
     ] = "solid"
 
+def normalize_file_url(path: str) -> str:
+    """Convert file:// URL to local path, handling malformed Windows URLs."""
+    if not path.startswith("file://"):
+        return path
 
+    path = path[7:]
+    
+    if os.name == 'nt':
+        # Remove leading slash before drive letter: /C:/path -> C:/path
+        if path.startswith('/') and len(path) > 2 and path[2] in (':', '|'):
+            path = path[1:]
+        path = path.replace('/', '\\')
+        path = path.replace('|', ':')
+    else:
+        if not path.startswith('/'):
+            path = '/' + path    
+    return path
 
-def _normalize_columns(df: AnyDataFrame, columns: Optional[Union[str, Iterable[str]]]):
+def _normalize_columns(
+        df: AnyDataFrame, 
+        columns: Optional[Union[str, Iterable[str]]]
+        ):
     if columns is None:
         # default: all object dtype cols
         return list(df.select_dtypes(include="object").columns)
@@ -89,7 +114,10 @@ def _normalize_columns(df: AnyDataFrame, columns: Optional[Union[str, Iterable[s
     return list(columns)
 
 @task
-def convert_object_to_value(df: AnyDataFrame, columns: Optional[Union[str, Iterable[str]]] = None) -> AnyDataFrame:
+def convert_object_to_value(
+    df: AnyDataFrame, 
+    columns: Optional[Union[str, Iterable[str]]] = None
+    ) -> AnyDataFrame:
     """
     Convert given object columns to numeric (float/int where possible).
     Non-convertible values become NaN (errors='coerce').
@@ -106,7 +134,10 @@ def convert_object_to_value(df: AnyDataFrame, columns: Optional[Union[str, Itera
     return df
 
 @task
-def convert_object_to_string(df: AnyDataFrame, columns: Optional[Union[str, Iterable[str]]] = None) -> AnyDataFrame:
+def convert_object_to_string(
+    df: AnyDataFrame, 
+    columns: Optional[Union[str, Iterable[str]]] = None
+    ) -> AnyDataFrame:
     """
     Convert given object columns to string dtype.
     Modifies df in-place and returns it.
@@ -539,7 +570,6 @@ def _sort_dataframe(
     sorted_cols = sorted(scores.keys(), key=lambda x: scores[x], reverse=True)
     return df[sorted_cols]
 
-
 @task
 def map_survey_responses(
     df: AnyDataFrame,
@@ -766,8 +796,7 @@ def draw_pie_and_persist(output_dir, df: AnyDataFrame, columns: Union[str, List[
         "Strongly disagree": "#ffaaa5",  # Pastel coral
     }
     
-    default_color = '#5f9ea0'
-    default_rgba = hex_to_rgba(default_color)
+    default_color = '#008b8b'  # Dark cyan
     for column in columns:
         try:
             df_filtered = df[df[column].notna()].copy()
@@ -796,7 +825,7 @@ def draw_pie_and_persist(output_dir, df: AnyDataFrame, columns: Union[str, List[
                     marker_colors=column_colors
                 ),
                 layout_style=LayoutStyle(
-                    font_size=9,
+                    font_size=13,
                     font_style="normal",
                     showlegend=True,
                 ),
@@ -911,7 +940,6 @@ def fill_missing_values(
         ),
     ] = "Unspecified",
 ) -> AnyDataFrame:
-    import pandas as pd
     df_filled = dataframe.copy()
     if numeric_columns is None:
         numeric_columns = df_filled.select_dtypes(include=["number"]).columns.tolist()
@@ -1680,6 +1708,7 @@ def draw_tukey_plots_and_persist(
             continue  
     return tukey_dir_list
 
+# amboseli specific mapping
 @task
 def map_survey_columns(df: AnyDataFrame, cols: Union[str, List[str]]) -> AnyDataFrame:
     if isinstance(cols, str):
@@ -2082,3 +2111,278 @@ def exclude_geom_outliers(
 def exclude_value(df:AnyDataFrame,column:str , value:Union[str, int, float]) -> AnyDataFrame:
     df_filtered = df[df[column] != value].copy()
     return cast(AnyDataFrame, df_filtered)
+
+# @task
+# def persist_survey_word(
+#     template_path: str,
+#     output_dir: str,
+#     time_period: Optional[TimeRange] = None,
+#     box_h_cm: float = 6.5,
+#     box_w_cm: float = 11.11,
+#     filename: str = "survey_report.docx",
+# ) -> str:
+#     """
+#     Render a docx template and inject images found in `output_dir` into the Jinja context.
+#     Image variable names = image filename stem without extension.
+#     e.g. output_dir/survey_locations_ecomap.png  -> context key 'survey_locations_ecomap'
+#     """
+#     print("=" * 80)
+#     print("STARTING MNC CONTEXT GENERATION")
+#     print("=" * 80)
+
+#     # Normalize paths
+#     template_path = normalize_file_url(template_path)
+#     output_dir = normalize_file_url(output_dir)
+
+#     print(f"\nTemplate Path: {template_path}")
+#     print(f"Output Directory: {output_dir}")
+
+#     if not template_path.strip():
+#         raise ValueError("template_path is empty after normalization")
+#     if not output_dir.strip():
+#         raise ValueError("output_directory is empty after normalization")
+#     if not os.path.exists(template_path):
+#         raise FileNotFoundError(f"Template file not found: {template_path}")
+#     if not os.path.exists(output_dir):
+#         os.makedirs(output_dir, exist_ok=True)
+
+#     os.makedirs(output_dir, exist_ok=True)
+#     output_path = Path(output_dir) / filename
+#     print(f"Output File: {output_path}")
+
+#     time_period_str = None
+#     duration_period_str = None
+#     if time_period:
+#         fmt = getattr(time_period, "time_format", "%Y-%m-%d")
+#         time_period_str = f"{time_period.since.strftime(fmt)} to {time_period.until.strftime(fmt)}"
+#         date_fmt = "%Y-%m-%d"
+#         duration_period_str = f"{time_period.since.strftime(date_fmt)} to {time_period.until.strftime(date_fmt)}"
+#         print(f"\nTime Range: {time_period_str}")
+#         print(f"Duration Period: {duration_period_str}")
+#     base_context = {
+#         "report_period": time_period_str,
+#         "time_generated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+#         "prepared_by": "Ecoscope",
+#     }
+#     result = dict(base_context)
+
+#     # Load the template
+#     tpl = DocxTemplate(template_path)
+
+#     images_found = {}
+#     for root, _, files in os.walk(output_dir):
+#         for f in files:
+#             p = Path(root) / f
+#             if p.suffix.lower() in IMAGE_EXTS:
+#                 var_name = p.stem
+#                 images_found[var_name] = str(p)
+
+#     if images_found:
+#         print(f"\nFound {len(images_found)} image(s) in output_dir. Mapping to context by stem:")
+#         for k, v in images_found.items():
+#             print(f"  - {k} -> {v}")
+#             try:
+#                 result[k] = InlineImage(tpl, v, width=Cm(box_w_cm), height=Cm(box_h_cm))
+#             except Exception as e:
+#                 print(f"Failed to create InlineImage with fixed size for {v}: {e}. Trying without explicit height...")
+#                 try:
+#                     result[k] = InlineImage(tpl, v, width=Cm(box_w_cm))
+#                 except Exception as e2:
+#                     print(f"Failed to create InlineImage for {v}: {e2}. Skipping this image.")
+#     else:
+#         print("\nNo images found in output_dir.")
+
+#     for key, val in list(result.items()):
+#         if isinstance(val, str):
+#             p = Path(val)
+#             if p.exists() and p.suffix.lower() in IMAGE_EXTS:
+#                 print(f"Context key '{key}' points to an image file; attaching as InlineImage: {p}")
+#                 try:
+#                     result[key] = InlineImage(tpl, str(p), width=Cm(box_w_cm), height=Cm(box_h_cm))
+#                 except Exception:
+#                     result[key] = InlineImage(tpl, str(p), width=Cm(box_w_cm))
+
+#     try:
+#         tpl.render(result)
+#         tpl.save(output_path)
+#         print(f"\nDocument generated successfully!")
+#         print(f"Output: {output_path}")
+#         print("=" * 80)
+#         return str(output_path)
+#     except Exception as e:
+#         print(f"\nError rendering document: {str(e)}")
+#         raise
+
+
+@task
+def persist_survey_word(
+    template_path: str,
+    output_dir: str,
+    time_period: Optional[TimeRange] = None,
+    box_h_cm: float = 6.5,
+    box_w_cm: float = 11.11,
+    filename: str = "survey_report.docx",
+    demographic_csv: str = "demographic_table.csv",
+) -> str:
+    """
+    Render a docx template and inject images found in `output_dir` into the Jinja context.
+    Image variable names = image filename stem without extension.
+    e.g. output_dir/survey_locations_ecomap.png  -> context key 'survey_locations_ecomap'
+    
+    Also processes demographic_table.csv if present and adds to context as 'demographics'
+    """
+    print("=" * 80)
+    print("STARTING MNC CONTEXT GENERATION")
+    print("=" * 80)
+
+    # Normalize paths
+    template_path = normalize_file_url(template_path)
+    output_dir = normalize_file_url(output_dir)
+
+    print(f"\nTemplate Path: {template_path}")
+    print(f"Output Directory: {output_dir}")
+
+    if not template_path.strip():
+        raise ValueError("template_path is empty after normalization")
+    if not output_dir.strip():
+        raise ValueError("output_directory is empty after normalization")
+    if not os.path.exists(template_path):
+        raise FileNotFoundError(f"Template file not found: {template_path}")
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir, exist_ok=True)
+
+    os.makedirs(output_dir, exist_ok=True)
+    output_path = Path(output_dir) / filename
+    print(f"Output File: {output_path}")
+
+    time_period_str = None
+    duration_period_str = None
+    if time_period:
+        fmt = getattr(time_period, "time_format", "%Y-%m-%d")
+        time_period_str = f"{time_period.since.strftime(fmt)} to {time_period.until.strftime(fmt)}"
+        date_fmt = "%Y-%m-%d"
+        duration_period_str = f"{time_period.since.strftime(date_fmt)} to {time_period.until.strftime(date_fmt)}"
+        print(f"\nTime Range: {time_period_str}")
+        print(f"Duration Period: {duration_period_str}")
+    
+    base_context = {
+        "report_period": time_period_str,
+        "time_generated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "prepared_by": "Ecoscope",
+    }
+    result = dict(base_context)
+
+    # Load the template
+    tpl = DocxTemplate(template_path)
+
+    # ========================================================================
+    # NEW: Process demographic CSV if it exists
+    # ========================================================================
+    demographic_path = Path(output_dir) / demographic_csv
+    if demographic_path.exists():
+        print(f"\nProcessing demographic table: {demographic_path}")
+        try:
+            df = pd.read_csv(demographic_path)
+            
+            # Forward fill empty Demographic Variable cells
+            df['Demographic Variable'] = df['Demographic Variable'].replace('', pd.NA).ffill()
+            
+            # Transform to nested structure for Jinja
+            demographics = []
+            for var_name, group in df.groupby('Demographic Variable', sort=False):
+                categories = []
+                for _, row in group.iterrows():
+                    categories.append({
+                        'category': row['Categories'] if row['Categories'] else 'Statistics',
+                        'formatted_response': row['Number of responses']
+                    })
+                
+                demographics.append({
+                    'variable': var_name,
+                    'categories': categories
+                })
+            
+            # Add to context
+            result['demographics'] = demographics
+            
+            # Calculate total responses from first variable's total
+            try:
+                # Extract n from first category of first variable
+                first_response = demographics[0]['categories'][0]['formatted_response']
+                import re
+                match = re.search(r'n=(\d+)', first_response)
+                if match:
+                    # Sum all n values to get total
+                    total = 0
+                    for demo in demographics:
+                        for cat in demo['categories']:
+                            n_match = re.search(r'n=(\d+)', cat['formatted_response'])
+                            if n_match:
+                                total = max(total, int(n_match.group(1)))
+                    result['total_responses'] = total
+                else:
+                    result['total_responses'] = None
+            except:
+                result['total_responses'] = None
+            
+            print(f"✅ Processed {len(demographics)} demographic variables")
+            for demo in demographics:
+                print(f"  - {demo['variable']}: {len(demo['categories'])} categories")
+                
+        except Exception as e:
+            print(f"Failed to process demographic CSV: {e}")
+            result['demographics'] = []
+    else:
+        print(f"\nDemographic CSV not found: {demographic_path}")
+        result['demographics'] = []
+
+    # ========================================================================
+    # Process images (existing code)
+    # ========================================================================
+    images_found = {}
+    for root, _, files in os.walk(output_dir):
+        for f in files:
+            p = Path(root) / f
+            if p.suffix.lower() in IMAGE_EXTS:
+                var_name = p.stem
+                images_found[var_name] = str(p)
+
+    if images_found:
+        print(f"\nFound {len(images_found)} image(s) in output_dir. Mapping to context by stem:")
+        for k, v in images_found.items():
+            print(f"  - {k} -> {v}")
+            try:
+                result[k] = InlineImage(tpl, v, width=Cm(box_w_cm), height=Cm(box_h_cm))
+            except Exception as e:
+                print(f"Failed to create InlineImage with fixed size for {v}: {e}. Trying without explicit height...")
+                try:
+                    result[k] = InlineImage(tpl, v, width=Cm(box_w_cm))
+                except Exception as e2:
+                    print(f"Failed to create InlineImage for {v}: {e2}. Skipping this image.")
+    else:
+        print("\nNo images found in output_dir.")
+
+    # Check if string context values point to images
+    for key, val in list(result.items()):
+        if isinstance(val, str):
+            p = Path(val)
+            if p.exists() and p.suffix.lower() in IMAGE_EXTS:
+                print(f"Context key '{key}' points to an image file; attaching as InlineImage: {p}")
+                try:
+                    result[key] = InlineImage(tpl, str(p), width=Cm(box_w_cm), height=Cm(box_h_cm))
+                except Exception:
+                    result[key] = InlineImage(tpl, str(p), width=Cm(box_w_cm))
+
+    # ========================================================================
+    # Render and save
+    # ========================================================================
+    try:
+        tpl.render(result)
+        tpl.save(output_path)
+        print(f"\nDocument generated successfully!")
+        print(f"Output: {output_path}")
+        print("=" * 80)
+        return str(output_path)
+    except Exception as e:
+        print(f"\nError rendering document: {str(e)}")
+        raise

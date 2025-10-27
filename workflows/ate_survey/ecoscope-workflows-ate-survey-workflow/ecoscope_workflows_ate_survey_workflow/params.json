@@ -747,6 +747,34 @@
       "required": [],
       "type": "object",
       "title": "Generate overall point layers"
+    },
+    "persist_survey_context": {
+      "additionalProperties": false,
+      "properties": {
+        "box_h_cm": {
+          "default": 6.5,
+          "title": "Box H Cm",
+          "type": "number"
+        },
+        "box_w_cm": {
+          "default": 11.11,
+          "title": "Box W Cm",
+          "type": "number"
+        },
+        "filename": {
+          "default": "survey_report.docx",
+          "title": "Filename",
+          "type": "string"
+        },
+        "demographic_csv": {
+          "default": "demographic_table.csv",
+          "title": "Demographic Csv",
+          "type": "string"
+        }
+      },
+      "required": [],
+      "type": "object",
+      "title": "Persist word doc context"
     }
   },
   "$defs": {
@@ -915,6 +943,14 @@
         "sort_by"
       ]
     },
+    "persist_survey_context": {
+      "ui:order": [
+        "box_h_cm",
+        "box_w_cm",
+        "filename",
+        "demographic_csv"
+      ]
+    },
     "ui:order": [
       "workflow_details",
       "time_range",
@@ -944,7 +980,8 @@
       "remove_geom_outliers",
       "remove_geom_gn_outliers",
       "remove_geom_ov_outliers",
-      "generate_ov_layers"
+      "generate_ov_layers",
+      "persist_survey_context"
     ]
   },
   "additionalProperties": false

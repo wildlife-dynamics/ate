@@ -35,6 +35,7 @@ from ecoscope_workflows_ext_ate.tasks import (
     map_survey_responses,
     merge_dataframes,
     perform_anova_analysis,
+    persist_survey_word,
     view_df,
     zhtml_to_png,
 )
@@ -96,7 +97,7 @@ def main(params: Params):
         download_file_and_persist.validate()
         .handle_errors(task_instance_id="download_ate_tpt")
         .partial(
-            url="https://www.dropbox.com/scl/fi/8eig0iyg2uu76eghi2sd4/ate_survey_template.docx?rlkey=pe5dpqnskj60v0b5uchocdpy1&st=zdokeegg&dl=0",
+            url="https://www.dropbox.com/scl/fi/2sepiim1sswiesq0fj4ry/ate_survey_template_v4.docx?rlkey=67atuk1qeh9e7joreb5hli5t5&st=eg37qvf9&dl=0",
             output_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
             overwrite_existing=False,
             **(params_dict.get("download_ate_tpt") or {}),
@@ -169,21 +170,13 @@ def main(params: Params):
             file_dict=load_local_shapefiles,
             style_config={
                 "styles": {
-                    "amboseli_ecosystem": {
-                        "get_elevation": 1000,
-                        "get_fill_color": "#FFFFFF00",
-                        "get_line_color": "#696969",
-                        "get_line_width": 3,
-                        "opacity": 0.75,
-                        "stroked": True,
-                    },
                     "amboseli_ranch_boundaries": {
                         "get_elevation": 1000,
                         "get_fill_color": "#FFFFFF00",
                         "get_line_color": "#000000",
                         "get_line_width": 2,
                         "stroked": True,
-                        "opacity": 0.25,
+                        "opacity": 0.45,
                     },
                     "amboseli_swamps": {
                         "get_elevation": 1000,
@@ -191,24 +184,24 @@ def main(params: Params):
                         "get_line_color": "#609cb5",
                         "get_line_width": 2,
                         "stroked": True,
-                        "opacity": 0.25,
+                        "opacity": 0.45,
                     },
                     "national_parks": {
-                        "fill_color": "#4c8c2b",
-                        "line_color": "#4c8c2b",
-                        "line_width": 2,
+                        "get_elevation": 1000,
+                        "get_fill_color": "#4c8c2b",
+                        "get_line_color": "#4c8c2b",
+                        "get_line_width": 2,
                         "stroked": True,
-                        "fill_opacity": 0.25,
+                        "opacity": 0.45,
                     },
                 },
                 "legend": {
                     "labels": [
-                        "Amboseli Ecosystem",
                         "Amboseli Ranch Boundaries",
                         "Amboseli Swamps",
                         "National Parks",
                     ],
-                    "colors": ["#41b6c4", "#f03b20", "#006d2c", "#6a51a3"],
+                    "colors": ["#000000", "#609cb5", "#4c8c2b"],
                 },
             },
             **(params_dict.get("create_custom_map_layers") or {}),
@@ -1214,7 +1207,7 @@ def main(params: Params):
         .partial(
             input_column_name="Participant gender",
             output_column_name="gender_colors",
-            colormap=["#0000FF", "#FFC0CB", "#f8f8ff"],
+            colormap=["#FFC0CB", "#0000FF", "#dc143c"],
             df=remove_geom_gn_outliers,
             **(params_dict.get("apply_gn_colormap") or {}),
         )
@@ -1461,8 +1454,20 @@ def main(params: Params):
                 persist_likert_eff,
             ],
             output_dir=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
-            config={"wait_for_timeout": 20000},
+            config={"wait_for_timeout": 25000},
             **(params_dict.get("convt_ecohtml_png") or {}),
+        )
+        .call()
+    )
+
+    persist_survey_context = (
+        persist_survey_word.validate()
+        .handle_errors(task_instance_id="persist_survey_context")
+        .partial(
+            template_path=download_ate_tpt,
+            output_dir=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
+            time_period=time_range,
+            **(params_dict.get("persist_survey_context") or {}),
         )
         .call()
     )

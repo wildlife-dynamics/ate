@@ -421,6 +421,18 @@ class GenerateOvLayers(BaseModel):
     )
 
 
+class PersistSurveyContext(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    box_h_cm: Optional[float] = Field(6.5, title="Box H Cm")
+    box_w_cm: Optional[float] = Field(11.11, title="Box W Cm")
+    filename: Optional[str] = Field("survey_report.docx", title="Filename")
+    demographic_csv: Optional[str] = Field(
+        "demographic_table.csv", title="Demographic Csv"
+    )
+
+
 class TimezoneInfo(BaseModel):
     label: str = Field(..., title="Label")
     tzCode: str = Field(..., title="Tzcode")
@@ -553,4 +565,7 @@ class FormData(BaseModel):
     )
     generate_ov_layers: Optional[GenerateOvLayers] = Field(
         None, title="Generate overall point layers"
+    )
+    persist_survey_context: Optional[PersistSurveyContext] = Field(
+        None, title="Persist word doc context"
     )

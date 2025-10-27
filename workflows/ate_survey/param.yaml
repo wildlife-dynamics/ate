@@ -4,8 +4,8 @@ workflow_details:
 
 # Desired time range
 time_range:
-  since: "2024-01-01T00:00:00Z"
-  until: "2025-01-01T23:59:59Z"
+  since: "2024-01-30T00:00:00Z"
+  until: "2025-10-01T23:59:59Z"
 
 # Connect to EarthRanger
 er_client_name:
@@ -14,7 +14,6 @@ er_client_name:
 
 groupers:
   groupers: []
-
 
 configure_base_maps:
   base_maps:
