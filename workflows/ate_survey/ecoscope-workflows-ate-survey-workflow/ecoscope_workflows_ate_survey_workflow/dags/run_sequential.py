@@ -97,7 +97,7 @@ def main(params: Params):
         download_file_and_persist.validate()
         .handle_errors(task_instance_id="download_ate_tpt")
         .partial(
-            url="https://www.dropbox.com/scl/fi/2sepiim1sswiesq0fj4ry/ate_survey_template_v4.docx?rlkey=67atuk1qeh9e7joreb5hli5t5&st=eg37qvf9&dl=0",
+            url="https://www.dropbox.com/scl/fi/1tau1alt2woo5c4efjjp3/ate_survey_template_v2.docx?rlkey=1f2h9tnp2eb9jxao70zt2xll1&st=8zjovig4&dl=0",
             output_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
             overwrite_existing=False,
             **(params_dict.get("download_ate_tpt") or {}),

@@ -841,7 +841,6 @@ def draw_pie_and_persist(output_dir, df: AnyDataFrame, columns: Union[str, List[
                     output_dir, 
                     f"{new_col}_pie_chart.html"
                 )
-                print(f"Successfully saved pie chart for `{column}` to {file_path}")
                 pie_dir_list.append(file_path)
                 
         except Exception as e:
@@ -900,7 +899,6 @@ def draw_bar_and_persist(output_dir, df: AnyDataFrame, columns: Union[str, List[
                     output_dir, 
                     f"{new_col}_bar_chart.html"
                 )
-                print(f"Successfully saved pie chart for `{column}` to {file_path}")
                 bar_dir_list.append(file_path)
                 
         except Exception as e:
@@ -1250,7 +1248,6 @@ def draw_boxplot_and_persist(output_dir, df: AnyDataFrame, columns: Union[str, L
                     output_dir, 
                     f"{new_col}_boxplot_chart.html"
                 )
-                print(f"Successfully saved pie chart for `{column}` to {file_path}")
                 bp_dir_list.append(file_path)
                 
         except Exception as e:
@@ -1471,7 +1468,6 @@ def draw_ols_scatterplot_and_persist(
                     output_dir, 
                     f"{new_col}_ols_scatter_chart.html"
                 )
-                print(f"Successfully saved ols scatter chart for `{column}` to {file_path}")
                 ols_dir_list.append(file_path)
                 
         except Exception as e:
@@ -1700,7 +1696,6 @@ def draw_tukey_plots_and_persist(
                     output_dir, 
                     f"{new_col}_tukey_chart.html"
                 )
-                print(f"Successfully saved tukey chart for `{column}` to {file_path}")
                 tukey_dir_list.append(file_path)
                 
         except Exception as e:
@@ -2101,9 +2096,6 @@ def exclude_geom_outliers(
     mask = np.abs(z_scores) < z_threshold
     df_clean = df[mask].copy()
     outliers_count = (~mask).sum()
-    print(f"  - Total points: {len(df)}")
-    print(f"  - Outliers removed: {outliers_count} ({outliers_count/len(df)*100:.1f}%)")
-    print(f"  - Points retained: {len(df_clean)}")
     return df_clean
 
 
@@ -2111,108 +2103,6 @@ def exclude_geom_outliers(
 def exclude_value(df:AnyDataFrame,column:str , value:Union[str, int, float]) -> AnyDataFrame:
     df_filtered = df[df[column] != value].copy()
     return cast(AnyDataFrame, df_filtered)
-
-# @task
-# def persist_survey_word(
-#     template_path: str,
-#     output_dir: str,
-#     time_period: Optional[TimeRange] = None,
-#     box_h_cm: float = 6.5,
-#     box_w_cm: float = 11.11,
-#     filename: str = "survey_report.docx",
-# ) -> str:
-#     """
-#     Render a docx template and inject images found in `output_dir` into the Jinja context.
-#     Image variable names = image filename stem without extension.
-#     e.g. output_dir/survey_locations_ecomap.png  -> context key 'survey_locations_ecomap'
-#     """
-#     print("=" * 80)
-#     print("STARTING MNC CONTEXT GENERATION")
-#     print("=" * 80)
-
-#     # Normalize paths
-#     template_path = normalize_file_url(template_path)
-#     output_dir = normalize_file_url(output_dir)
-
-#     print(f"\nTemplate Path: {template_path}")
-#     print(f"Output Directory: {output_dir}")
-
-#     if not template_path.strip():
-#         raise ValueError("template_path is empty after normalization")
-#     if not output_dir.strip():
-#         raise ValueError("output_directory is empty after normalization")
-#     if not os.path.exists(template_path):
-#         raise FileNotFoundError(f"Template file not found: {template_path}")
-#     if not os.path.exists(output_dir):
-#         os.makedirs(output_dir, exist_ok=True)
-
-#     os.makedirs(output_dir, exist_ok=True)
-#     output_path = Path(output_dir) / filename
-#     print(f"Output File: {output_path}")
-
-#     time_period_str = None
-#     duration_period_str = None
-#     if time_period:
-#         fmt = getattr(time_period, "time_format", "%Y-%m-%d")
-#         time_period_str = f"{time_period.since.strftime(fmt)} to {time_period.until.strftime(fmt)}"
-#         date_fmt = "%Y-%m-%d"
-#         duration_period_str = f"{time_period.since.strftime(date_fmt)} to {time_period.until.strftime(date_fmt)}"
-#         print(f"\nTime Range: {time_period_str}")
-#         print(f"Duration Period: {duration_period_str}")
-#     base_context = {
-#         "report_period": time_period_str,
-#         "time_generated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-#         "prepared_by": "Ecoscope",
-#     }
-#     result = dict(base_context)
-
-#     # Load the template
-#     tpl = DocxTemplate(template_path)
-
-#     images_found = {}
-#     for root, _, files in os.walk(output_dir):
-#         for f in files:
-#             p = Path(root) / f
-#             if p.suffix.lower() in IMAGE_EXTS:
-#                 var_name = p.stem
-#                 images_found[var_name] = str(p)
-
-#     if images_found:
-#         print(f"\nFound {len(images_found)} image(s) in output_dir. Mapping to context by stem:")
-#         for k, v in images_found.items():
-#             print(f"  - {k} -> {v}")
-#             try:
-#                 result[k] = InlineImage(tpl, v, width=Cm(box_w_cm), height=Cm(box_h_cm))
-#             except Exception as e:
-#                 print(f"Failed to create InlineImage with fixed size for {v}: {e}. Trying without explicit height...")
-#                 try:
-#                     result[k] = InlineImage(tpl, v, width=Cm(box_w_cm))
-#                 except Exception as e2:
-#                     print(f"Failed to create InlineImage for {v}: {e2}. Skipping this image.")
-#     else:
-#         print("\nNo images found in output_dir.")
-
-#     for key, val in list(result.items()):
-#         if isinstance(val, str):
-#             p = Path(val)
-#             if p.exists() and p.suffix.lower() in IMAGE_EXTS:
-#                 print(f"Context key '{key}' points to an image file; attaching as InlineImage: {p}")
-#                 try:
-#                     result[key] = InlineImage(tpl, str(p), width=Cm(box_w_cm), height=Cm(box_h_cm))
-#                 except Exception:
-#                     result[key] = InlineImage(tpl, str(p), width=Cm(box_w_cm))
-
-#     try:
-#         tpl.render(result)
-#         tpl.save(output_path)
-#         print(f"\nDocument generated successfully!")
-#         print(f"Output: {output_path}")
-#         print("=" * 80)
-#         return str(output_path)
-#     except Exception as e:
-#         print(f"\nError rendering document: {str(e)}")
-#         raise
-
 
 @task
 def persist_survey_word(
@@ -2325,7 +2215,7 @@ def persist_survey_word(
             except:
                 result['total_responses'] = None
             
-            print(f"✅ Processed {len(demographics)} demographic variables")
+            print(f"Processed {len(demographics)} demographic variables")
             for demo in demographics:
                 print(f"  - {demo['variable']}: {len(demo['categories'])} categories")
                 
