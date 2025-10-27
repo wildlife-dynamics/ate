@@ -25,16 +25,8 @@ get_events = create_task_magicmock(  # 🧪
     func_name="get_events",  # 🧪
 )  # 🧪
 from ecoscope_workflows_core.tasks.io import persist_text
-from ecoscope_workflows_core.tasks.results import (
-    create_map_widget_single_view,
-    gather_dashboard,
-    merge_widget_views,
-)
-from ecoscope_workflows_core.tasks.skip import (
-    any_dependency_skipped,
-    any_is_empty_df,
-    never,
-)
+from ecoscope_workflows_core.tasks.results import gather_dashboard
+from ecoscope_workflows_core.tasks.skip import any_dependency_skipped, any_is_empty_df
 from ecoscope_workflows_core.tasks.transformation import map_columns
 from ecoscope_workflows_ext_ate.tasks import (
     bin_columns,
@@ -128,8 +120,6 @@ def main(params: Params):
             "generate_att_layers",
         ],
         "persist_att_ecomap_urls": ["draw_att_ecomap"],
-        "create_att_widgets": ["persist_att_ecomap_urls"],
-        "merge_att_widgets": ["create_att_widgets"],
         "apply_gn_colormap": ["bin_survey_cols"],
         "generate_gn_layers": ["apply_gn_colormap"],
         "zoom_gn_layers": ["apply_gn_colormap"],
@@ -139,8 +129,6 @@ def main(params: Params):
             "generate_gn_layers",
         ],
         "persist_gn_ecomap_urls": ["draw_gn_ecomap"],
-        "create_gn_widgets": ["persist_gn_ecomap_urls"],
-        "merge_gn_widgets": ["create_gn_widgets"],
         "generate_ov_layers": ["bin_survey_cols"],
         "zoom_ov_layers": ["bin_survey_cols"],
         "draw_ov_ecomap": [
@@ -149,8 +137,6 @@ def main(params: Params):
             "generate_ov_layers",
         ],
         "persist_ov_ecomap_urls": ["draw_ov_ecomap"],
-        "create_ov_widgets": ["persist_ov_ecomap_urls"],
-        "merge_ov_widgets": ["create_ov_widgets"],
         "convt_plot_png": [
             "draw_survey_pies",
             "draw_survey_bar",
@@ -163,14 +149,7 @@ def main(params: Params):
             "persist_gn_ecomap_urls",
             "persist_ov_ecomap_urls",
         ],
-        "survey_dashboard": [
-            "workflow_details",
-            "merge_att_widgets",
-            "merge_gn_widgets",
-            "merge_ov_widgets",
-            "time_range",
-            "groupers",
-        ],
+        "survey_dashboard": ["workflow_details", "time_range", "groupers"],
     }
 
     nodes = {
@@ -1198,39 +1177,9 @@ def main(params: Params):
             partial={
                 "root_path": os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
                 "text": DependsOn("draw_att_ecomap"),
-                "filename": "attitude_scores_community",
+                "filename": "attitude_scores_community.html",
             }
             | (params_dict.get("persist_att_ecomap_urls") or {}),
-            method="call",
-        ),
-        "create_att_widgets": Node(
-            async_task=create_map_widget_single_view.validate()
-            .handle_errors(task_instance_id="create_att_widgets")
-            .skipif(
-                conditions=[
-                    never,
-                ],
-                unpack_depth=1,
-            )
-            .set_executor("lithops"),
-            partial={
-                "title": "Attitude Scores",
-            }
-            | (params_dict.get("create_att_widgets") or {}),
-            method="map",
-            kwargs={
-                "argnames": ["view", "data"],
-                "argvalues": DependsOn("persist_att_ecomap_urls"),
-            },
-        ),
-        "merge_att_widgets": Node(
-            async_task=merge_widget_views.validate()
-            .handle_errors(task_instance_id="merge_att_widgets")
-            .set_executor("lithops"),
-            partial={
-                "widgets": DependsOn("create_att_widgets"),
-            }
-            | (params_dict.get("merge_att_widgets") or {}),
             method="call",
         ),
         "apply_gn_colormap": Node(
@@ -1310,39 +1259,9 @@ def main(params: Params):
             partial={
                 "root_path": os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
                 "text": DependsOn("draw_gn_ecomap"),
-                "filename": "gender_distribution_ecomap",
+                "filename": "gender_distribution_ecomap.html",
             }
             | (params_dict.get("persist_gn_ecomap_urls") or {}),
-            method="call",
-        ),
-        "create_gn_widgets": Node(
-            async_task=create_map_widget_single_view.validate()
-            .handle_errors(task_instance_id="create_gn_widgets")
-            .skipif(
-                conditions=[
-                    never,
-                ],
-                unpack_depth=1,
-            )
-            .set_executor("lithops"),
-            partial={
-                "title": "Gender",
-            }
-            | (params_dict.get("create_gn_widgets") or {}),
-            method="map",
-            kwargs={
-                "argnames": ["view", "data"],
-                "argvalues": DependsOn("persist_gn_ecomap_urls"),
-            },
-        ),
-        "merge_gn_widgets": Node(
-            async_task=merge_widget_views.validate()
-            .handle_errors(task_instance_id="merge_gn_widgets")
-            .set_executor("lithops"),
-            partial={
-                "widgets": DependsOn("create_gn_widgets"),
-            }
-            | (params_dict.get("merge_gn_widgets") or {}),
             method="call",
         ),
         "generate_ov_layers": Node(
@@ -1402,39 +1321,9 @@ def main(params: Params):
             partial={
                 "root_path": os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
                 "text": DependsOn("draw_ov_ecomap"),
-                "filename": "survey_locations_ecomap",
+                "filename": "survey_locations_ecomap.html",
             }
             | (params_dict.get("persist_ov_ecomap_urls") or {}),
-            method="call",
-        ),
-        "create_ov_widgets": Node(
-            async_task=create_map_widget_single_view.validate()
-            .handle_errors(task_instance_id="create_ov_widgets")
-            .skipif(
-                conditions=[
-                    never,
-                ],
-                unpack_depth=1,
-            )
-            .set_executor("lithops"),
-            partial={
-                "title": "Survey Locations",
-            }
-            | (params_dict.get("create_ov_widgets") or {}),
-            method="map",
-            kwargs={
-                "argnames": ["view", "data"],
-                "argvalues": DependsOn("persist_ov_ecomap_urls"),
-            },
-        ),
-        "merge_ov_widgets": Node(
-            async_task=merge_widget_views.validate()
-            .handle_errors(task_instance_id="merge_ov_widgets")
-            .set_executor("lithops"),
-            partial={
-                "widgets": DependsOn("create_ov_widgets"),
-            }
-            | (params_dict.get("merge_ov_widgets") or {}),
             method="call",
         ),
         "convt_plot_png": Node(
@@ -1481,13 +1370,7 @@ def main(params: Params):
             .set_executor("lithops"),
             partial={
                 "details": DependsOn("workflow_details"),
-                "widgets": DependsOnSequence(
-                    [
-                        DependsOn("merge_att_widgets"),
-                        DependsOn("merge_gn_widgets"),
-                        DependsOn("merge_ov_widgets"),
-                    ],
-                ),
+                "widgets": [],
                 "time_range": DependsOn("time_range"),
                 "groupers": DependsOn("groupers"),
             }

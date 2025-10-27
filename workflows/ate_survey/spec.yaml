@@ -891,27 +891,27 @@ workflow:
     partial:
       root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
       text: ${{ workflow.draw_att_ecomap.return }}
-      filename: attitude_scores_community
+      filename: attitude_scores_community.html
 
-  - name: Create attitude ecomap widgets
-    id: create_att_widgets
-    task: create_map_widget_single_view
-    skipif:
-      conditions: 
-        - never
-    partial:
-      title: Attitude Scores
-    map:
-      argnames:
-        - view 
-        - data
-      argvalues: ${{ workflow.persist_att_ecomap_urls.return }}
+  # - name: Create attitude ecomap widgets
+  #   id: create_att_widgets
+  #   task: create_map_widget_single_view
+  #   skipif:
+  #     conditions: 
+  #       - never
+  #   partial:
+  #     title: Attitude Scores
+  #   map:
+  #     argnames:
+  #       - view 
+  #       - data
+  #     argvalues: ${{ workflow.persist_att_ecomap_urls.return }}
 
-  - name: Merge attitude ecomap widgets
-    id: merge_att_widgets
-    task: merge_widget_views
-    partial:
-      widgets: ${{ workflow.create_att_widgets.return }}
+  # - name: Merge attitude ecomap widgets
+  #   id: merge_att_widgets
+  #   task: merge_widget_views
+  #   partial:
+  #     widgets: ${{ workflow.create_att_widgets.return }}
 
 
 # -- Draw Gender distribution ecomap and persist
@@ -987,28 +987,27 @@ workflow:
     partial:
       root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
       text: ${{ workflow.draw_gn_ecomap.return }}
-      filename: gender_distribution_ecomap
+      filename: gender_distribution_ecomap.html
 
-  - name: Create gender ecomap widgets
-    id: create_gn_widgets
-    task: create_map_widget_single_view
-    skipif:
-      conditions: 
-        - never
-    partial:
-      title: Gender
-    map:
-      argnames:
-        - view 
-        - data
-      argvalues: ${{ workflow.persist_gn_ecomap_urls.return }}
+  # - name: Create gender ecomap widgets
+  #   id: create_gn_widgets
+  #   task: create_map_widget_single_view
+  #   skipif:
+  #     conditions: 
+  #       - never
+  #   partial:
+  #     title: Gender
+  #   map:
+  #     argnames:
+  #       - view 
+  #       - data
+  #     argvalues: ${{ workflow.persist_gn_ecomap_urls.return }}
 
-  - name: Merge gender ecomap widgets
-    id: merge_gn_widgets
-    task: merge_widget_views
-    partial:
-      widgets: ${{ workflow.create_gn_widgets.return }}
-
+  # - name: Merge gender ecomap widgets
+  #   id: merge_gn_widgets
+  #   task: merge_widget_views
+  #   partial:
+  #     widgets: ${{ workflow.create_gn_widgets.return }}
 
 
 # -- Draw overall survey ecomap
@@ -1084,27 +1083,27 @@ workflow:
     partial:
       root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
       text: ${{ workflow.draw_ov_ecomap.return }}
-      filename: survey_locations_ecomap
+      filename: survey_locations_ecomap.html
 
-  - name: Create ov ecomap widgets
-    id: create_ov_widgets
-    task: create_map_widget_single_view
-    skipif:
-      conditions: 
-        - never
-    partial:
-      title: Survey Locations
-    map:
-      argnames:
-        - view 
-        - data
-      argvalues: ${{ workflow.persist_ov_ecomap_urls.return }}
+  # - name: Create ov ecomap widgets
+  #   id: create_ov_widgets
+  #   task: create_map_widget_single_view
+  #   skipif:
+  #     conditions: 
+  #       - never
+  #   partial:
+  #     title: Survey Locations
+  #   map:
+  #     argnames:
+  #       - view 
+  #       - data
+  #     argvalues: ${{ workflow.persist_ov_ecomap_urls.return }}
 
-  - name: Merge overall ecomap widgets
-    id: merge_ov_widgets
-    task: merge_widget_views
-    partial:
-      widgets: ${{ workflow.create_ov_widgets.return }}
+  # - name: Merge overall ecomap widgets
+  #   id: merge_ov_widgets
+  #   task: merge_widget_views
+  #   partial:
+  #     widgets: ${{ workflow.create_ov_widgets.return }}
 
   - name: Convert html to png 
     id: convt_plot_png
@@ -1139,10 +1138,10 @@ workflow:
     task: gather_dashboard
     partial:
       details: ${{ workflow.workflow_details.return}}
-      widgets:
-        - ${{ workflow.merge_att_widgets.return }}
-        - ${{ workflow.merge_gn_widgets.return }}
-        - ${{ workflow.merge_ov_widgets.return }}
+      widgets: []
+        # - ${{ workflow.merge_att_widgets.return }}
+        # - ${{ workflow.merge_gn_widgets.return }}
+        # - ${{ workflow.merge_ov_widgets.return }}
 
 
       time_range: ${{ workflow.time_range.return}}

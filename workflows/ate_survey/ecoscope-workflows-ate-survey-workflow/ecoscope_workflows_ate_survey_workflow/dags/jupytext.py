@@ -16,16 +16,8 @@ from ecoscope_workflows_core.tasks.config import set_workflow_details
 from ecoscope_workflows_core.tasks.filter import set_time_range
 from ecoscope_workflows_core.tasks.groupby import set_groupers
 from ecoscope_workflows_core.tasks.io import persist_text, set_er_connection
-from ecoscope_workflows_core.tasks.results import (
-    create_map_widget_single_view,
-    gather_dashboard,
-    merge_widget_views,
-)
-from ecoscope_workflows_core.tasks.skip import (
-    any_dependency_skipped,
-    any_is_empty_df,
-    never,
-)
+from ecoscope_workflows_core.tasks.results import gather_dashboard
+from ecoscope_workflows_core.tasks.skip import any_dependency_skipped, any_is_empty_df
 from ecoscope_workflows_core.tasks.transformation import map_columns
 from ecoscope_workflows_ext_ate.tasks import (
     bin_columns,
@@ -1698,53 +1690,9 @@ persist_att_ecomap_urls = (
     .partial(
         root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
         text=draw_att_ecomap,
-        filename="attitude_scores_community",
+        filename="attitude_scores_community.html",
         **persist_att_ecomap_urls_params,
     )
-    .call()
-)
-
-
-# %% [markdown]
-# ## Create attitude ecomap widgets
-
-# %%
-# parameters
-
-create_att_widgets_params = dict()
-
-# %%
-# call the task
-
-
-create_att_widgets = (
-    create_map_widget_single_view.handle_errors(task_instance_id="create_att_widgets")
-    .skipif(
-        conditions=[
-            never,
-        ],
-        unpack_depth=1,
-    )
-    .partial(title="Attitude Scores", **create_att_widgets_params)
-    .map(argnames=["view", "data"], argvalues=persist_att_ecomap_urls)
-)
-
-
-# %% [markdown]
-# ## Merge attitude ecomap widgets
-
-# %%
-# parameters
-
-merge_att_widgets_params = dict()
-
-# %%
-# call the task
-
-
-merge_att_widgets = (
-    merge_widget_views.handle_errors(task_instance_id="merge_att_widgets")
-    .partial(widgets=create_att_widgets, **merge_att_widgets_params)
     .call()
 )
 
@@ -1884,53 +1832,9 @@ persist_gn_ecomap_urls = (
     .partial(
         root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
         text=draw_gn_ecomap,
-        filename="gender_distribution_ecomap",
+        filename="gender_distribution_ecomap.html",
         **persist_gn_ecomap_urls_params,
     )
-    .call()
-)
-
-
-# %% [markdown]
-# ## Create gender ecomap widgets
-
-# %%
-# parameters
-
-create_gn_widgets_params = dict()
-
-# %%
-# call the task
-
-
-create_gn_widgets = (
-    create_map_widget_single_view.handle_errors(task_instance_id="create_gn_widgets")
-    .skipif(
-        conditions=[
-            never,
-        ],
-        unpack_depth=1,
-    )
-    .partial(title="Gender", **create_gn_widgets_params)
-    .map(argnames=["view", "data"], argvalues=persist_gn_ecomap_urls)
-)
-
-
-# %% [markdown]
-# ## Merge gender ecomap widgets
-
-# %%
-# parameters
-
-merge_gn_widgets_params = dict()
-
-# %%
-# call the task
-
-
-merge_gn_widgets = (
-    merge_widget_views.handle_errors(task_instance_id="merge_gn_widgets")
-    .partial(widgets=create_gn_widgets, **merge_gn_widgets_params)
     .call()
 )
 
@@ -2041,53 +1945,9 @@ persist_ov_ecomap_urls = (
     .partial(
         root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
         text=draw_ov_ecomap,
-        filename="survey_locations_ecomap",
+        filename="survey_locations_ecomap.html",
         **persist_ov_ecomap_urls_params,
     )
-    .call()
-)
-
-
-# %% [markdown]
-# ## Create ov ecomap widgets
-
-# %%
-# parameters
-
-create_ov_widgets_params = dict()
-
-# %%
-# call the task
-
-
-create_ov_widgets = (
-    create_map_widget_single_view.handle_errors(task_instance_id="create_ov_widgets")
-    .skipif(
-        conditions=[
-            never,
-        ],
-        unpack_depth=1,
-    )
-    .partial(title="Survey Locations", **create_ov_widgets_params)
-    .map(argnames=["view", "data"], argvalues=persist_ov_ecomap_urls)
-)
-
-
-# %% [markdown]
-# ## Merge overall ecomap widgets
-
-# %%
-# parameters
-
-merge_ov_widgets_params = dict()
-
-# %%
-# call the task
-
-
-merge_ov_widgets = (
-    merge_widget_views.handle_errors(task_instance_id="merge_ov_widgets")
-    .partial(widgets=create_ov_widgets, **merge_ov_widgets_params)
     .call()
 )
 
@@ -2166,7 +2026,7 @@ survey_dashboard = (
     gather_dashboard.handle_errors(task_instance_id="survey_dashboard")
     .partial(
         details=workflow_details,
-        widgets=[merge_att_widgets, merge_gn_widgets, merge_ov_widgets],
+        widgets=[],
         time_range=time_range,
         groupers=groupers,
         **survey_dashboard_params,

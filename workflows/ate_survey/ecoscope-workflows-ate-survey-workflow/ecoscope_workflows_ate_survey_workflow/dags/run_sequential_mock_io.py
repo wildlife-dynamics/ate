@@ -24,16 +24,8 @@ get_events = create_task_magicmock(  # 🧪
     func_name="get_events",  # 🧪
 )  # 🧪
 from ecoscope_workflows_core.tasks.io import persist_text
-from ecoscope_workflows_core.tasks.results import (
-    create_map_widget_single_view,
-    gather_dashboard,
-    merge_widget_views,
-)
-from ecoscope_workflows_core.tasks.skip import (
-    any_dependency_skipped,
-    any_is_empty_df,
-    never,
-)
+from ecoscope_workflows_core.tasks.results import gather_dashboard
+from ecoscope_workflows_core.tasks.skip import any_dependency_skipped, any_is_empty_df
 from ecoscope_workflows_core.tasks.transformation import map_columns
 from ecoscope_workflows_ext_ate.tasks import (
     bin_columns,
@@ -1091,32 +1083,8 @@ def main(params: Params):
         .partial(
             root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
             text=draw_att_ecomap,
-            filename="attitude_scores_community",
+            filename="attitude_scores_community.html",
             **(params_dict.get("persist_att_ecomap_urls") or {}),
-        )
-        .call()
-    )
-
-    create_att_widgets = (
-        create_map_widget_single_view.validate()
-        .handle_errors(task_instance_id="create_att_widgets")
-        .skipif(
-            conditions=[
-                never,
-            ],
-            unpack_depth=1,
-        )
-        .partial(
-            title="Attitude Scores", **(params_dict.get("create_att_widgets") or {})
-        )
-        .map(argnames=["view", "data"], argvalues=persist_att_ecomap_urls)
-    )
-
-    merge_att_widgets = (
-        merge_widget_views.validate()
-        .handle_errors(task_instance_id="merge_att_widgets")
-        .partial(
-            widgets=create_att_widgets, **(params_dict.get("merge_att_widgets") or {})
         )
         .call()
     )
@@ -1194,30 +1162,8 @@ def main(params: Params):
         .partial(
             root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
             text=draw_gn_ecomap,
-            filename="gender_distribution_ecomap",
+            filename="gender_distribution_ecomap.html",
             **(params_dict.get("persist_gn_ecomap_urls") or {}),
-        )
-        .call()
-    )
-
-    create_gn_widgets = (
-        create_map_widget_single_view.validate()
-        .handle_errors(task_instance_id="create_gn_widgets")
-        .skipif(
-            conditions=[
-                never,
-            ],
-            unpack_depth=1,
-        )
-        .partial(title="Gender", **(params_dict.get("create_gn_widgets") or {}))
-        .map(argnames=["view", "data"], argvalues=persist_gn_ecomap_urls)
-    )
-
-    merge_gn_widgets = (
-        merge_widget_views.validate()
-        .handle_errors(task_instance_id="merge_gn_widgets")
-        .partial(
-            widgets=create_gn_widgets, **(params_dict.get("merge_gn_widgets") or {})
         )
         .call()
     )
@@ -1278,32 +1224,8 @@ def main(params: Params):
         .partial(
             root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
             text=draw_ov_ecomap,
-            filename="survey_locations_ecomap",
+            filename="survey_locations_ecomap.html",
             **(params_dict.get("persist_ov_ecomap_urls") or {}),
-        )
-        .call()
-    )
-
-    create_ov_widgets = (
-        create_map_widget_single_view.validate()
-        .handle_errors(task_instance_id="create_ov_widgets")
-        .skipif(
-            conditions=[
-                never,
-            ],
-            unpack_depth=1,
-        )
-        .partial(
-            title="Survey Locations", **(params_dict.get("create_ov_widgets") or {})
-        )
-        .map(argnames=["view", "data"], argvalues=persist_ov_ecomap_urls)
-    )
-
-    merge_ov_widgets = (
-        merge_widget_views.validate()
-        .handle_errors(task_instance_id="merge_ov_widgets")
-        .partial(
-            widgets=create_ov_widgets, **(params_dict.get("merge_ov_widgets") or {})
         )
         .call()
     )
@@ -1347,7 +1269,7 @@ def main(params: Params):
         .handle_errors(task_instance_id="survey_dashboard")
         .partial(
             details=workflow_details,
-            widgets=[merge_att_widgets, merge_gn_widgets, merge_ov_widgets],
+            widgets=[],
             time_range=time_range,
             groupers=groupers,
             **(params_dict.get("survey_dashboard") or {}),
