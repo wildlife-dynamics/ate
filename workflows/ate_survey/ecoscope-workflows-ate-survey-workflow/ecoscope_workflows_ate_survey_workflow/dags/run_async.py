@@ -761,7 +761,7 @@ def main(params: Params):
                     "Agree",
                     "Strongly agree",
                 ],
-                "neutral_categories": ["Neutral", "I don't know", "Unspecified"],
+                "neutral_categories": ["Neutral", "I don't know"],
                 "colors": {
                     "Strongly disagree": "#2c5282",
                     "Disagree": "#4299e1",
@@ -809,7 +809,7 @@ def main(params: Params):
             partial={
                 "df": DependsOn("filter_eff_noeff"),
                 "response_order": ["Not effective", "Effective", "Highly effective"],
-                "neutral_categories": ["I don't know", "Unspecified"],
+                "neutral_categories": ["I don't know"],
                 "colors": {
                     "Not effective": "#D64545",
                     "I don't know": "#A8A8A8",
@@ -1098,7 +1098,7 @@ def main(params: Params):
             partial={
                 "input_column_name": "overall_attitude",
                 "output_column_name": "attitude_colors",
-                "colormap": [None, None, None, None, None],
+                "colormap": ["#FF0000", "#FFA500", "#FFFF00", "#00FF00", "#0000FF"],
                 "df": DependsOn("calc_attitude_scores"),
             }
             | (params_dict.get("apply_att_colormap") or {}),
@@ -1227,7 +1227,7 @@ def main(params: Params):
             partial={
                 "input_column_name": "Participant gender",
                 "output_column_name": "gender_colors",
-                "colormap": [None, None, None],
+                "colormap": ["#0000FF", "#FFC0CB", "#f8f8ff"],
                 "df": DependsOn("bin_survey_cols"),
             }
             | (params_dict.get("apply_gn_colormap") or {}),
@@ -1358,8 +1358,8 @@ def main(params: Params):
             .set_executor("lithops"),
             partial={
                 "layer_style": {
-                    "get_fill_color": None,
-                    "legend": {"labels": ["Survey locations"], "colors": [None]},
+                    "get_fill_color": "#C70039",
+                    "legend": {"labels": ["Survey locations"], "colors": ["#C70039"]},
                     "geodataframe": DependsOn("bin_survey_cols"),
                 },
             }

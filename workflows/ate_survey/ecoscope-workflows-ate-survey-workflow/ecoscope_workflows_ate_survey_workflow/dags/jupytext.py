@@ -1000,7 +1000,7 @@ draw_likert_chart = (
             "Agree",
             "Strongly agree",
         ],
-        neutral_categories=["Neutral", "I don't know", "Unspecified"],
+        neutral_categories=["Neutral", "I don't know"],
         colors={
             "Strongly disagree": "#2c5282",
             "Disagree": "#4299e1",
@@ -1096,7 +1096,7 @@ draw_likert_eff = (
     .partial(
         df=filter_eff_noeff,
         response_order=["Not effective", "Effective", "Highly effective"],
-        neutral_categories=["I don't know", "Unspecified"],
+        neutral_categories=["I don't know"],
         colors={
             "Not effective": "#D64545",
             "I don't know": "#A8A8A8",
@@ -1577,7 +1577,7 @@ apply_att_colormap = (
     .partial(
         input_column_name="overall_attitude",
         output_column_name="attitude_colors",
-        colormap=[None, None, None, None, None],
+        colormap=["#FF0000", "#FFA500", "#FFFF00", "#00FF00", "#0000FF"],
         df=calc_attitude_scores,
         **apply_att_colormap_params,
     )
@@ -1787,7 +1787,7 @@ apply_gn_colormap = (
     .partial(
         input_column_name="Participant gender",
         output_column_name="gender_colors",
-        colormap=[None, None, None],
+        colormap=["#0000FF", "#FFC0CB", "#f8f8ff"],
         df=bin_survey_cols,
         **apply_gn_colormap_params,
     )
@@ -2002,8 +2002,8 @@ generate_ov_layers = (
     )
     .partial(
         layer_style={
-            "get_fill_color": None,
-            "legend": {"labels": ["Survey locations"], "colors": [None]},
+            "get_fill_color": "#C70039",
+            "legend": {"labels": ["Survey locations"], "colors": ["#C70039"]},
             "geodataframe": bin_survey_cols,
         },
         **generate_ov_layers_params,

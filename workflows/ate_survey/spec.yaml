@@ -542,7 +542,7 @@ workflow:
       neutral_categories:
         - Neutral
         - I don't know
-        - Unspecified
+       # - Unspecified
       colors:
         "Strongly disagree": "#2c5282"
         "Disagree": "#4299e1"
@@ -585,7 +585,7 @@ workflow:
 
       neutral_categories:
         - I don't know
-        - Unspecified
+      #  - Unspecified
       colors:
         "Not effective": "#D64545"
         "I don't know": "#A8A8A8"
@@ -749,7 +749,7 @@ workflow:
         Household size: household_size
         Participant age group: age_group_distribution
         Participant gender: gender_of_participant
-        
+
 # -- Perform anova analysis
   - name: Perform anova analysis and persist  
     id: perform_anova
@@ -823,11 +823,11 @@ workflow:
       input_column_name: overall_attitude
       output_column_name: attitude_colors
       colormap: 
-        - #FF0000
-        - #FFA500
-        - #FFFF00
-        - #00FF00
-        - #0000FF
+        - "#FF0000"
+        - "#FFA500"
+        - "#FFFF00"
+        - "#00FF00"
+        - "#0000FF"
       df: ${{ workflow.calc_attitude_scores.return }}
   
   - name: Generate attitude score point layers  
@@ -920,9 +920,9 @@ workflow:
       input_column_name: Participant gender
       output_column_name: gender_colors
       colormap: 
-        - #0000FF
-        - #FFC0CB
-        - #f8f8ff
+        - "#0000FF"
+        - "#FFC0CB"
+        - "#f8f8ff"
       df: ${{ workflow.bin_survey_cols.return }}
   
   - name: Generate gender point layers  
@@ -1029,12 +1029,12 @@ workflow:
         - any_dependency_skipped
     partial:
       layer_style:
-        get_fill_color: #C70039
+        get_fill_color: "#C70039"
         legend:
           labels: 
             - Survey locations
           colors:
-            - #C70039
+            - "#C70039"
         geodataframe: ${{ workflow.bin_survey_cols.return }}
   
   - name: Zoom overall point layers by view state
