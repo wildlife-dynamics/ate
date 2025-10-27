@@ -570,7 +570,7 @@ def main(params: Params):
             .set_executor("lithops"),
             partial={
                 "df": DependsOn("map_yes_no"),
-                "columns": [
+                "cols": [
                     "Female elephants live in family groups",
                     "Female elephants protect their young",
                     "Elephants move seasonally for food and water",

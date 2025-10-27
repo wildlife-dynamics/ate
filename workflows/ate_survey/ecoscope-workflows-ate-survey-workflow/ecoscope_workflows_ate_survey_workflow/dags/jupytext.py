@@ -675,9 +675,7 @@ map_yes_no = (
 # %%
 # parameters
 
-map_col_surveys_params = dict(
-    cols=...,
-)
+map_col_surveys_params = dict()
 
 # %%
 # call the task
@@ -687,7 +685,7 @@ map_col_surveys = (
     map_survey_columns.handle_errors(task_instance_id="map_col_surveys")
     .partial(
         df=map_yes_no,
-        columns=[
+        cols=[
             "Female elephants live in family groups",
             "Female elephants protect their young",
             "Elephants move seasonally for food and water",

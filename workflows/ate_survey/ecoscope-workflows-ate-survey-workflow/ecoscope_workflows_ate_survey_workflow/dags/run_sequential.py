@@ -481,7 +481,7 @@ def main(params: Params):
         .handle_errors(task_instance_id="map_col_surveys")
         .partial(
             df=map_yes_no,
-            columns=[
+            cols=[
                 "Female elephants live in family groups",
                 "Female elephants protect their young",
                 "Elephants move seasonally for food and water",

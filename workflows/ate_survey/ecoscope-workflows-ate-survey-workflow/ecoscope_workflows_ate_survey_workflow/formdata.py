@@ -221,13 +221,6 @@ class MapYesNo(BaseModel):
     inplace: Optional[bool] = Field(False, title="Inplace")
 
 
-class MapColSurveys(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    cols: Union[str, List[str]] = Field(..., title="Cols")
-
-
 class ConvtToInt(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -472,7 +465,6 @@ class FormData(BaseModel):
         None, title="Map Agree/Disagree columns"
     )
     map_yes_no: Optional[MapYesNo] = Field(None, title="Map Yes/No columns")
-    map_col_surveys: Optional[MapColSurveys] = Field(None, title="Map survey columns")
     convt_to_int: Optional[ConvtToInt] = Field(None, title="Convert columns to int")
     persist_demo_df: Optional[PersistDemoDf] = Field(
         None, title="Persist demographic table to disk"

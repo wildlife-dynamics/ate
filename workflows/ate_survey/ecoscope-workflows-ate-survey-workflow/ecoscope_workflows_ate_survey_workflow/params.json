@@ -353,30 +353,6 @@
       "type": "object",
       "title": "Map Yes/No columns"
     },
-    "map_col_surveys": {
-      "additionalProperties": false,
-      "properties": {
-        "cols": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "items": {
-                "type": "string"
-              },
-              "type": "array"
-            }
-          ],
-          "title": "Cols"
-        }
-      },
-      "required": [
-        "cols"
-      ],
-      "type": "object",
-      "title": "Map survey columns"
-    },
     "convt_to_int": {
       "additionalProperties": false,
       "properties": {
@@ -939,7 +915,6 @@
       "get_survey_events_data",
       "map_agree_disagree",
       "map_yes_no",
-      "map_col_surveys",
       "convt_to_int",
       "persist_demo_df",
       "bin_survey_cols",

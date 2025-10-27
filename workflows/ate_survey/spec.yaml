@@ -389,7 +389,7 @@ workflow:
     task: map_survey_columns
     partial:
       df: ${{ workflow.map_yes_no.return }}
-      columns:
+      cols:
         - Female elephants live in family groups
         - Female elephants protect their young
         - Elephants move seasonally for food and water
