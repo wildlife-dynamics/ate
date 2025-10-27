@@ -198,6 +198,62 @@ class DownloadAteTpt(BaseModel):
     )
 
 
+class DowwnloadAmboEco(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    retries: Optional[conint(ge=0)] = Field(
+        3, description="Number of retries on failure", title="Retries"
+    )
+    unzip: Optional[bool] = Field(
+        False,
+        description="Whether to unzip the file if it's a zip archive",
+        title="Unzip",
+    )
+
+
+class DowwnloadRanchBnds(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    retries: Optional[conint(ge=0)] = Field(
+        3, description="Number of retries on failure", title="Retries"
+    )
+    unzip: Optional[bool] = Field(
+        False,
+        description="Whether to unzip the file if it's a zip archive",
+        title="Unzip",
+    )
+
+
+class DowwnloadAmboSws(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    retries: Optional[conint(ge=0)] = Field(
+        3, description="Number of retries on failure", title="Retries"
+    )
+    unzip: Optional[bool] = Field(
+        False,
+        description="Whether to unzip the file if it's a zip archive",
+        title="Unzip",
+    )
+
+
+class DowwnloadNpShp(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    retries: Optional[conint(ge=0)] = Field(
+        3, description="Number of retries on failure", title="Retries"
+    )
+    unzip: Optional[bool] = Field(
+        False,
+        description="Whether to unzip the file if it's a zip archive",
+        title="Unzip",
+    )
+
+
 class GetSurveyEventsData(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -340,6 +396,38 @@ class PersistAnovaDf(BaseModel):
     )
 
 
+class RemoveGeomOutliers(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    z_threshold: Optional[float] = Field(3.0, title="Z Threshold")
+
+
+class RemoveGeomGnOutliers(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    z_threshold: Optional[float] = Field(3.0, title="Z Threshold")
+
+
+class RemoveGeomOvOutliers(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    z_threshold: Optional[float] = Field(3.0, title="Z Threshold")
+
+
+class GenerateOvLayers(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    tooltip_columns: Optional[List[str]] = Field(
+        None,
+        description="If present, only the listed dataframe columns will display in the layer's picking info",
+        title="Tooltip Columns",
+    )
+
+
 class TimezoneInfo(BaseModel):
     label: str = Field(..., title="Label")
     tzCode: str = Field(..., title="Tzcode")
@@ -357,20 +445,6 @@ class ValueGrouper(RootModel[str]):
 
 class EarthRangerConnection(BaseModel):
     name: str = Field(..., title="Data Source")
-
-
-class Sort(str, Enum):
-    ascending = "ascending"
-    descending = "descending"
-
-
-class LegendDefinition(BaseModel):
-    label_column: Optional[str] = Field(None, title="Label Column")
-    color_column: Optional[str] = Field(None, title="Color Column")
-    labels: Optional[List[str]] = Field(None, title="Labels")
-    colors: Optional[List[str]] = Field(None, title="Colors")
-    sort: Optional[Sort] = Field(None, title="Sort")
-    label_suffix: Optional[str] = Field(None, title="Label Suffix")
 
 
 class TimeRange(BaseModel):
@@ -402,54 +476,6 @@ class ErClientName(BaseModel):
     )
 
 
-class GenerateAttLayers(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    legend: Optional[LegendDefinition] = Field(
-        None,
-        description="If present, includes this layer in the map legend",
-        title="Legend",
-    )
-    tooltip_columns: Optional[List[str]] = Field(
-        None,
-        description="If present, only the listed dataframe columns will display in the layer's picking info",
-        title="Tooltip Columns",
-    )
-
-
-class GenerateGnLayers(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    legend: Optional[LegendDefinition] = Field(
-        None,
-        description="If present, includes this layer in the map legend",
-        title="Legend",
-    )
-    tooltip_columns: Optional[List[str]] = Field(
-        None,
-        description="If present, only the listed dataframe columns will display in the layer's picking info",
-        title="Tooltip Columns",
-    )
-
-
-class GenerateOvLayers(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    legend: Optional[LegendDefinition] = Field(
-        None,
-        description="If present, includes this layer in the map legend",
-        title="Legend",
-    )
-    tooltip_columns: Optional[List[str]] = Field(
-        None,
-        description="If present, only the listed dataframe columns will display in the layer's picking info",
-        title="Tooltip Columns",
-    )
-
-
 class Params(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -471,6 +497,18 @@ class Params(BaseModel):
     )
     download_ate_tpt: Optional[DownloadAteTpt] = Field(
         None, title="Download ATE survey template"
+    )
+    dowwnload_ambo_eco: Optional[DowwnloadAmboEco] = Field(
+        None, title="Download amboseli ecosystem shapefiles"
+    )
+    dowwnload_ranch_bnds: Optional[DowwnloadRanchBnds] = Field(
+        None, title="Download amboseli ranch boundaries shapefiles"
+    )
+    dowwnload_ambo_sws: Optional[DowwnloadAmboSws] = Field(
+        None, title="Download amboseli swamps shapefiles"
+    )
+    dowwnload_np_shp: Optional[DowwnloadNpShp] = Field(
+        None, title="Download national parks shapefiles"
     )
     get_survey_events_data: Optional[GetSurveyEventsData] = Field(
         None, title="Retrieve ate survey events"
@@ -512,11 +550,14 @@ class Params(BaseModel):
     persist_anova_df: Optional[PersistAnovaDf] = Field(
         None, title="Persist anova df to disk"
     )
-    generate_att_layers: Optional[GenerateAttLayers] = Field(
-        None, title="Generate attitude score point layers"
+    remove_geom_outliers: Optional[RemoveGeomOutliers] = Field(
+        None, title="Exclude geom outliers from df"
     )
-    generate_gn_layers: Optional[GenerateGnLayers] = Field(
-        None, title="Generate gender point layers"
+    remove_geom_gn_outliers: Optional[RemoveGeomGnOutliers] = Field(
+        None, title="Exclude geom outliers from df"
+    )
+    remove_geom_ov_outliers: Optional[RemoveGeomOvOutliers] = Field(
+        None, title="Exclude geom outliers from df"
     )
     generate_ov_layers: Optional[GenerateOvLayers] = Field(
         None, title="Generate overall point layers"

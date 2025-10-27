@@ -314,6 +314,90 @@
       "type": "object",
       "title": "Download ATE survey template"
     },
+    "dowwnload_ambo_eco": {
+      "additionalProperties": false,
+      "properties": {
+        "retries": {
+          "default": 3,
+          "minimum": 0,
+          "title": "Retries",
+          "type": "integer",
+          "description": "Number of retries on failure"
+        },
+        "unzip": {
+          "default": false,
+          "title": "Unzip",
+          "type": "boolean",
+          "description": "Whether to unzip the file if it's a zip archive"
+        }
+      },
+      "required": [],
+      "type": "object",
+      "title": "Download amboseli ecosystem shapefiles"
+    },
+    "dowwnload_ranch_bnds": {
+      "additionalProperties": false,
+      "properties": {
+        "retries": {
+          "default": 3,
+          "minimum": 0,
+          "title": "Retries",
+          "type": "integer",
+          "description": "Number of retries on failure"
+        },
+        "unzip": {
+          "default": false,
+          "title": "Unzip",
+          "type": "boolean",
+          "description": "Whether to unzip the file if it's a zip archive"
+        }
+      },
+      "required": [],
+      "type": "object",
+      "title": "Download amboseli ranch boundaries shapefiles"
+    },
+    "dowwnload_ambo_sws": {
+      "additionalProperties": false,
+      "properties": {
+        "retries": {
+          "default": 3,
+          "minimum": 0,
+          "title": "Retries",
+          "type": "integer",
+          "description": "Number of retries on failure"
+        },
+        "unzip": {
+          "default": false,
+          "title": "Unzip",
+          "type": "boolean",
+          "description": "Whether to unzip the file if it's a zip archive"
+        }
+      },
+      "required": [],
+      "type": "object",
+      "title": "Download amboseli swamps shapefiles"
+    },
+    "dowwnload_np_shp": {
+      "additionalProperties": false,
+      "properties": {
+        "retries": {
+          "default": 3,
+          "minimum": 0,
+          "title": "Retries",
+          "type": "integer",
+          "description": "Number of retries on failure"
+        },
+        "unzip": {
+          "default": false,
+          "title": "Unzip",
+          "type": "boolean",
+          "description": "Whether to unzip the file if it's a zip archive"
+        }
+      },
+      "required": [],
+      "type": "object",
+      "title": "Download national parks shapefiles"
+    },
     "get_survey_events_data": {
       "additionalProperties": false,
       "properties": {
@@ -620,78 +704,48 @@
       "type": "object",
       "title": "Persist anova df to disk"
     },
-    "generate_att_layers": {
+    "remove_geom_outliers": {
       "additionalProperties": false,
       "properties": {
-        "legend": {
-          "allOf": [
-            {
-              "$ref": "#/$defs/LegendDefinition"
-            }
-          ],
-          "default": null,
-          "title": "Legend",
-          "description": "If present, includes this layer in the map legend",
-          "ecoscope:advanced": true
-        },
-        "tooltip_columns": {
-          "default": null,
-          "items": {
-            "type": "string"
-          },
-          "title": "Tooltip Columns",
-          "type": "array",
-          "description": "If present, only the listed dataframe columns will display in the layer's picking info",
-          "ecoscope:advanced": true
+        "z_threshold": {
+          "default": 3.0,
+          "title": "Z Threshold",
+          "type": "number"
         }
       },
       "required": [],
       "type": "object",
-      "title": "Generate attitude score point layers"
+      "title": "Exclude geom outliers from df"
     },
-    "generate_gn_layers": {
+    "remove_geom_gn_outliers": {
       "additionalProperties": false,
       "properties": {
-        "legend": {
-          "allOf": [
-            {
-              "$ref": "#/$defs/LegendDefinition"
-            }
-          ],
-          "default": null,
-          "title": "Legend",
-          "description": "If present, includes this layer in the map legend",
-          "ecoscope:advanced": true
-        },
-        "tooltip_columns": {
-          "default": null,
-          "items": {
-            "type": "string"
-          },
-          "title": "Tooltip Columns",
-          "type": "array",
-          "description": "If present, only the listed dataframe columns will display in the layer's picking info",
-          "ecoscope:advanced": true
+        "z_threshold": {
+          "default": 3.0,
+          "title": "Z Threshold",
+          "type": "number"
         }
       },
       "required": [],
       "type": "object",
-      "title": "Generate gender point layers"
+      "title": "Exclude geom outliers from df"
+    },
+    "remove_geom_ov_outliers": {
+      "additionalProperties": false,
+      "properties": {
+        "z_threshold": {
+          "default": 3.0,
+          "title": "Z Threshold",
+          "type": "number"
+        }
+      },
+      "required": [],
+      "type": "object",
+      "title": "Exclude geom outliers from df"
     },
     "generate_ov_layers": {
       "additionalProperties": false,
       "properties": {
-        "legend": {
-          "allOf": [
-            {
-              "$ref": "#/$defs/LegendDefinition"
-            }
-          ],
-          "default": null,
-          "title": "Legend",
-          "description": "If present, includes this layer in the map legend",
-          "ecoscope:advanced": true
-        },
         "tooltip_columns": {
           "default": null,
           "items": {
@@ -792,63 +846,6 @@
       ],
       "title": "EarthRangerConnection",
       "type": "object"
-    },
-    "LegendDefinition": {
-      "properties": {
-        "label_column": {
-          "default": null,
-          "ecoscope:advanced": true,
-          "title": "Label Column",
-          "type": "string"
-        },
-        "color_column": {
-          "default": null,
-          "ecoscope:advanced": true,
-          "title": "Color Column",
-          "type": "string"
-        },
-        "labels": {
-          "default": null,
-          "items": {
-            "type": "string"
-          },
-          "title": "Labels",
-          "type": "array"
-        },
-        "colors": {
-          "default": null,
-          "items": {
-            "type": "string"
-          },
-          "title": "Colors",
-          "type": "array"
-        },
-        "sort": {
-          "anyOf": [
-            {
-              "enum": [
-                "ascending",
-                "descending"
-              ],
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "ecoscope:advanced": true,
-          "title": "Sort"
-        },
-        "label_suffix": {
-          "default": null,
-          "ecoscope:advanced": true,
-          "title": "Label Suffix",
-          "type": "string"
-        }
-      },
-      "title": "LegendDefinition",
-      "type": "object"
     }
   },
   "uiSchema": {
@@ -866,6 +863,30 @@
       ]
     },
     "download_ate_tpt": {
+      "ui:order": [
+        "retries",
+        "unzip"
+      ]
+    },
+    "dowwnload_ambo_eco": {
+      "ui:order": [
+        "retries",
+        "unzip"
+      ]
+    },
+    "dowwnload_ranch_bnds": {
+      "ui:order": [
+        "retries",
+        "unzip"
+      ]
+    },
+    "dowwnload_ambo_sws": {
+      "ui:order": [
+        "retries",
+        "unzip"
+      ]
+    },
+    "dowwnload_np_shp": {
       "ui:order": [
         "retries",
         "unzip"
@@ -907,24 +928,6 @@
         "sort_by"
       ]
     },
-    "generate_att_layers": {
-      "ui:order": [
-        "legend",
-        "tooltip_columns"
-      ]
-    },
-    "generate_gn_layers": {
-      "ui:order": [
-        "legend",
-        "tooltip_columns"
-      ]
-    },
-    "generate_ov_layers": {
-      "ui:order": [
-        "legend",
-        "tooltip_columns"
-      ]
-    },
     "ui:order": [
       "workflow_details",
       "time_range",
@@ -932,6 +935,10 @@
       "er_client_name",
       "configure_base_maps",
       "download_ate_tpt",
+      "dowwnload_ambo_eco",
+      "dowwnload_ranch_bnds",
+      "dowwnload_ambo_sws",
+      "dowwnload_np_shp",
       "get_survey_events_data",
       "map_agree_disagree",
       "map_yes_no",
@@ -948,8 +955,9 @@
       "persist_attitude_df",
       "filter_stat_qs",
       "persist_anova_df",
-      "generate_att_layers",
-      "generate_gn_layers",
+      "remove_geom_outliers",
+      "remove_geom_gn_outliers",
+      "remove_geom_ov_outliers",
       "generate_ov_layers"
     ]
   },

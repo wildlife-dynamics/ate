@@ -22,10 +22,12 @@ from ecoscope_workflows_core.tasks.transformation import map_columns
 from ecoscope_workflows_ext_ate.tasks import (
     bin_columns,
     calculate_elephant_sentiment_score,
+    combine_map_layers,
     convert_object_to_string,
     convert_object_to_value,
     convert_to_int,
     create_likert_chart,
+    create_map_layers,
     create_view_state_from_gdf,
     download_file_and_persist,
     draw_bar_and_persist,
@@ -33,9 +35,11 @@ from ecoscope_workflows_ext_ate.tasks import (
     draw_ols_scatterplot_and_persist,
     draw_pie_and_persist,
     draw_tukey_plots_and_persist,
+    exclude_geom_outliers,
     fill_missing_values,
     filter_cols_df,
     format_demographic_table,
+    load_geospatial_files,
     map_survey_columns,
     map_survey_responses,
     merge_dataframes,
@@ -185,6 +189,195 @@ download_ate_tpt = (
         output_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
         overwrite_existing=False,
         **download_ate_tpt_params,
+    )
+    .call()
+)
+
+
+# %% [markdown]
+# ## Download amboseli ecosystem shapefiles
+
+# %%
+# parameters
+
+dowwnload_ambo_eco_params = dict(
+    retries=...,
+    unzip=...,
+)
+
+# %%
+# call the task
+
+
+dowwnload_ambo_eco = (
+    download_file_and_persist.handle_errors(task_instance_id="dowwnload_ambo_eco")
+    .partial(
+        url="https://www.dropbox.com/scl/fi/3yvgk7va9pxm1k3qe5aue/Amboseli-Ecosystem.gpkg?rlkey=nx9udkzvghxxz76rzl5dgx922&st=14pq6124&dl=0",
+        output_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
+        overwrite_existing=False,
+        **dowwnload_ambo_eco_params,
+    )
+    .call()
+)
+
+
+# %% [markdown]
+# ## Download amboseli ranch boundaries shapefiles
+
+# %%
+# parameters
+
+dowwnload_ranch_bnds_params = dict(
+    retries=...,
+    unzip=...,
+)
+
+# %%
+# call the task
+
+
+dowwnload_ranch_bnds = (
+    download_file_and_persist.handle_errors(task_instance_id="dowwnload_ranch_bnds")
+    .partial(
+        url="https://www.dropbox.com/scl/fi/b4yckfk2t077bhigb1k07/Amboseli-Ranch-Boundaries.gpkg?rlkey=kxiehp8f73j3y5g792jstwo0z&st=6hb6qwj9&dl=0",
+        output_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
+        overwrite_existing=False,
+        **dowwnload_ranch_bnds_params,
+    )
+    .call()
+)
+
+
+# %% [markdown]
+# ## Download amboseli swamps shapefiles
+
+# %%
+# parameters
+
+dowwnload_ambo_sws_params = dict(
+    retries=...,
+    unzip=...,
+)
+
+# %%
+# call the task
+
+
+dowwnload_ambo_sws = (
+    download_file_and_persist.handle_errors(task_instance_id="dowwnload_ambo_sws")
+    .partial(
+        url="https://www.dropbox.com/scl/fi/1x5imkkvesnxv35kp8ngw/Amboseli-Swamps.gpkg?rlkey=n5rtu313zh0cg7o0cmbbt1jf4&st=zebggl8l&dl=0",
+        output_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
+        overwrite_existing=False,
+        **dowwnload_ambo_sws_params,
+    )
+    .call()
+)
+
+
+# %% [markdown]
+# ## Download national parks shapefiles
+
+# %%
+# parameters
+
+dowwnload_np_shp_params = dict(
+    retries=...,
+    unzip=...,
+)
+
+# %%
+# call the task
+
+
+dowwnload_np_shp = (
+    download_file_and_persist.handle_errors(task_instance_id="dowwnload_np_shp")
+    .partial(
+        url="https://www.dropbox.com/scl/fi/7txo6s0tof8j0jp7j7lgk/National-Parks.gpkg?rlkey=yemiaztgu5scvlcdwapbkek9j&st=m9lz6abw&dl=0",
+        output_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
+        overwrite_existing=False,
+        **dowwnload_np_shp_params,
+    )
+    .call()
+)
+
+
+# %% [markdown]
+# ## Load local map files
+
+# %%
+# parameters
+
+load_local_shapefiles_params = dict()
+
+# %%
+# call the task
+
+
+load_local_shapefiles = (
+    load_geospatial_files.handle_errors(task_instance_id="load_local_shapefiles")
+    .partial(
+        config={"path": os.environ["ECOSCOPE_WORKFLOWS_RESULTS"]},
+        **load_local_shapefiles_params,
+    )
+    .call()
+)
+
+
+# %% [markdown]
+# ## Create Map Layers
+
+# %%
+# parameters
+
+create_custom_map_layers_params = dict()
+
+# %%
+# call the task
+
+
+create_custom_map_layers = (
+    create_map_layers.handle_errors(task_instance_id="create_custom_map_layers")
+    .partial(
+        file_dict=load_local_shapefiles,
+        style_config={
+            "styles": {
+                "Amboseli Ecosystem": {
+                    "fill_color": "#a1dab4",
+                    "line_color": "#41b6c4",
+                    "line_width": 1,
+                    "fill_opacity": 0.5,
+                },
+                "Amboseli Ranch Boundaries": {
+                    "fill_color": "#feb24c",
+                    "line_color": "#f03b20",
+                    "line_width": 1,
+                    "fill_opacity": 0.5,
+                },
+                "Amboseli Swamps": {
+                    "fill_color": "#31a354",
+                    "line_color": "#006d2c",
+                    "line_width": 1,
+                    "fill_opacity": 0.5,
+                },
+                "National Parks": {
+                    "fill_color": "#9e9ac8",
+                    "line_color": "#6a51a3",
+                    "line_width": 1,
+                    "fill_opacity": 0.5,
+                },
+            },
+            "legend": {
+                "labels": [
+                    "Amboseli Ecosystem",
+                    "Amboseli Ranch Boundaries",
+                    "Amboseli Swamps",
+                    "National Parks",
+                ],
+                "colors": ["#41b6c4", "#f03b20", "#006d2c", "#6a51a3"],
+            },
+        },
+        **create_custom_map_layers_params,
     )
     .call()
 )
@@ -991,7 +1184,7 @@ draw_likert_chart = (
             "Agree",
             "Strongly agree",
         ],
-        neutral_categories=["Neutral", "I don't know"],
+        neutral_categories=["Neutral"],
         colors={
             "Strongly disagree": "#2c5282",
             "Disagree": "#4299e1",
@@ -1552,6 +1745,27 @@ draw_tukey_plots = (
 
 
 # %% [markdown]
+# ## Exclude geom outliers from df
+
+# %%
+# parameters
+
+remove_geom_outliers_params = dict(
+    z_threshold=...,
+)
+
+# %%
+# call the task
+
+
+remove_geom_outliers = (
+    exclude_geom_outliers.handle_errors(task_instance_id="remove_geom_outliers")
+    .partial(df=calc_attitude_scores, **remove_geom_outliers_params)
+    .call()
+)
+
+
+# %% [markdown]
 # ## Apply colormap to attitude scores df
 
 # %%
@@ -1569,7 +1783,7 @@ apply_att_colormap = (
         input_column_name="overall_attitude",
         output_column_name="attitude_colors",
         colormap=["#FF0000", "#FFA500", "#FFFF00", "#00FF00", "#0000FF"],
-        df=calc_attitude_scores,
+        df=remove_geom_outliers,
         **apply_att_colormap_params,
     )
     .call()
@@ -1583,8 +1797,6 @@ apply_att_colormap = (
 # parameters
 
 generate_att_layers_params = dict(
-    legend=...,
-    tooltip_columns=...,
     zoom=...,
 )
 
@@ -1602,20 +1814,38 @@ generate_att_layers = (
         unpack_depth=1,
     )
     .partial(
-        layer_style={
-            "fill_color_column": "attitude_colors",
-            "legend": {
-                "label_column": "overall_attitude",
-                "color_column": "attitude_colors",
-            },
-            "tooltip_columns": [
-                "overall_attitude",
-                "attitude_colors",
-                "elephant_sentiment_score",
-            ],
-        },
+        layer_style={"fill_color_column": "attitude_colors"},
+        legend={"label_column": "overall_attitude", "color_column": "attitude_colors"},
+        tooltip_columns=[
+            "overall_attitude",
+            "attitude_colors",
+            "elephant_sentiment_score",
+        ],
         geodataframe=apply_att_colormap,
         **generate_att_layers_params,
+    )
+    .call()
+)
+
+
+# %% [markdown]
+# ## Combine map layers
+
+# %%
+# parameters
+
+combine_att_map_layers_params = dict()
+
+# %%
+# call the task
+
+
+combine_att_map_layers = (
+    combine_map_layers.handle_errors(task_instance_id="combine_att_map_layers")
+    .partial(
+        static_layers=create_custom_map_layers,
+        grouped_layers=generate_att_layers,
+        **combine_att_map_layers_params,
     )
     .call()
 )
@@ -1664,7 +1894,7 @@ draw_att_ecomap = (
         title=None,
         max_zoom=20,
         view_state=zoom_att_layers,
-        geo_layers=generate_att_layers,
+        geo_layers=combine_att_map_layers,
         **draw_att_ecomap_params,
     )
     .call()
@@ -1698,6 +1928,27 @@ persist_att_ecomap_urls = (
 
 
 # %% [markdown]
+# ## Exclude geom outliers from df
+
+# %%
+# parameters
+
+remove_geom_gn_outliers_params = dict(
+    z_threshold=...,
+)
+
+# %%
+# call the task
+
+
+remove_geom_gn_outliers = (
+    exclude_geom_outliers.handle_errors(task_instance_id="remove_geom_gn_outliers")
+    .partial(df=bin_survey_cols, **remove_geom_gn_outliers_params)
+    .call()
+)
+
+
+# %% [markdown]
 # ## Apply colormap for gender distribution
 
 # %%
@@ -1715,7 +1966,7 @@ apply_gn_colormap = (
         input_column_name="Participant gender",
         output_column_name="gender_colors",
         colormap=["#0000FF", "#FFC0CB", "#f8f8ff"],
-        df=bin_survey_cols,
+        df=remove_geom_gn_outliers,
         **apply_gn_colormap_params,
     )
     .call()
@@ -1729,8 +1980,6 @@ apply_gn_colormap = (
 # parameters
 
 generate_gn_layers_params = dict(
-    legend=...,
-    tooltip_columns=...,
     zoom=...,
 )
 
@@ -1748,16 +1997,34 @@ generate_gn_layers = (
         unpack_depth=1,
     )
     .partial(
-        layer_style={
-            "fill_color_column": "gender_colors",
-            "legend": {
-                "label_column": "Participant gender",
-                "color_column": "gender_colors",
-            },
-            "tooltip_columns": ["Participant gender", "gender_colors"],
-        },
+        layer_style={"fill_color_column": "gender_colors"},
+        legend={"label_column": "Participant gender", "color_column": "gender_colors"},
+        tooltip_columns=["Participant gender", "gender_colors"],
         geodataframe=apply_gn_colormap,
         **generate_gn_layers_params,
+    )
+    .call()
+)
+
+
+# %% [markdown]
+# ## Combine  gender map layers
+
+# %%
+# parameters
+
+combine_gn_map_layers_params = dict()
+
+# %%
+# call the task
+
+
+combine_gn_map_layers = (
+    combine_map_layers.handle_errors(task_instance_id="combine_gn_map_layers")
+    .partial(
+        static_layers=create_custom_map_layers,
+        grouped_layers=generate_gn_layers,
+        **combine_gn_map_layers_params,
     )
     .call()
 )
@@ -1806,7 +2073,7 @@ draw_gn_ecomap = (
         title=None,
         max_zoom=20,
         view_state=zoom_gn_layers,
-        geo_layers=generate_gn_layers,
+        geo_layers=combine_gn_map_layers,
         **draw_gn_ecomap_params,
     )
     .call()
@@ -1840,13 +2107,33 @@ persist_gn_ecomap_urls = (
 
 
 # %% [markdown]
+# ## Exclude geom outliers from df
+
+# %%
+# parameters
+
+remove_geom_ov_outliers_params = dict(
+    z_threshold=...,
+)
+
+# %%
+# call the task
+
+
+remove_geom_ov_outliers = (
+    exclude_geom_outliers.handle_errors(task_instance_id="remove_geom_ov_outliers")
+    .partial(df=bin_survey_cols, **remove_geom_ov_outliers_params)
+    .call()
+)
+
+
+# %% [markdown]
 # ## Generate overall point layers
 
 # %%
 # parameters
 
 generate_ov_layers_params = dict(
-    legend=...,
     tooltip_columns=...,
     zoom=...,
 )
@@ -1865,12 +2152,33 @@ generate_ov_layers = (
         unpack_depth=1,
     )
     .partial(
-        layer_style={
-            "get_fill_color": "#C70039",
-            "legend": {"labels": ["Survey locations"], "colors": ["#C70039"]},
-        },
-        geodataframe=bin_survey_cols,
+        layer_style={"get_fill_color": "#C70039"},
+        legend={"labels": ["Survey locations"], "colors": ["#C70039"]},
+        geodataframe=remove_geom_ov_outliers,
         **generate_ov_layers_params,
+    )
+    .call()
+)
+
+
+# %% [markdown]
+# ## Combine overall map layers
+
+# %%
+# parameters
+
+combine_ov_map_layers_params = dict()
+
+# %%
+# call the task
+
+
+combine_ov_map_layers = (
+    combine_map_layers.handle_errors(task_instance_id="combine_ov_map_layers")
+    .partial(
+        static_layers=create_custom_map_layers,
+        grouped_layers=generate_ov_layers,
+        **combine_ov_map_layers_params,
     )
     .call()
 )
@@ -1919,7 +2227,7 @@ draw_ov_ecomap = (
         title=None,
         max_zoom=20,
         view_state=zoom_ov_layers,
-        geo_layers=generate_ov_layers,
+        geo_layers=combine_ov_map_layers,
         **draw_ov_ecomap_params,
     )
     .call()
@@ -1953,30 +2261,120 @@ persist_ov_ecomap_urls = (
 
 
 # %% [markdown]
-# ## Convert html to png
+# ## Convert  pie chart html to png
 
 # %%
 # parameters
 
-convt_plot_png_params = dict()
+convt_pie_html_png_params = dict()
 
 # %%
 # call the task
 
 
-convt_plot_png = (
-    zhtml_to_png.handle_errors(task_instance_id="convt_plot_png")
+convt_pie_html_png = (
+    zhtml_to_png.handle_errors(task_instance_id="convt_pie_html_png")
     .partial(
-        html_path=[
-            draw_survey_pies,
-            draw_survey_bar,
-            draw_stat_box,
-            draw_ols_plots,
-            draw_tukey_plots,
-        ],
+        html_path=draw_survey_pies,
         output_dir=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
         config={"wait_for_timeout": 100},
-        **convt_plot_png_params,
+        **convt_pie_html_png_params,
+    )
+    .call()
+)
+
+
+# %% [markdown]
+# ## Convert bar chart html to png
+
+# %%
+# parameters
+
+convt_bar_html_png_params = dict()
+
+# %%
+# call the task
+
+
+convt_bar_html_png = (
+    zhtml_to_png.handle_errors(task_instance_id="convt_bar_html_png")
+    .partial(
+        html_path=draw_survey_bar,
+        output_dir=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
+        config={"wait_for_timeout": 100},
+        **convt_bar_html_png_params,
+    )
+    .call()
+)
+
+
+# %% [markdown]
+# ## Convert stats html to png
+
+# %%
+# parameters
+
+convt_stats_html_png_params = dict()
+
+# %%
+# call the task
+
+
+convt_stats_html_png = (
+    zhtml_to_png.handle_errors(task_instance_id="convt_stats_html_png")
+    .partial(
+        html_path=draw_stat_box,
+        output_dir=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
+        config={"wait_for_timeout": 100},
+        **convt_stats_html_png_params,
+    )
+    .call()
+)
+
+
+# %% [markdown]
+# ## Convert  ols html to png
+
+# %%
+# parameters
+
+convt_ols_html_png_params = dict()
+
+# %%
+# call the task
+
+
+convt_ols_html_png = (
+    zhtml_to_png.handle_errors(task_instance_id="convt_ols_html_png")
+    .partial(
+        html_path=draw_ols_plots,
+        output_dir=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
+        config={"wait_for_timeout": 100},
+        **convt_ols_html_png_params,
+    )
+    .call()
+)
+
+
+# %% [markdown]
+# ## Convert tukey html to png
+
+# %%
+# parameters
+
+convt_tuk_html_png_params = dict()
+
+# %%
+# call the task
+
+
+convt_tuk_html_png = (
+    zhtml_to_png.handle_errors(task_instance_id="convt_tuk_html_png")
+    .partial(
+        html_path=draw_tukey_plots,
+        output_dir=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
+        config={"wait_for_timeout": 100},
+        **convt_tuk_html_png_params,
     )
     .call()
 )

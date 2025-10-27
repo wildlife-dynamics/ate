@@ -99,20 +99,52 @@ def detect_geometry_type(gdf: AnyGeoDataFrame) -> GeometrySummary:
 
     return {"primary_type": primary_type, "counts": geom_counts}
 
+def normalize_file_url(path: str) -> str:
+    """Convert file:// URL to local path, handling malformed Windows URLs."""
+    if not path.startswith("file://"):
+        return path
+
+    path = path[7:]
+    
+    if os.name == 'nt':
+        # Remove leading slash before drive letter: /C:/path -> C:/path
+        if path.startswith('/') and len(path) > 2 and path[2] in (':', '|'):
+            path = path[1:]
+
+        path = path.replace('/', '\\')
+        path = path.replace('|', ':')
+    else:
+        if not path.startswith('/'):
+            path = '/' + path
+    
+    return path
+
 @task
 def load_geospatial_files(config: MapProcessingConfig) -> Dict[str, AnyGeoDataFrame]:
     """
     Load geospatial files from `config.path` and return a dict mapping
     relative file path -> cleaned GeoDataFrame (reprojected to target_crs).
     """
-    base_path = Path(config.path)
+    # Convert to Path object
+    base_path_str = normalize_file_url(config.path)
+    base_path = Path(base_path_str)
+    
+    # Validate path exists
     if not base_path.exists():
-        raise FileNotFoundError(f"Path does not exist: {base_path!s}")
+        raise FileNotFoundError(f"Path does not exist: {base_path}")
+    
+    if not base_path.is_dir():
+        raise NotADirectoryError(f"Path is not a directory: {base_path}")
 
     target_crs = CRS.from_user_input(config.target_crs)
 
     loaded_files: Dict[str, AnyGeoDataFrame] = {}
-    normalized_suffixes = {s.lower() if s.startswith(".") else f".{s.lower()}" for s in SUPPORTED_FORMATS}
+    normalized_suffixes = {
+        s.lower() if s.startswith(".") else f".{s.lower()}" 
+        for s in SUPPORTED_FORMATS
+    }
+    
+    # Use correct iterator method
     iterator = base_path.rglob("*") if config.recursive else base_path.iterdir()
 
     for p in iterator:
@@ -135,13 +167,16 @@ def load_geospatial_files(config: MapProcessingConfig) -> Dict[str, AnyGeoDataFr
             else:
                 try:
                     gdf_crs = CRS.from_user_input(gdf.crs)
-                    if not gdf_crs == target_crs:
-                        # geopandas accepts a CRS-like input string/object
+                    if gdf_crs != target_crs:
+                        # Reproject to target CRS
                         gdf = gdf.to_crs(target_crs.to_string())
                 except Exception as e:
                     logger.warning("Failed to normalize or compare CRS for %s: %s", file_path, e)
 
+            # Remove invalid geometries
             cleaned = remove_invalid_geometries(gdf)
+            
+            # Create relative path key
             key = str(p.relative_to(base_path))
             loaded_files[key] = cleaned
 

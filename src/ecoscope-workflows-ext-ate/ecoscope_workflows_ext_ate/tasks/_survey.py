@@ -6,14 +6,15 @@ import pandas as pd
 from pathlib import Path
 import statsmodels.api as sm   
 import plotly.graph_objects as go
+from typing_extensions import Literal
 from statsmodels.formula.api import ols
 from ecoscope.base.utils import hex_to_rgba
 from ecoscope_workflows_core.decorators import task
 from ecoscope_workflows_core.tasks.io import persist_text
-from typing import Iterable, Optional, Union,List,Dict,Literal,Annotated
 from ecoscope_workflows_core.annotations import AnyDataFrame
-from ecoscope_workflows_ext_ecoscope.tasks.results._ecoplot import ExportArgs
+from typing import Iterable, Optional, Union,List,Dict,Annotated
 from ecoscope_workflows_core.tasks.transformation._mapping import map_values
+from ecoscope_workflows_ext_ecoscope.tasks.results._ecoplot import ExportArgs
 from ecoscope_workflows_ext_ecoscope.tasks.results._ecoplot import (
     draw_pie_chart, PlotStyle, 
     LayoutStyle,draw_bar_chart,
@@ -2008,3 +2009,47 @@ def map_survey_columns(df: AnyDataFrame, cols: Union[str, List[str]]) -> AnyData
     )
     
     return df
+
+@task
+def exclude_geom_outliers(
+    df: AnyDataFrame,
+    z_threshold: float = 3.0,
+) -> AnyDataFrame:
+    
+    if df.empty:
+        print("Warning: Input dataframe is empty")
+        return df
+    
+    if len(df) < 4:
+        print(f"Warning: Too few points ({len(df)}) for reliable outlier detection. Returning original data.")
+        return df
+    
+    if "geometry" not in df.columns:
+        raise ValueError("DataFrame must have a 'geometry' column")
+    df_work = df.copy()
+
+    df_work["x"] = df_work.geometry.x
+    df_work["y"] = df_work.geometry.y
+
+    centroid_x = df_work["x"].mean()
+    centroid_y = df_work["y"].mean()
+
+    df_work["dist_from_center"] = np.sqrt(
+        (df_work["x"] - centroid_x)**2 + (df_work["y"] - centroid_y)**2
+    )
+    
+    dist_mean = df_work["dist_from_center"].mean()
+    dist_std = df_work["dist_from_center"].std()
+    
+    if dist_std == 0:
+        print("Warning: All points at same location (std=0). No outliers removed.")
+        return df.copy()
+    
+    z_scores = (df_work["dist_from_center"] - dist_mean) / dist_std
+    mask = np.abs(z_scores) < z_threshold
+    df_clean = df[mask].copy()
+    outliers_count = (~mask).sum()
+    print(f"  - Total points: {len(df)}")
+    print(f"  - Outliers removed: {outliers_count} ({outliers_count/len(df)*100:.1f}%)")
+    print(f"  - Points retained: {len(df_clean)}")
+    return df_clean

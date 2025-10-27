@@ -44,6 +44,93 @@ workflow:
       output_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
       overwrite_existing: false
 
+# -- download ate shapefiles
+  - name: Download amboseli ecosystem shapefiles
+    id: dowwnload_ambo_eco
+    task: download_file_and_persist
+    partial:
+      url: https://www.dropbox.com/scl/fi/3yvgk7va9pxm1k3qe5aue/Amboseli-Ecosystem.gpkg?rlkey=nx9udkzvghxxz76rzl5dgx922&st=14pq6124&dl=0
+      output_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      overwrite_existing: false
+
+
+  - name: Download amboseli ranch boundaries shapefiles
+    id: dowwnload_ranch_bnds
+    task: download_file_and_persist
+    partial:
+      url: https://www.dropbox.com/scl/fi/b4yckfk2t077bhigb1k07/Amboseli-Ranch-Boundaries.gpkg?rlkey=kxiehp8f73j3y5g792jstwo0z&st=6hb6qwj9&dl=0
+      output_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      overwrite_existing: false
+
+
+  - name: Download amboseli swamps shapefiles
+    id: dowwnload_ambo_sws
+    task: download_file_and_persist
+    partial:
+      url: https://www.dropbox.com/scl/fi/1x5imkkvesnxv35kp8ngw/Amboseli-Swamps.gpkg?rlkey=n5rtu313zh0cg7o0cmbbt1jf4&st=zebggl8l&dl=0
+      output_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      overwrite_existing: false
+
+
+  - name: Download national parks shapefiles
+    id: dowwnload_np_shp
+    task: download_file_and_persist
+    partial:
+      url: https://www.dropbox.com/scl/fi/7txo6s0tof8j0jp7j7lgk/National-Parks.gpkg?rlkey=yemiaztgu5scvlcdwapbkek9j&st=m9lz6abw&dl=0
+      output_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      overwrite_existing: false
+
+
+  #Load custom shapefiles
+  - name : Load local map files
+    id: load_local_shapefiles 
+    task: load_geospatial_files
+    partial:
+      config: 
+        path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+
+  - name: Create Map Layers
+    id: create_custom_map_layers
+    task: create_map_layers
+    partial:
+      file_dict: ${{ workflow.load_local_shapefiles.return }}
+      style_config:
+        styles:
+          Amboseli Ecosystem:
+            fill_color: "#a1dab4"
+            line_color: "#41b6c4"
+            line_width: 1
+            fill_opacity: 0.5
+          
+          Amboseli Ranch Boundaries:
+            fill_color: "#feb24c"
+            line_color: "#f03b20"
+            line_width: 1
+            fill_opacity: 0.5
+          
+          Amboseli Swamps:
+            fill_color: "#31a354"
+            line_color: "#006d2c"
+            line_width: 1
+            fill_opacity: 0.5
+          National Parks:
+            fill_color: "#9e9ac8"
+            line_color: "#6a51a3"
+            line_width: 1
+            fill_opacity: 0.5
+
+        legend:
+          labels:
+            - Amboseli Ecosystem
+            - Amboseli Ranch Boundaries
+            - Amboseli Swamps
+            - National Parks
+          colors:
+            - "#41b6c4"
+            - "#f03b20"
+            - "#006d2c"
+            - "#6a51a3"
+
 # -- Retrieve ate survey events 
   - name: Retrieve ate survey events
     id: get_survey_events_data
@@ -377,10 +464,10 @@ workflow:
         - Receive livelihood benefits from elephants
 
       value_map:
-        yes: Yes
-        no: No
-        i_dont_know: I don't know
-        prefer_not_to_answer: Prefer not to answer
+        "yes": "Yes"
+        "no": "No"
+        "i_dont_know": "I don't know"
+        "prefer_not_to_answer": "Prefer not to answer"
 
 
   - name: Map true false columns
@@ -541,8 +628,8 @@ workflow:
 
       neutral_categories:
         - Neutral
-        - I don't know
-       # - Unspecified
+      #  - I don't know
+      # - Unspecified
       colors:
         "Strongly disagree": "#2c5282"
         "Disagree": "#4299e1"
@@ -816,6 +903,12 @@ workflow:
       value_column: elephant_sentiment_score
 
 # -- Draw Attitude scores ecomap and persist
+  - name: Exclude geom outliers from df 
+    id: remove_geom_outliers
+    task: exclude_geom_outliers
+    partial:
+      df: ${{ workflow.calc_attitude_scores.return }}
+
   - name: Apply colormap to attitude scores df
     id: apply_att_colormap
     task: apply_color_map
@@ -828,7 +921,7 @@ workflow:
         - "#FFFF00"
         - "#00FF00"
         - "#0000FF"
-      df: ${{ workflow.calc_attitude_scores.return }}
+      df: ${{ workflow.remove_geom_outliers.return }}
   
   - name: Generate attitude score point layers  
     id: generate_att_layers
@@ -840,15 +933,24 @@ workflow:
     partial:
       layer_style:
         fill_color_column: attitude_colors
-        legend:
-          label_column: overall_attitude
-          color_column: attitude_colors
-        tooltip_columns:
-          - overall_attitude
-          - attitude_colors
-          - elephant_sentiment_score
+      legend:
+        label_column: overall_attitude
+        color_column: attitude_colors
+      tooltip_columns:
+        - overall_attitude
+        - attitude_colors
+        - elephant_sentiment_score
       geodataframe: ${{ workflow.apply_att_colormap.return }}
   
+  - name: Combine map layers
+    id: combine_att_map_layers
+    task: combine_map_layers
+    partial:
+      static_layers:
+        - ${{ workflow.create_custom_map_layers.return }}
+      grouped_layers: 
+        - ${{ workflow.generate_att_layers.return }}
+
   - name: Zoom attitude point layers by view state
     id: zoom_att_layers
     task: create_view_state_from_gdf
@@ -856,13 +958,6 @@ workflow:
       pitch: 0
       bearing: 0
       gdf: ${{ workflow.apply_att_colormap.return }}
-
-  # - name: Zip attitude point layers and zoom values
-  #   id: zip_att_zoom_values
-  #   task: zip_grouped_by_key
-  #   partial:
-  #     left:  ${{ workflow.generate_att_layers.return }}
-  #     right: ${{ workflow.zoom_att_layers.return }} 
 
   - name: Draw attitude scores ecomap
     id: draw_att_ecomap
@@ -878,12 +973,7 @@ workflow:
       title: null
       max_zoom: 20
       view_state: ${{ workflow.zoom_att_layers.return }}
-      geo_layers: ${{ workflow.generate_att_layers.return }}
-    # mapvalues:
-    #   argnames: 
-    #     - geo_layers
-    #     - view_state
-    #   argvalues: ${{ workflow.zip_att_zoom_values.return }}
+      geo_layers: ${{ workflow.combine_att_map_layers.return }}
 
   - name: Persist  attitude scores ecomap html paths
     id: persist_att_ecomap_urls
@@ -893,28 +983,13 @@ workflow:
       text: ${{ workflow.draw_att_ecomap.return }}
       filename: attitude_scores_community.html
 
-  # - name: Create attitude ecomap widgets
-  #   id: create_att_widgets
-  #   task: create_map_widget_single_view
-  #   skipif:
-  #     conditions: 
-  #       - never
-  #   partial:
-  #     title: Attitude Scores
-  #   map:
-  #     argnames:
-  #       - view 
-  #       - data
-  #     argvalues: ${{ workflow.persist_att_ecomap_urls.return }}
-
-  # - name: Merge attitude ecomap widgets
-  #   id: merge_att_widgets
-  #   task: merge_widget_views
-  #   partial:
-  #     widgets: ${{ workflow.create_att_widgets.return }}
-
-
 # -- Draw Gender distribution ecomap and persist
+  - name: Exclude geom outliers from df
+    id: remove_geom_gn_outliers
+    task: exclude_geom_outliers
+    partial:
+      df: ${{ workflow.bin_survey_cols.return }}
+
   - name: Apply colormap for gender distribution
     id: apply_gn_colormap
     task: apply_color_map
@@ -925,7 +1000,7 @@ workflow:
         - "#0000FF"
         - "#FFC0CB"
         - "#f8f8ff"
-      df: ${{ workflow.bin_survey_cols.return }}
+      df: ${{ workflow.remove_geom_gn_outliers.return }}
   
   - name: Generate gender point layers  
     id: generate_gn_layers
@@ -937,14 +1012,24 @@ workflow:
     partial:
       layer_style:
         fill_color_column: gender_colors
-        legend:
-          label_column: Participant gender
-          color_column: gender_colors
-        tooltip_columns:
-          - Participant gender
-          - gender_colors
+      legend:
+        label_column: Participant gender
+        color_column: gender_colors
+      tooltip_columns:
+        - Participant gender
+        - gender_colors
       geodataframe: ${{ workflow.apply_gn_colormap.return }}
   
+  - name: Combine  gender map layers
+    id: combine_gn_map_layers
+    task: combine_map_layers
+    partial:
+      static_layers:
+        - ${{ workflow.create_custom_map_layers.return }}
+      grouped_layers: 
+        - ${{ workflow.generate_gn_layers.return }}
+
+
   - name: Zoom gender point layers by view state
     id: zoom_gn_layers
     task: create_view_state_from_gdf
@@ -952,14 +1037,7 @@ workflow:
       pitch: 0
       bearing: 0
       gdf: ${{ workflow.apply_gn_colormap.return }}
-
-  # - name: Zip gender point layers and zoom values
-  #   id: zip_gn_zoom_values
-  #   task: zip_grouped_by_key
-  #   partial:
-  #     left:  ${{ workflow.generate_gn_layers.return }}
-  #     right: ${{ workflow.zoom_gn_layers.return }} 
-
+      
   - name: Draw gender scores ecomap
     id: draw_gn_ecomap
     task: draw_ecomap
@@ -974,12 +1052,7 @@ workflow:
       title: null
       max_zoom: 20
       view_state: ${{ workflow.zoom_gn_layers.return }}
-      geo_layers: ${{ workflow.generate_gn_layers.return }}
-    # mapvalues:
-    #   argnames: 
-    #     - geo_layers
-    #     - view_state
-    #   argvalues: ${{ workflow.zip_gn_zoom_values.return }}
+      geo_layers: ${{ workflow.combine_gn_map_layers.return }}
 
   - name: Persist gender ecomap html paths
     id: persist_gn_ecomap_urls
@@ -989,40 +1062,12 @@ workflow:
       text: ${{ workflow.draw_gn_ecomap.return }}
       filename: gender_distribution_ecomap.html
 
-  # - name: Create gender ecomap widgets
-  #   id: create_gn_widgets
-  #   task: create_map_widget_single_view
-  #   skipif:
-  #     conditions: 
-  #       - never
-  #   partial:
-  #     title: Gender
-  #   map:
-  #     argnames:
-  #       - view 
-  #       - data
-  #     argvalues: ${{ workflow.persist_gn_ecomap_urls.return }}
+  - name: Exclude geom outliers from df
+    id: remove_geom_ov_outliers
+    task: exclude_geom_outliers
+    partial:
+      df: ${{ workflow.bin_survey_cols.return }}
 
-  # - name: Merge gender ecomap widgets
-  #   id: merge_gn_widgets
-  #   task: merge_widget_views
-  #   partial:
-  #     widgets: ${{ workflow.create_gn_widgets.return }}
-
-
-# -- Draw overall survey ecomap
-  # - name: Apply colormap for gender distribution
-  #   id: apply_gn_colormap
-  #   task: apply_color_map
-  #   partial:
-  #     input_column_name: Participant gender
-  #     output_column_name: gender_colors
-  #     colormap: 
-  #       - #0000FF
-  #       - #FFC0CB
-  #       - #f8f8ff
-  #     df: ${{ workflow.bin_survey_cols.return }}
-  
   - name: Generate overall point layers  
     id: generate_ov_layers
     task: create_point_layer
@@ -1033,13 +1078,23 @@ workflow:
     partial:
       layer_style:
         get_fill_color: "#C70039"
-        legend:
-          labels: 
-            - Survey locations
-          colors:
-            - "#C70039"
-      geodataframe: ${{ workflow.bin_survey_cols.return }}
+      legend:
+        labels: 
+          - Survey locations
+        colors:
+          - "#C70039"
+      geodataframe: ${{ workflow.remove_geom_ov_outliers.return }}
   
+  - name: Combine overall map layers
+    id: combine_ov_map_layers
+    task: combine_map_layers
+    partial:
+      static_layers:
+        - ${{ workflow.create_custom_map_layers.return }}
+      grouped_layers: 
+        - ${{ workflow.generate_ov_layers.return }}
+
+
   - name: Zoom overall point layers by view state
     id: zoom_ov_layers
     task: create_view_state_from_gdf
@@ -1047,13 +1102,6 @@ workflow:
       pitch: 0
       bearing: 0
       gdf: ${{ workflow.bin_survey_cols.return }}
-
-  # - name: Zip overall point layers and zoom values
-  #   id: zip_ov_zoom_values
-  #   task: zip_grouped_by_key
-  #   partial:
-  #     left:  ${{ workflow.generate_ov_layers.return }}
-  #     right: ${{ workflow.zoom_ov_layers.return }} 
 
   - name: Draw overall ecomap
     id: draw_ov_ecomap
@@ -1069,13 +1117,7 @@ workflow:
       title: null
       max_zoom: 20
       view_state: ${{ workflow.zoom_ov_layers.return }}
-      geo_layers: ${{ workflow.generate_ov_layers.return }}
-
-    # mapvalues:
-    #   argnames: 
-    #     - geo_layers
-    #     - view_state
-    #   argvalues: ${{ workflow.zip_ov_zoom_values.return }}
+      geo_layers: ${{ workflow.combine_ov_map_layers.return }}
 
   - name: Persist overall  ecomap html paths
     id: persist_ov_ecomap_urls
@@ -1085,35 +1127,56 @@ workflow:
       text: ${{ workflow.draw_ov_ecomap.return }}
       filename: survey_locations_ecomap.html
 
-  # - name: Create ov ecomap widgets
-  #   id: create_ov_widgets
-  #   task: create_map_widget_single_view
-  #   skipif:
-  #     conditions: 
-  #       - never
-  #   partial:
-  #     title: Survey Locations
-  #   map:
-  #     argnames:
-  #       - view 
-  #       - data
-  #     argvalues: ${{ workflow.persist_ov_ecomap_urls.return }}
-
-  # - name: Merge overall ecomap widgets
-  #   id: merge_ov_widgets
-  #   task: merge_widget_views
-  #   partial:
-  #     widgets: ${{ workflow.create_ov_widgets.return }}
-
-  - name: Convert html to png 
-    id: convt_plot_png
+  - name: Convert  pie chart html to png 
+    id: convt_pie_html_png
     task: zhtml_to_png
     partial:
       html_path: 
         - ${{ workflow.draw_survey_pies.return }}
+
+      output_dir: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      config:
+        wait_for_timeout: 100
+  
+  - name: Convert bar chart html to png 
+    id: convt_bar_html_png
+    task: zhtml_to_png
+    partial:
+      html_path: 
         - ${{ workflow.draw_survey_bar.return }}
+
+      output_dir: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      config:
+        wait_for_timeout: 100
+
+  - name: Convert stats html to png 
+    id: convt_stats_html_png
+    task: zhtml_to_png
+    partial:
+      html_path: 
         - ${{ workflow.draw_stat_box.return }}
+
+      output_dir: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      config:
+        wait_for_timeout: 100
+
+
+  - name: Convert  ols html to png 
+    id: convt_ols_html_png
+    task: zhtml_to_png
+    partial:
+      html_path: 
         - ${{ workflow.draw_ols_plots.return }}
+
+      output_dir: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      config:
+        wait_for_timeout: 100
+
+  - name: Convert tukey html to png 
+    id: convt_tuk_html_png
+    task: zhtml_to_png
+    partial:
+      html_path: 
         - ${{ workflow.draw_tukey_plots.return }}
 
       output_dir: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
