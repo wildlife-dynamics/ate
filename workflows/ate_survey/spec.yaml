@@ -384,12 +384,12 @@ workflow:
         prefer_not_to_answer: Prefer not to answer
 
 
-  - name: Map survey columns 
-    id: map_col_surveys
-    task: map_survey_columns
+  - name: Map true false columns
+    id: map_true_false
+    task: map_survey_responses
     partial:
       df: ${{ workflow.map_yes_no.return }}
-      cols:
+      columns: 
         - Female elephants live in family groups
         - Female elephants protect their young
         - Elephants move seasonally for food and water
@@ -397,9 +397,36 @@ workflow:
         - Elephant signals awareness by raising trunk
         - Male elephants with secretions may be more aggressive
         - Elephants can smell and hear from far away
+
+      value_map:
+        "false": "False"
+        "true": "True"
+        "i_dont_know": "I don't know"
+
+
+  - name: Map effective/not effective columns
+    id: map_no_effect
+    task: map_survey_responses
+    partial:
+      df: ${{ workflow.map_true_false.return }}
+      columns: 
         - Effectiveness rating of primary crop protection method
         - Effectiveness rating of that practice
         - Effectiveness rating of water protection
+
+      value_map:
+        highly_effective: Highly effective
+        effective: Effective
+        not_effective: Not effective
+        i_dont_know: I don't know
+
+
+  - name: Map survey columns 
+    id: map_col_surveys
+    task: map_survey_columns
+    partial:
+      df: ${{ workflow.map_no_effect.return }}
+      cols:
         - Participant age
         - Household size
         - Participant tribe
@@ -534,7 +561,7 @@ workflow:
     partial:
       root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
       text: ${{ workflow.draw_likert_chart.return }}
-      filename: elephants_relationship_likert
+      filename: elephants_relationship_likert.html
 
 # -- Filter effective / not effective df
   - name: Filter effective / not effective df
@@ -575,7 +602,7 @@ workflow:
     partial:
       root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
       text: ${{ workflow.draw_likert_eff.return }}
-      filename: effectiveness_mitigation_methods
+      filename: effectiveness_mitigation_methods.html
 
 # -- Draw survey pie charts and persist  --> point this to ZH's html_to_png list
   - name: Draw survey pie charts and persist  
@@ -615,7 +642,7 @@ workflow:
 # -- Draw survey bar charts and persist  --> point this to ZH's html_to_png list
   - name: Draw survey bar charts and persist  
     id: draw_survey_bar
-    task: draw_pie_and_persist
+    task: draw_bar_and_persist
     partial:
       output_dir: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
       df: ${{ workflow.bin_survey_cols.return }}
@@ -679,6 +706,7 @@ workflow:
     partial:
       root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
       df: ${{ workflow.calc_attitude_scores.return }}
+      filename: elephant_sentiment_scores
 
 # -- Stats section
   - name: Filter stat relevant questions
@@ -721,8 +749,8 @@ workflow:
         Highest level of education: education_level
         Participant tribe: tribe
         Household size: household_size
-        Participant age group: age_group
-        Participant gender: gender
+        Participant age group: age_group_distribution
+        Participant gender: gender_of_participant
 
 # -- Perform anova analysis
   - name: Perform anova analysis and persist  

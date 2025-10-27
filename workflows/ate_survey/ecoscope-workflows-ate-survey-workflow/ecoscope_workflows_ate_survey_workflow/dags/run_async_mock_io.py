@@ -43,6 +43,7 @@ from ecoscope_workflows_ext_ate.tasks import (
     convert_to_int,
     create_likert_chart,
     create_view_state_from_gdf,
+    draw_bar_and_persist,
     draw_boxplot_and_persist,
     draw_ols_scatterplot_and_persist,
     draw_pie_and_persist,
@@ -91,7 +92,9 @@ def main(params: Params):
         "fill_values": ["convert_obj_to_str"],
         "map_agree_disagree": ["fill_values"],
         "map_yes_no": ["map_agree_disagree"],
-        "map_col_surveys": ["map_yes_no"],
+        "map_true_false": ["map_yes_no"],
+        "map_no_effect": ["map_true_false"],
+        "map_col_surveys": ["map_no_effect"],
         "print_mapped_df": ["map_col_surveys"],
         "convt_to_int": ["map_col_surveys"],
         "create_demo_table": ["convt_to_int"],
@@ -582,13 +585,13 @@ def main(params: Params):
             | (params_dict.get("map_yes_no") or {}),
             method="call",
         ),
-        "map_col_surveys": Node(
-            async_task=map_survey_columns.validate()
-            .handle_errors(task_instance_id="map_col_surveys")
+        "map_true_false": Node(
+            async_task=map_survey_responses.validate()
+            .handle_errors(task_instance_id="map_true_false")
             .set_executor("lithops"),
             partial={
                 "df": DependsOn("map_yes_no"),
-                "cols": [
+                "columns": [
                     "Female elephants live in family groups",
                     "Female elephants protect their young",
                     "Elephants move seasonally for food and water",
@@ -596,9 +599,44 @@ def main(params: Params):
                     "Elephant signals awareness by raising trunk",
                     "Male elephants with secretions may be more aggressive",
                     "Elephants can smell and hear from far away",
+                ],
+                "value_map": {
+                    "false": "False",
+                    "true": "True",
+                    "i_dont_know": "I don't know",
+                },
+            }
+            | (params_dict.get("map_true_false") or {}),
+            method="call",
+        ),
+        "map_no_effect": Node(
+            async_task=map_survey_responses.validate()
+            .handle_errors(task_instance_id="map_no_effect")
+            .set_executor("lithops"),
+            partial={
+                "df": DependsOn("map_true_false"),
+                "columns": [
                     "Effectiveness rating of primary crop protection method",
                     "Effectiveness rating of that practice",
                     "Effectiveness rating of water protection",
+                ],
+                "value_map": {
+                    "highly_effective": "Highly effective",
+                    "effective": "Effective",
+                    "not_effective": "Not effective",
+                    "i_dont_know": "I don't know",
+                },
+            }
+            | (params_dict.get("map_no_effect") or {}),
+            method="call",
+        ),
+        "map_col_surveys": Node(
+            async_task=map_survey_columns.validate()
+            .handle_errors(task_instance_id="map_col_surveys")
+            .set_executor("lithops"),
+            partial={
+                "df": DependsOn("map_no_effect"),
+                "cols": [
                     "Participant age",
                     "Household size",
                     "Participant tribe",
@@ -761,7 +799,7 @@ def main(params: Params):
             partial={
                 "root_path": os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
                 "text": DependsOn("draw_likert_chart"),
-                "filename": "elephants_relationship_likert",
+                "filename": "elephants_relationship_likert.html",
             }
             | (params_dict.get("persist_likert") or {}),
             method="call",
@@ -807,7 +845,7 @@ def main(params: Params):
             partial={
                 "root_path": os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
                 "text": DependsOn("draw_likert_eff"),
-                "filename": "effectiveness_mitigation_methods",
+                "filename": "effectiveness_mitigation_methods.html",
             }
             | (params_dict.get("persist_likert_eff") or {}),
             method="call",
@@ -852,7 +890,7 @@ def main(params: Params):
             method="call",
         ),
         "draw_survey_bar": Node(
-            async_task=draw_pie_and_persist.validate()
+            async_task=draw_bar_and_persist.validate()
             .handle_errors(task_instance_id="draw_survey_bar")
             .set_executor("lithops"),
             partial={
@@ -930,6 +968,7 @@ def main(params: Params):
             partial={
                 "root_path": os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
                 "df": DependsOn("calc_attitude_scores"),
+                "filename": "elephant_sentiment_scores",
             }
             | (params_dict.get("persist_attitude_df") or {}),
             method="call",
@@ -982,8 +1021,8 @@ def main(params: Params):
                     "Highest level of education": "education_level",
                     "Participant tribe": "tribe",
                     "Household size": "household_size",
-                    "Participant age group": "age_group",
-                    "Participant gender": "gender",
+                    "Participant age group": "age_group_distribution",
+                    "Participant gender": "gender_of_participant",
                 },
             }
             | (params_dict.get("map_stats_df") or {}),

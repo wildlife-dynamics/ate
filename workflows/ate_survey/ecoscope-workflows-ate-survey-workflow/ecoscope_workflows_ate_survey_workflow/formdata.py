@@ -221,6 +221,20 @@ class MapYesNo(BaseModel):
     inplace: Optional[bool] = Field(False, title="Inplace")
 
 
+class MapTrueFalse(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    inplace: Optional[bool] = Field(False, title="Inplace")
+
+
+class MapNoEffect(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    inplace: Optional[bool] = Field(False, title="Inplace")
+
+
 class ConvtToInt(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -465,6 +479,10 @@ class FormData(BaseModel):
         None, title="Map Agree/Disagree columns"
     )
     map_yes_no: Optional[MapYesNo] = Field(None, title="Map Yes/No columns")
+    map_true_false: Optional[MapTrueFalse] = Field(None, title="Map true false columns")
+    map_no_effect: Optional[MapNoEffect] = Field(
+        None, title="Map effective/not effective columns"
+    )
     convt_to_int: Optional[ConvtToInt] = Field(None, title="Convert columns to int")
     persist_demo_df: Optional[PersistDemoDf] = Field(
         None, title="Persist demographic table to disk"

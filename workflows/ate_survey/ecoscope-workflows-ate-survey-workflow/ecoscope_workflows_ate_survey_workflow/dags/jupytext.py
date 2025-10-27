@@ -35,6 +35,7 @@ from ecoscope_workflows_ext_ate.tasks import (
     create_likert_chart,
     create_view_state_from_gdf,
     download_file_and_persist,
+    draw_bar_and_persist,
     draw_boxplot_and_persist,
     draw_ols_scatterplot_and_persist,
     draw_pie_and_persist,
@@ -670,6 +671,75 @@ map_yes_no = (
 
 
 # %% [markdown]
+# ## Map true false columns
+
+# %%
+# parameters
+
+map_true_false_params = dict(
+    inplace=...,
+)
+
+# %%
+# call the task
+
+
+map_true_false = (
+    map_survey_responses.handle_errors(task_instance_id="map_true_false")
+    .partial(
+        df=map_yes_no,
+        columns=[
+            "Female elephants live in family groups",
+            "Female elephants protect their young",
+            "Elephants move seasonally for food and water",
+            "Elephant may shake its head when annoyed",
+            "Elephant signals awareness by raising trunk",
+            "Male elephants with secretions may be more aggressive",
+            "Elephants can smell and hear from far away",
+        ],
+        value_map={"false": "False", "true": "True", "i_dont_know": "I don't know"},
+        **map_true_false_params,
+    )
+    .call()
+)
+
+
+# %% [markdown]
+# ## Map effective/not effective columns
+
+# %%
+# parameters
+
+map_no_effect_params = dict(
+    inplace=...,
+)
+
+# %%
+# call the task
+
+
+map_no_effect = (
+    map_survey_responses.handle_errors(task_instance_id="map_no_effect")
+    .partial(
+        df=map_true_false,
+        columns=[
+            "Effectiveness rating of primary crop protection method",
+            "Effectiveness rating of that practice",
+            "Effectiveness rating of water protection",
+        ],
+        value_map={
+            "highly_effective": "Highly effective",
+            "effective": "Effective",
+            "not_effective": "Not effective",
+            "i_dont_know": "I don't know",
+        },
+        **map_no_effect_params,
+    )
+    .call()
+)
+
+
+# %% [markdown]
 # ## Map survey columns
 
 # %%
@@ -684,18 +754,8 @@ map_col_surveys_params = dict()
 map_col_surveys = (
     map_survey_columns.handle_errors(task_instance_id="map_col_surveys")
     .partial(
-        df=map_yes_no,
+        df=map_no_effect,
         cols=[
-            "Female elephants live in family groups",
-            "Female elephants protect their young",
-            "Elephants move seasonally for food and water",
-            "Elephant may shake its head when annoyed",
-            "Elephant signals awareness by raising trunk",
-            "Male elephants with secretions may be more aggressive",
-            "Elephants can smell and hear from far away",
-            "Effectiveness rating of primary crop protection method",
-            "Effectiveness rating of that practice",
-            "Effectiveness rating of water protection",
             "Participant age",
             "Household size",
             "Participant tribe",
@@ -974,7 +1034,7 @@ persist_likert = (
     .partial(
         root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
         text=draw_likert_chart,
-        filename="elephants_relationship_likert",
+        filename="elephants_relationship_likert.html",
         **persist_likert_params,
     )
     .call()
@@ -1068,7 +1128,7 @@ persist_likert_eff = (
     .partial(
         root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
         text=draw_likert_eff,
-        filename="effectiveness_mitigation_methods",
+        filename="effectiveness_mitigation_methods.html",
         **persist_likert_eff_params,
     )
     .call()
@@ -1139,7 +1199,7 @@ draw_survey_bar_params = dict()
 
 
 draw_survey_bar = (
-    draw_pie_and_persist.handle_errors(task_instance_id="draw_survey_bar")
+    draw_bar_and_persist.handle_errors(task_instance_id="draw_survey_bar")
     .partial(
         output_dir=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
         df=bin_survey_cols,
@@ -1245,7 +1305,6 @@ calc_attitude_scores = (
 # parameters
 
 persist_attitude_df_params = dict(
-    filename=...,
     filetype=...,
 )
 
@@ -1258,6 +1317,7 @@ persist_attitude_df = (
     .partial(
         root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
         df=calc_attitude_scores,
+        filename="elephant_sentiment_scores",
         **persist_attitude_df_params,
     )
     .call()
@@ -1348,8 +1408,8 @@ map_stats_df = (
             "Highest level of education": "education_level",
             "Participant tribe": "tribe",
             "Household size": "household_size",
-            "Participant age group": "age_group",
-            "Participant gender": "gender",
+            "Participant age group": "age_group_distribution",
+            "Participant gender": "gender_of_participant",
         },
         **map_stats_df_params,
     )

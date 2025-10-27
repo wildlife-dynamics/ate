@@ -1687,42 +1687,6 @@ def map_survey_columns(df: AnyDataFrame, cols: Union[str, List[str]]) -> AnyData
     elif not isinstance(cols, list):
         raise ValueError("cols parameter must be a string or list of strings")
     
-    # Map survey responses for elephant knowledge questions
-    df = map_survey_responses(
-        df=df,
-        columns=[
-            "Female elephants live in family groups",
-            "Female elephants protect their young",
-            "Elephants move seasonally for food and water",
-            "Elephant may shake its head when annoyed",
-            "Elephant signals awareness by raising trunk",
-            "Male elephants with secretions may be more aggressive",
-            "Elephants can smell and hear from far away",
-        ],
-        value_map={
-            "false": "False",
-            "true": "True",
-            "i_dont_know": "I don't know"
-        }
-    )
-
-    # Map effectiveness ratings
-    df = map_survey_responses(
-        df=df,
-        columns=[
-            "Effectiveness rating of primary crop protection method",
-            "Effectiveness rating of that practice",
-            "Effectiveness rating of water protection"
-        ],
-        value_map={
-            "highly_effective": "Highly effective",
-            "effective": "Effective",
-            "not_effective": "Not effective",
-            "i_dont_know": "I don't know",
-        }
-    )
-
-    # Fix data entry errors
     df = map_values(
         df=df,
         column_name="Participant age",

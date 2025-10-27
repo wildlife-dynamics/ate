@@ -353,6 +353,32 @@
       "type": "object",
       "title": "Map Yes/No columns"
     },
+    "map_true_false": {
+      "additionalProperties": false,
+      "properties": {
+        "inplace": {
+          "default": false,
+          "title": "Inplace",
+          "type": "boolean"
+        }
+      },
+      "required": [],
+      "type": "object",
+      "title": "Map true false columns"
+    },
+    "map_no_effect": {
+      "additionalProperties": false,
+      "properties": {
+        "inplace": {
+          "default": false,
+          "title": "Inplace",
+          "type": "boolean"
+        }
+      },
+      "required": [],
+      "type": "object",
+      "title": "Map effective/not effective columns"
+    },
     "convt_to_int": {
       "additionalProperties": false,
       "properties": {
@@ -915,6 +941,8 @@
       "get_survey_events_data",
       "map_agree_disagree",
       "map_yes_no",
+      "map_true_false",
+      "map_no_effect",
       "convt_to_int",
       "persist_demo_df",
       "bin_survey_cols",
