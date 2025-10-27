@@ -645,9 +645,7 @@
           "ecoscope:advanced": true
         }
       },
-      "required": [
-        "geodataframe"
-      ],
+      "required": [],
       "type": "object",
       "title": "Generate attitude score point layers"
     },
@@ -676,9 +674,7 @@
           "ecoscope:advanced": true
         }
       },
-      "required": [
-        "geodataframe"
-      ],
+      "required": [],
       "type": "object",
       "title": "Generate gender point layers"
     },
@@ -707,9 +703,7 @@
           "ecoscope:advanced": true
         }
       },
-      "required": [
-        "geodataframe"
-      ],
+      "required": [],
       "type": "object",
       "title": "Generate overall point layers"
     }

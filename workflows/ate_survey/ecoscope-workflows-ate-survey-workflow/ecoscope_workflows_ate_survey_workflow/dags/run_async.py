@@ -1127,8 +1127,8 @@ def main(params: Params):
                         "attitude_colors",
                         "elephant_sentiment_score",
                     ],
-                    "geodataframe": DependsOn("apply_att_colormap"),
                 },
+                "geodataframe": DependsOn("apply_att_colormap"),
             }
             | (params_dict.get("generate_att_layers") or {}),
             method="call",
@@ -1252,8 +1252,8 @@ def main(params: Params):
                         "color_column": "gender_colors",
                     },
                     "tooltip_columns": ["Participant gender", "gender_colors"],
-                    "geodataframe": DependsOn("apply_gn_colormap"),
                 },
+                "geodataframe": DependsOn("apply_gn_colormap"),
             }
             | (params_dict.get("generate_gn_layers") or {}),
             method="call",
@@ -1360,8 +1360,8 @@ def main(params: Params):
                 "layer_style": {
                     "get_fill_color": "#C70039",
                     "legend": {"labels": ["Survey locations"], "colors": ["#C70039"]},
-                    "geodataframe": DependsOn("bin_survey_cols"),
                 },
+                "geodataframe": DependsOn("bin_survey_cols"),
             }
             | (params_dict.get("generate_ov_layers") or {}),
             method="call",

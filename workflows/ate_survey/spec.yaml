@@ -847,7 +847,7 @@ workflow:
           - overall_attitude
           - attitude_colors
           - elephant_sentiment_score
-        geodataframe: ${{ workflow.apply_att_colormap.return }}
+      geodataframe: ${{ workflow.apply_att_colormap.return }}
   
   - name: Zoom attitude point layers by view state
     id: zoom_att_layers
@@ -941,7 +941,7 @@ workflow:
         tooltip_columns:
           - Participant gender
           - gender_colors
-        geodataframe: ${{ workflow.apply_gn_colormap.return }}
+      geodataframe: ${{ workflow.apply_gn_colormap.return }}
   
   - name: Zoom gender point layers by view state
     id: zoom_gn_layers
@@ -1035,7 +1035,7 @@ workflow:
             - Survey locations
           colors:
             - "#C70039"
-        geodataframe: ${{ workflow.bin_survey_cols.return }}
+      geodataframe: ${{ workflow.bin_survey_cols.return }}
   
   - name: Zoom overall point layers by view state
     id: zoom_ov_layers

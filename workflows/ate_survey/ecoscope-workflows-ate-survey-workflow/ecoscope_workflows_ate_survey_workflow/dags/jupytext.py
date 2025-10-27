@@ -1592,7 +1592,6 @@ apply_att_colormap = (
 # parameters
 
 generate_att_layers_params = dict(
-    geodataframe=...,
     legend=...,
     tooltip_columns=...,
     zoom=...,
@@ -1623,8 +1622,8 @@ generate_att_layers = (
                 "attitude_colors",
                 "elephant_sentiment_score",
             ],
-            "geodataframe": apply_att_colormap,
         },
+        geodataframe=apply_att_colormap,
         **generate_att_layers_params,
     )
     .call()
@@ -1802,7 +1801,6 @@ apply_gn_colormap = (
 # parameters
 
 generate_gn_layers_params = dict(
-    geodataframe=...,
     legend=...,
     tooltip_columns=...,
     zoom=...,
@@ -1829,8 +1827,8 @@ generate_gn_layers = (
                 "color_column": "gender_colors",
             },
             "tooltip_columns": ["Participant gender", "gender_colors"],
-            "geodataframe": apply_gn_colormap,
         },
+        geodataframe=apply_gn_colormap,
         **generate_gn_layers_params,
     )
     .call()
@@ -1981,7 +1979,6 @@ merge_gn_widgets = (
 # parameters
 
 generate_ov_layers_params = dict(
-    geodataframe=...,
     legend=...,
     tooltip_columns=...,
     zoom=...,
@@ -2004,8 +2001,8 @@ generate_ov_layers = (
         layer_style={
             "get_fill_color": "#C70039",
             "legend": {"labels": ["Survey locations"], "colors": ["#C70039"]},
-            "geodataframe": bin_survey_cols,
         },
+        geodataframe=bin_survey_cols,
         **generate_ov_layers_params,
     )
     .call()
