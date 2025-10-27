@@ -201,6 +201,14 @@ workflow:
         - Number of cattle
         - Number of donkeys
 
+# -- print df for testsewf
+  - name: Print obj to int
+    id: print_obj_int
+    task: view_df
+    partial:
+      gdf: ${{ workflow.convert_obj_to_num.return }}
+      name: checking converted objects to int
+
 # -- Convert objects to string
   - name: Convert objects to string
     id: convert_obj_to_str
@@ -258,6 +266,15 @@ workflow:
         - Which intervention would help you in future
         - Effectiveness rating of primary crop protection method
         - If yes, which methods do you use for livestock
+
+
+# -- print df for testsewf
+  - name: Print obj to str 
+    id: print_obj_str
+    task: view_df
+    partial:
+      gdf: ${{ workflow.convert_obj_to_str.return }}
+      name: view converted objects to string
 
 # -- Fill missing values
   - name: Fill missing values with default values
@@ -330,6 +347,14 @@ workflow:
         - Effectiveness rating of primary crop protection method
         - If yes, which methods do you use for livestock
 
+# -- print df for testsewf
+  - name: Print filled values df
+    id: print_filled_df
+    task: view_df
+    partial:
+      gdf: ${{ workflow.fill_values.return }}
+      name: checking filled values df
+
 
 # -- map survey responses 
   - name: Map Agree/Disagree columns
@@ -351,13 +376,13 @@ workflow:
         - Receive livelihood benefits from elephants
 
       value_map:
-        strongly_agree: Strongly agree
-        agree: Agree
-        neutral: Neutral
-        disagree: Disagree
-        strongly_disagree: Strongly disagree
-        i_dont_know: I don't know
-        prefer_not_to_answer: Prefer not to answer
+        "strongly_agree": "Strongly agree"
+        "agree": "Agree"
+        "neutral": "Neutral"
+        "disagree": "Disagree"
+        "strongly_disagree": "Strongly disagree"
+        "i_dont_know": "I don't know"
+        "prefer_not_to_answer": "Prefer not to answer"
 
   - name: Map Yes/No columns
     id: map_yes_no
@@ -378,10 +403,10 @@ workflow:
         - Receive livelihood benefits from elephants
 
       value_map:
-        yes: Yes
-        no: No
-        i_dont_know: I don't know
-        prefer_not_to_answer: Prefer not to answer
+        "yes": "Yes"
+        "no": "No"
+        "i_dont_know": "I don't know"
+        "prefer_not_to_answer": "Prefer not to answer"
 
 
   - name: Map true false columns
@@ -420,6 +445,13 @@ workflow:
         not_effective: Not effective
         i_dont_know: I don't know
 
+# -- print df for testsewf
+  - name: Print prior mapped values
+    id: print_prior_df
+    task: view_df
+    partial:
+      gdf: ${{ workflow.map_no_effect.return }}
+      name: checking existing mapped values
 
   - name: Map survey columns 
     id: map_col_surveys
@@ -751,6 +783,15 @@ workflow:
         Household size: household_size
         Participant age group: age_group_distribution
         Participant gender: gender_of_participant
+
+
+# -- print df for testsewf
+  - name: Print stats vals
+    id: print_stats_df
+    task: view_df
+    partial:
+      gdf: ${{ workflow.map_stats_df.return }}
+      name: View stats df
 
 # -- Perform anova analysis
   - name: Perform anova analysis and persist  

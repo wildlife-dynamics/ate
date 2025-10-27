@@ -296,6 +296,17 @@ def main(params: Params):
         .call()
     )
 
+    print_obj_int = (
+        view_df.validate()
+        .handle_errors(task_instance_id="print_obj_int")
+        .partial(
+            gdf=convert_obj_to_num,
+            name="checking converted objects to int",
+            **(params_dict.get("print_obj_int") or {}),
+        )
+        .call()
+    )
+
     convert_obj_to_str = (
         convert_object_to_value.validate()
         .handle_errors(task_instance_id="convert_obj_to_str")
@@ -354,6 +365,17 @@ def main(params: Params):
                 "If yes, which methods do you use for livestock",
             ],
             **(params_dict.get("convert_obj_to_str") or {}),
+        )
+        .call()
+    )
+
+    print_obj_str = (
+        view_df.validate()
+        .handle_errors(task_instance_id="print_obj_str")
+        .partial(
+            gdf=convert_obj_to_str,
+            name="view converted objects to string",
+            **(params_dict.get("print_obj_str") or {}),
         )
         .call()
     )
@@ -430,6 +452,17 @@ def main(params: Params):
                 "If yes, which methods do you use for livestock",
             ],
             **(params_dict.get("fill_values") or {}),
+        )
+        .call()
+    )
+
+    print_filled_df = (
+        view_df.validate()
+        .handle_errors(task_instance_id="print_filled_df")
+        .partial(
+            gdf=fill_values,
+            name="checking filled values df",
+            **(params_dict.get("print_filled_df") or {}),
         )
         .call()
     )
@@ -532,6 +565,17 @@ def main(params: Params):
                 "i_dont_know": "I don't know",
             },
             **(params_dict.get("map_no_effect") or {}),
+        )
+        .call()
+    )
+
+    print_prior_df = (
+        view_df.validate()
+        .handle_errors(task_instance_id="print_prior_df")
+        .partial(
+            gdf=map_no_effect,
+            name="checking existing mapped values",
+            **(params_dict.get("print_prior_df") or {}),
         )
         .call()
     )
@@ -930,6 +974,17 @@ def main(params: Params):
                 "Participant gender": "gender_of_participant",
             },
             **(params_dict.get("map_stats_df") or {}),
+        )
+        .call()
+    )
+
+    print_stats_df = (
+        view_df.validate()
+        .handle_errors(task_instance_id="print_stats_df")
+        .partial(
+            gdf=map_stats_df,
+            name="View stats df",
+            **(params_dict.get("print_stats_df") or {}),
         )
         .call()
     )

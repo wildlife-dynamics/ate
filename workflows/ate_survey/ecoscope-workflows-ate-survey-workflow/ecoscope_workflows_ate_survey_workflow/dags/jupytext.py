@@ -420,6 +420,29 @@ convert_obj_to_num = (
 
 
 # %% [markdown]
+# ## Print obj to int
+
+# %%
+# parameters
+
+print_obj_int_params = dict()
+
+# %%
+# call the task
+
+
+print_obj_int = (
+    view_df.handle_errors(task_instance_id="print_obj_int")
+    .partial(
+        gdf=convert_obj_to_num,
+        name="checking converted objects to int",
+        **print_obj_int_params,
+    )
+    .call()
+)
+
+
+# %% [markdown]
 # ## Convert objects to string
 
 # %%
@@ -488,6 +511,29 @@ convert_obj_to_str = (
             "If yes, which methods do you use for livestock",
         ],
         **convert_obj_to_str_params,
+    )
+    .call()
+)
+
+
+# %% [markdown]
+# ## Print obj to str
+
+# %%
+# parameters
+
+print_obj_str_params = dict()
+
+# %%
+# call the task
+
+
+print_obj_str = (
+    view_df.handle_errors(task_instance_id="print_obj_str")
+    .partial(
+        gdf=convert_obj_to_str,
+        name="view converted objects to string",
+        **print_obj_str_params,
     )
     .call()
 )
@@ -576,6 +622,27 @@ fill_values = (
             "If yes, which methods do you use for livestock",
         ],
         **fill_values_params,
+    )
+    .call()
+)
+
+
+# %% [markdown]
+# ## Print filled values df
+
+# %%
+# parameters
+
+print_filled_df_params = dict()
+
+# %%
+# call the task
+
+
+print_filled_df = (
+    view_df.handle_errors(task_instance_id="print_filled_df")
+    .partial(
+        gdf=fill_values, name="checking filled values df", **print_filled_df_params
     )
     .call()
 )
@@ -734,6 +801,29 @@ map_no_effect = (
             "i_dont_know": "I don't know",
         },
         **map_no_effect_params,
+    )
+    .call()
+)
+
+
+# %% [markdown]
+# ## Print prior mapped values
+
+# %%
+# parameters
+
+print_prior_df_params = dict()
+
+# %%
+# call the task
+
+
+print_prior_df = (
+    view_df.handle_errors(task_instance_id="print_prior_df")
+    .partial(
+        gdf=map_no_effect,
+        name="checking existing mapped values",
+        **print_prior_df_params,
     )
     .call()
 )
@@ -1413,6 +1503,25 @@ map_stats_df = (
         },
         **map_stats_df_params,
     )
+    .call()
+)
+
+
+# %% [markdown]
+# ## Print stats vals
+
+# %%
+# parameters
+
+print_stats_df_params = dict()
+
+# %%
+# call the task
+
+
+print_stats_df = (
+    view_df.handle_errors(task_instance_id="print_stats_df")
+    .partial(gdf=map_stats_df, name="View stats df", **print_stats_df_params)
     .call()
 )
 
