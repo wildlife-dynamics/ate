@@ -58,7 +58,6 @@ from ecoscope_workflows_ext_ate.tasks import (
     perform_anova_analysis,
     view_df,
     zhtml_to_png,
-    zip_grouped_by_key,
 )
 from ecoscope_workflows_ext_ecoscope.tasks.io import persist_df
 from ecoscope_workflows_ext_ecoscope.tasks.results import (
@@ -123,23 +122,32 @@ def main(params: Params):
         "apply_att_colormap": ["calc_attitude_scores"],
         "generate_att_layers": ["apply_att_colormap"],
         "zoom_att_layers": ["apply_att_colormap"],
-        "zip_att_zoom_values": ["generate_att_layers", "zoom_att_layers"],
-        "draw_att_ecomap": ["configure_base_maps", "zip_att_zoom_values"],
+        "draw_att_ecomap": [
+            "configure_base_maps",
+            "zoom_att_layers",
+            "generate_att_layers",
+        ],
         "persist_att_ecomap_urls": ["draw_att_ecomap"],
         "create_att_widgets": ["persist_att_ecomap_urls"],
         "merge_att_widgets": ["create_att_widgets"],
         "apply_gn_colormap": ["bin_survey_cols"],
         "generate_gn_layers": ["apply_gn_colormap"],
         "zoom_gn_layers": ["apply_gn_colormap"],
-        "zip_gn_zoom_values": ["generate_gn_layers", "zoom_gn_layers"],
-        "draw_gn_ecomap": ["configure_base_maps", "zip_gn_zoom_values"],
+        "draw_gn_ecomap": [
+            "configure_base_maps",
+            "zoom_gn_layers",
+            "generate_gn_layers",
+        ],
         "persist_gn_ecomap_urls": ["draw_gn_ecomap"],
         "create_gn_widgets": ["persist_gn_ecomap_urls"],
         "merge_gn_widgets": ["create_gn_widgets"],
         "generate_ov_layers": ["bin_survey_cols"],
         "zoom_ov_layers": ["bin_survey_cols"],
-        "zip_ov_zoom_values": ["generate_ov_layers", "zoom_ov_layers"],
-        "draw_ov_ecomap": ["configure_base_maps", "zip_ov_zoom_values"],
+        "draw_ov_ecomap": [
+            "configure_base_maps",
+            "zoom_ov_layers",
+            "generate_ov_layers",
+        ],
         "persist_ov_ecomap_urls": ["draw_ov_ecomap"],
         "create_ov_widgets": ["persist_ov_ecomap_urls"],
         "merge_ov_widgets": ["create_ov_widgets"],
@@ -1163,17 +1171,6 @@ def main(params: Params):
             | (params_dict.get("zoom_att_layers") or {}),
             method="call",
         ),
-        "zip_att_zoom_values": Node(
-            async_task=zip_grouped_by_key.validate()
-            .handle_errors(task_instance_id="zip_att_zoom_values")
-            .set_executor("lithops"),
-            partial={
-                "left": DependsOn("generate_att_layers"),
-                "right": DependsOn("zoom_att_layers"),
-            }
-            | (params_dict.get("zip_att_zoom_values") or {}),
-            method="call",
-        ),
         "draw_att_ecomap": Node(
             async_task=draw_ecomap.validate()
             .handle_errors(task_instance_id="draw_att_ecomap")
@@ -1188,13 +1185,11 @@ def main(params: Params):
                 "static": False,
                 "title": None,
                 "max_zoom": 20,
+                "view_state": DependsOn("zoom_att_layers"),
+                "geo_layers": DependsOn("generate_att_layers"),
             }
             | (params_dict.get("draw_att_ecomap") or {}),
-            method="mapvalues",
-            kwargs={
-                "argnames": ["geo_layers", "view_state"],
-                "argvalues": DependsOn("zip_att_zoom_values"),
-            },
+            method="call",
         ),
         "persist_att_ecomap_urls": Node(
             async_task=persist_text.validate()
@@ -1288,17 +1283,6 @@ def main(params: Params):
             | (params_dict.get("zoom_gn_layers") or {}),
             method="call",
         ),
-        "zip_gn_zoom_values": Node(
-            async_task=zip_grouped_by_key.validate()
-            .handle_errors(task_instance_id="zip_gn_zoom_values")
-            .set_executor("lithops"),
-            partial={
-                "left": DependsOn("generate_gn_layers"),
-                "right": DependsOn("zoom_gn_layers"),
-            }
-            | (params_dict.get("zip_gn_zoom_values") or {}),
-            method="call",
-        ),
         "draw_gn_ecomap": Node(
             async_task=draw_ecomap.validate()
             .handle_errors(task_instance_id="draw_gn_ecomap")
@@ -1313,13 +1297,11 @@ def main(params: Params):
                 "static": False,
                 "title": None,
                 "max_zoom": 20,
+                "view_state": DependsOn("zoom_gn_layers"),
+                "geo_layers": DependsOn("generate_gn_layers"),
             }
             | (params_dict.get("draw_gn_ecomap") or {}),
-            method="mapvalues",
-            kwargs={
-                "argnames": ["geo_layers", "view_state"],
-                "argvalues": DependsOn("zip_gn_zoom_values"),
-            },
+            method="call",
         ),
         "persist_gn_ecomap_urls": Node(
             async_task=persist_text.validate()
@@ -1396,17 +1378,6 @@ def main(params: Params):
             | (params_dict.get("zoom_ov_layers") or {}),
             method="call",
         ),
-        "zip_ov_zoom_values": Node(
-            async_task=zip_grouped_by_key.validate()
-            .handle_errors(task_instance_id="zip_ov_zoom_values")
-            .set_executor("lithops"),
-            partial={
-                "left": DependsOn("generate_ov_layers"),
-                "right": DependsOn("zoom_ov_layers"),
-            }
-            | (params_dict.get("zip_ov_zoom_values") or {}),
-            method="call",
-        ),
         "draw_ov_ecomap": Node(
             async_task=draw_ecomap.validate()
             .handle_errors(task_instance_id="draw_ov_ecomap")
@@ -1418,13 +1389,11 @@ def main(params: Params):
                 "static": False,
                 "title": None,
                 "max_zoom": 20,
+                "view_state": DependsOn("zoom_ov_layers"),
+                "geo_layers": DependsOn("generate_ov_layers"),
             }
             | (params_dict.get("draw_ov_ecomap") or {}),
-            method="mapvalues",
-            kwargs={
-                "argnames": ["geo_layers", "view_state"],
-                "argvalues": DependsOn("zip_ov_zoom_values"),
-            },
+            method="call",
         ),
         "persist_ov_ecomap_urls": Node(
             async_task=persist_text.validate()

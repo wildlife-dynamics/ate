@@ -50,7 +50,6 @@ from ecoscope_workflows_ext_ate.tasks import (
     perform_anova_analysis,
     view_df,
     zhtml_to_png,
-    zip_grouped_by_key,
 )
 from ecoscope_workflows_ext_ecoscope.tasks.io import get_events, persist_df
 from ecoscope_workflows_ext_ecoscope.tasks.results import (
@@ -1650,27 +1649,6 @@ zoom_att_layers = (
 
 
 # %% [markdown]
-# ## Zip attitude point layers and zoom values
-
-# %%
-# parameters
-
-zip_att_zoom_values_params = dict()
-
-# %%
-# call the task
-
-
-zip_att_zoom_values = (
-    zip_grouped_by_key.handle_errors(task_instance_id="zip_att_zoom_values")
-    .partial(
-        left=generate_att_layers, right=zoom_att_layers, **zip_att_zoom_values_params
-    )
-    .call()
-)
-
-
-# %% [markdown]
 # ## Draw attitude scores ecomap
 
 # %%
@@ -1693,9 +1671,11 @@ draw_att_ecomap = (
         static=False,
         title=None,
         max_zoom=20,
+        view_state=zoom_att_layers,
+        geo_layers=generate_att_layers,
         **draw_att_ecomap_params,
     )
-    .mapvalues(argnames=["geo_layers", "view_state"], argvalues=zip_att_zoom_values)
+    .call()
 )
 
 
@@ -1855,25 +1835,6 @@ zoom_gn_layers = (
 
 
 # %% [markdown]
-# ## Zip gender point layers and zoom values
-
-# %%
-# parameters
-
-zip_gn_zoom_values_params = dict()
-
-# %%
-# call the task
-
-
-zip_gn_zoom_values = (
-    zip_grouped_by_key.handle_errors(task_instance_id="zip_gn_zoom_values")
-    .partial(left=generate_gn_layers, right=zoom_gn_layers, **zip_gn_zoom_values_params)
-    .call()
-)
-
-
-# %% [markdown]
 # ## Draw gender scores ecomap
 
 # %%
@@ -1896,9 +1857,11 @@ draw_gn_ecomap = (
         static=False,
         title=None,
         max_zoom=20,
+        view_state=zoom_gn_layers,
+        geo_layers=generate_gn_layers,
         **draw_gn_ecomap_params,
     )
-    .mapvalues(argnames=["geo_layers", "view_state"], argvalues=zip_gn_zoom_values)
+    .call()
 )
 
 
@@ -2029,25 +1992,6 @@ zoom_ov_layers = (
 
 
 # %% [markdown]
-# ## Zip overall point layers and zoom values
-
-# %%
-# parameters
-
-zip_ov_zoom_values_params = dict()
-
-# %%
-# call the task
-
-
-zip_ov_zoom_values = (
-    zip_grouped_by_key.handle_errors(task_instance_id="zip_ov_zoom_values")
-    .partial(left=generate_ov_layers, right=zoom_ov_layers, **zip_ov_zoom_values_params)
-    .call()
-)
-
-
-# %% [markdown]
 # ## Draw overall ecomap
 
 # %%
@@ -2070,9 +2014,11 @@ draw_ov_ecomap = (
         static=False,
         title=None,
         max_zoom=20,
+        view_state=zoom_ov_layers,
+        geo_layers=generate_ov_layers,
         **draw_ov_ecomap_params,
     )
-    .mapvalues(argnames=["geo_layers", "view_state"], argvalues=zip_ov_zoom_values)
+    .call()
 )
 
 

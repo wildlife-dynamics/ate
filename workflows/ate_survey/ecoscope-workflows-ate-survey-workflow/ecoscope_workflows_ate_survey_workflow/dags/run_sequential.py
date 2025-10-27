@@ -40,7 +40,6 @@ from ecoscope_workflows_ext_ate.tasks import (
     perform_anova_analysis,
     view_df,
     zhtml_to_png,
-    zip_grouped_by_key,
 )
 from ecoscope_workflows_ext_ecoscope.tasks.io import get_events, persist_df
 from ecoscope_workflows_ext_ecoscope.tasks.results import (
@@ -1051,17 +1050,6 @@ def main(params: Params):
         .call()
     )
 
-    zip_att_zoom_values = (
-        zip_grouped_by_key.validate()
-        .handle_errors(task_instance_id="zip_att_zoom_values")
-        .partial(
-            left=generate_att_layers,
-            right=zoom_att_layers,
-            **(params_dict.get("zip_att_zoom_values") or {}),
-        )
-        .call()
-    )
-
     draw_att_ecomap = (
         draw_ecomap.validate()
         .handle_errors(task_instance_id="draw_att_ecomap")
@@ -1072,9 +1060,11 @@ def main(params: Params):
             static=False,
             title=None,
             max_zoom=20,
+            view_state=zoom_att_layers,
+            geo_layers=generate_att_layers,
             **(params_dict.get("draw_att_ecomap") or {}),
         )
-        .mapvalues(argnames=["geo_layers", "view_state"], argvalues=zip_att_zoom_values)
+        .call()
     )
 
     persist_att_ecomap_urls = (
@@ -1163,17 +1153,6 @@ def main(params: Params):
         .call()
     )
 
-    zip_gn_zoom_values = (
-        zip_grouped_by_key.validate()
-        .handle_errors(task_instance_id="zip_gn_zoom_values")
-        .partial(
-            left=generate_gn_layers,
-            right=zoom_gn_layers,
-            **(params_dict.get("zip_gn_zoom_values") or {}),
-        )
-        .call()
-    )
-
     draw_gn_ecomap = (
         draw_ecomap.validate()
         .handle_errors(task_instance_id="draw_gn_ecomap")
@@ -1184,9 +1163,11 @@ def main(params: Params):
             static=False,
             title=None,
             max_zoom=20,
+            view_state=zoom_gn_layers,
+            geo_layers=generate_gn_layers,
             **(params_dict.get("draw_gn_ecomap") or {}),
         )
-        .mapvalues(argnames=["geo_layers", "view_state"], argvalues=zip_gn_zoom_values)
+        .call()
     )
 
     persist_gn_ecomap_urls = (
@@ -1256,17 +1237,6 @@ def main(params: Params):
         .call()
     )
 
-    zip_ov_zoom_values = (
-        zip_grouped_by_key.validate()
-        .handle_errors(task_instance_id="zip_ov_zoom_values")
-        .partial(
-            left=generate_ov_layers,
-            right=zoom_ov_layers,
-            **(params_dict.get("zip_ov_zoom_values") or {}),
-        )
-        .call()
-    )
-
     draw_ov_ecomap = (
         draw_ecomap.validate()
         .handle_errors(task_instance_id="draw_ov_ecomap")
@@ -1277,9 +1247,11 @@ def main(params: Params):
             static=False,
             title=None,
             max_zoom=20,
+            view_state=zoom_ov_layers,
+            geo_layers=generate_ov_layers,
             **(params_dict.get("draw_ov_ecomap") or {}),
         )
-        .mapvalues(argnames=["geo_layers", "view_state"], argvalues=zip_ov_zoom_values)
+        .call()
     )
 
     persist_ov_ecomap_urls = (

@@ -857,12 +857,12 @@ workflow:
       bearing: 0
       gdf: ${{ workflow.apply_att_colormap.return }}
 
-  - name: Zip attitude point layers and zoom values
-    id: zip_att_zoom_values
-    task: zip_grouped_by_key
-    partial:
-      left:  ${{ workflow.generate_att_layers.return }}
-      right: ${{ workflow.zoom_att_layers.return }} 
+  # - name: Zip attitude point layers and zoom values
+  #   id: zip_att_zoom_values
+  #   task: zip_grouped_by_key
+  #   partial:
+  #     left:  ${{ workflow.generate_att_layers.return }}
+  #     right: ${{ workflow.zoom_att_layers.return }} 
 
   - name: Draw attitude scores ecomap
     id: draw_att_ecomap
@@ -877,11 +877,13 @@ workflow:
       static: false
       title: null
       max_zoom: 20
-    mapvalues:
-      argnames: 
-        - geo_layers
-        - view_state
-      argvalues: ${{ workflow.zip_att_zoom_values.return }}
+      view_state: ${{ workflow.zoom_att_layers.return }}
+      geo_layers: ${{ workflow.generate_att_layers.return }}
+    # mapvalues:
+    #   argnames: 
+    #     - geo_layers
+    #     - view_state
+    #   argvalues: ${{ workflow.zip_att_zoom_values.return }}
 
   - name: Persist  attitude scores ecomap html paths
     id: persist_att_ecomap_urls
@@ -951,12 +953,12 @@ workflow:
       bearing: 0
       gdf: ${{ workflow.apply_gn_colormap.return }}
 
-  - name: Zip gender point layers and zoom values
-    id: zip_gn_zoom_values
-    task: zip_grouped_by_key
-    partial:
-      left:  ${{ workflow.generate_gn_layers.return }}
-      right: ${{ workflow.zoom_gn_layers.return }} 
+  # - name: Zip gender point layers and zoom values
+  #   id: zip_gn_zoom_values
+  #   task: zip_grouped_by_key
+  #   partial:
+  #     left:  ${{ workflow.generate_gn_layers.return }}
+  #     right: ${{ workflow.zoom_gn_layers.return }} 
 
   - name: Draw gender scores ecomap
     id: draw_gn_ecomap
@@ -971,11 +973,13 @@ workflow:
       static: false
       title: null
       max_zoom: 20
-    mapvalues:
-      argnames: 
-        - geo_layers
-        - view_state
-      argvalues: ${{ workflow.zip_gn_zoom_values.return }}
+      view_state: ${{ workflow.zoom_gn_layers.return }}
+      geo_layers: ${{ workflow.generate_gn_layers.return }}
+    # mapvalues:
+    #   argnames: 
+    #     - geo_layers
+    #     - view_state
+    #   argvalues: ${{ workflow.zip_gn_zoom_values.return }}
 
   - name: Persist gender ecomap html paths
     id: persist_gn_ecomap_urls
@@ -1045,12 +1049,12 @@ workflow:
       bearing: 0
       gdf: ${{ workflow.bin_survey_cols.return }}
 
-  - name: Zip overall point layers and zoom values
-    id: zip_ov_zoom_values
-    task: zip_grouped_by_key
-    partial:
-      left:  ${{ workflow.generate_ov_layers.return }}
-      right: ${{ workflow.zoom_ov_layers.return }} 
+  # - name: Zip overall point layers and zoom values
+  #   id: zip_ov_zoom_values
+  #   task: zip_grouped_by_key
+  #   partial:
+  #     left:  ${{ workflow.generate_ov_layers.return }}
+  #     right: ${{ workflow.zoom_ov_layers.return }} 
 
   - name: Draw overall ecomap
     id: draw_ov_ecomap
@@ -1065,11 +1069,14 @@ workflow:
       static: false
       title: null
       max_zoom: 20
-    mapvalues:
-      argnames: 
-        - geo_layers
-        - view_state
-      argvalues: ${{ workflow.zip_ov_zoom_values.return }}
+      view_state: ${{ workflow.zoom_ov_layers.return }}
+      geo_layers: ${{ workflow.generate_ov_layers.return }}
+
+    # mapvalues:
+    #   argnames: 
+    #     - geo_layers
+    #     - view_state
+    #   argvalues: ${{ workflow.zip_ov_zoom_values.return }}
 
   - name: Persist overall  ecomap html paths
     id: persist_ov_ecomap_urls
