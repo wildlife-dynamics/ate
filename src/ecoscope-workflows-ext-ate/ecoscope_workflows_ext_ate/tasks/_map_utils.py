@@ -130,7 +130,7 @@ def load_geospatial_files(config: MapProcessingConfig) -> Dict[str, AnyGeoDataFr
     if not base_path.is_dir():
         raise NotADirectoryError(f"Path is not a directory: {base_path}")
 
-    target_crs = CRS.from_user_input(config.target_crs)
+    target_crs = config.target_crs
 
     loaded_files: Dict[str, AnyGeoDataFrame] = {}
     normalized_suffixes = {
@@ -160,10 +160,10 @@ def load_geospatial_files(config: MapProcessingConfig) -> Dict[str, AnyGeoDataFr
                 logger.warning("File has no CRS, skipping reprojection: %s", file_path)
             else:
                 try:
-                    gdf_crs = CRS.from_user_input(gdf.crs)
+                    gdf_crs = gdf.crs
                     if gdf_crs != target_crs:
                         # Reproject to target CRS
-                        gdf = gdf.to_crs(target_crs.to_string())
+                        gdf = gdf.to_crs(target_crs)
                 except Exception as e:
                     logger.warning("Failed to normalize or compare CRS for %s: %s", file_path, e)
 
