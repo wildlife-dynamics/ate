@@ -940,15 +940,15 @@ draw_likert_chart = (
             "Strongly agree",
         ],
         neutral_categories=["Neutral", "I don't know", "Unspecified"],
-        colors=[
-            {"Strongly disagree": None},
-            {"Disagree": None},
-            {"Neutral": None},
-            {"Unspecified": None},
-            {"I don't know": None},
-            {"Agree": None},
-            {"Strongly agree": None},
-        ],
+        colors={
+            "Strongly disagree": None,
+            "Disagree": None,
+            "Neutral": None,
+            "Unspecified": None,
+            "I don't know": None,
+            "Agree": None,
+            "Strongly agree": None,
+        },
         **draw_likert_chart_params,
     )
     .call()
@@ -1036,13 +1036,13 @@ draw_likert_eff = (
         df=filter_eff_noeff,
         response_order=["Not effective", "Effective", "Highly effective"],
         neutral_categories=["I don't know", "Unspecified"],
-        colors=[
-            {"Not effective": None},
-            {"I don't know": None},
-            {"Unspecified": None},
-            {"Effective": None},
-            {"Highly effective": None},
-        ],
+        colors={
+            "Not effective": None,
+            "I don't know": None,
+            "Unspecified": None,
+            "Effective": None,
+            "Highly effective": None,
+        },
         **draw_likert_eff_params,
     )
     .call()
