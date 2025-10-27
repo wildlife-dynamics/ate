@@ -96,25 +96,25 @@ workflow:
       file_dict: ${{ workflow.load_local_shapefiles.return }}
       style_config:
         styles:
-          Amboseli-Ecosystem:
+          amboseli_ecosystem:
             fill_color: "#a1dab4"
             line_color: "#41b6c4"
             line_width: 1
             fill_opacity: 0.5
           
-          Amboseli-Ranch-Boundaries:
+          amboseli_ranch_boundaries:
             fill_color: "#feb24c"
             line_color: "#f03b20"
             line_width: 1
             fill_opacity: 0.5
           
-          Amboseli-Swamps:
+          amboseli_swamps:
             fill_color: "#31a354"
             line_color: "#006d2c"
             line_width: 1
             fill_opacity: 0.5
-            
-          National-Parks:
+
+          national_parks:
             fill_color: "#9e9ac8"
             line_color: "#6a51a3"
             line_width: 1
@@ -156,6 +156,14 @@ workflow:
       include_updates: false
       include_related_events: false
 
+#-- exclude id 
+  - name: Exclude id value from df
+    id: exclude_val_id
+    task: exclude_value
+    partial:
+      df: ${{ workflow.get_survey_events_data.return }}
+      column: serial_number
+      value: 46283
 
 # -- Normalize `event_details` column
   - name: Normalize event details column
@@ -163,7 +171,7 @@ workflow:
     task: normalize_column
     partial:
       column: event_details
-      df: ${{ workflow.get_survey_events_data.return }}
+      df: ${{ workflow.exclude_val_id.return }}
 
 # -- Map columns and drop columns 
   - name: Retain columns and rename columns 

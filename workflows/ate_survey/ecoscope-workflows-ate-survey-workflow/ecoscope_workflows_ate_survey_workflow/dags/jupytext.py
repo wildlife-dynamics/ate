@@ -36,6 +36,7 @@ from ecoscope_workflows_ext_ate.tasks import (
     draw_pie_and_persist,
     draw_tukey_plots_and_persist,
     exclude_geom_outliers,
+    exclude_value,
     fill_missing_values,
     filter_cols_df,
     format_demographic_table,
@@ -342,25 +343,25 @@ create_custom_map_layers = (
         file_dict=load_local_shapefiles,
         style_config={
             "styles": {
-                "Amboseli-Ecosystem": {
+                "amboseli_ecosystem": {
                     "fill_color": "#a1dab4",
                     "line_color": "#41b6c4",
                     "line_width": 1,
                     "fill_opacity": 0.5,
                 },
-                "Amboseli-Ranch-Boundaries": {
+                "amboseli_ranch_boundaries": {
                     "fill_color": "#feb24c",
                     "line_color": "#f03b20",
                     "line_width": 1,
                     "fill_opacity": 0.5,
                 },
-                "Amboseli-Swamps": {
+                "amboseli_swamps": {
                     "fill_color": "#31a354",
                     "line_color": "#006d2c",
                     "line_width": 1,
                     "fill_opacity": 0.5,
                 },
-                "National-Parks": {
+                "national_parks": {
                     "fill_color": "#9e9ac8",
                     "line_color": "#6a51a3",
                     "line_width": 1,
@@ -425,6 +426,30 @@ get_survey_events_data = (
 
 
 # %% [markdown]
+# ## Exclude id value from df
+
+# %%
+# parameters
+
+exclude_val_id_params = dict()
+
+# %%
+# call the task
+
+
+exclude_val_id = (
+    exclude_value.handle_errors(task_instance_id="exclude_val_id")
+    .partial(
+        df=get_survey_events_data,
+        column="serial_number",
+        value=46283,
+        **exclude_val_id_params,
+    )
+    .call()
+)
+
+
+# %% [markdown]
 # ## Normalize event details column
 
 # %%
@@ -439,9 +464,7 @@ normalize_event_details_params = dict()
 normalize_event_details = (
     normalize_column.handle_errors(task_instance_id="normalize_event_details")
     .partial(
-        column="event_details",
-        df=get_survey_events_data,
-        **normalize_event_details_params,
+        column="event_details", df=exclude_val_id, **normalize_event_details_params
     )
     .call()
 )

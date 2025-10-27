@@ -1,4 +1,3 @@
-# Rainfall report 
 import os 
 import warnings
 import numpy as np
@@ -12,7 +11,7 @@ from ecoscope.base.utils import hex_to_rgba
 from ecoscope_workflows_core.decorators import task
 from ecoscope_workflows_core.tasks.io import persist_text
 from ecoscope_workflows_core.annotations import AnyDataFrame
-from typing import Iterable, Optional, Union,List,Dict,Annotated
+from typing import Iterable, Optional, Union,List,Dict,Annotated,cast
 from ecoscope_workflows_core.tasks.transformation._mapping import map_values
 from ecoscope_workflows_ext_ecoscope.tasks.results._ecoplot import ExportArgs
 from ecoscope_workflows_ext_ecoscope.tasks.results._ecoplot import (
@@ -2053,3 +2052,9 @@ def exclude_geom_outliers(
     print(f"  - Outliers removed: {outliers_count} ({outliers_count/len(df)*100:.1f}%)")
     print(f"  - Points retained: {len(df_clean)}")
     return df_clean
+
+
+@task
+def exclude_value(df:AnyDataFrame,column:str , value:Union[str, int, float]) -> AnyDataFrame:
+    df_filtered = df[df[column] != value].copy()
+    return cast(AnyDataFrame, df_filtered)

@@ -22,7 +22,8 @@ from ._survey import (
    draw_tukey_plot,
    draw_tukey_plots_and_persist,
    map_survey_columns,
-   exclude_geom_outliers
+   exclude_geom_outliers,
+   exclude_value
 )
 from ._zip import zip_grouped_by_key ,flatten_tuple
 from ._inspect import print_output,view_df
@@ -43,6 +44,7 @@ from ._map_utils import (
 )
 from ._zhtml import zhtml_to_png
 __all__ = [
+    "exclude_value",
     "exclude_geom_outliers",
     "zhtml_to_png",
     "map_survey_columns",
