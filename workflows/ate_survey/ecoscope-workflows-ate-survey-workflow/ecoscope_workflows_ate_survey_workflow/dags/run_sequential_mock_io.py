@@ -38,6 +38,7 @@ from ecoscope_workflows_core.tasks.transformation import map_columns
 from ecoscope_workflows_ext_ate.tasks import (
     bin_columns,
     calculate_elephant_sentiment_score,
+    convert_object_to_string,
     convert_object_to_value,
     convert_to_int,
     create_likert_chart,
@@ -308,7 +309,7 @@ def main(params: Params):
     )
 
     convert_obj_to_str = (
-        convert_object_to_value.validate()
+        convert_object_to_string.validate()
         .handle_errors(task_instance_id="convert_obj_to_str")
         .partial(
             df=convert_obj_to_num,

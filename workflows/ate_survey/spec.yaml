@@ -212,7 +212,7 @@ workflow:
 # -- Convert objects to string
   - name: Convert objects to string
     id: convert_obj_to_str
-    task: convert_object_to_value
+    task: convert_object_to_string
     partial:
       df: ${{ workflow.convert_obj_to_num.return }}
       columns:
