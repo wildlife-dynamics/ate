@@ -344,28 +344,35 @@ create_custom_map_layers = (
         style_config={
             "styles": {
                 "amboseli_ecosystem": {
-                    "fill_color": "#a1dab4",
-                    "line_color": "#41b6c4",
-                    "line_width": 1,
-                    "fill_opacity": 0.5,
+                    "get_elevation": 1000,
+                    "get_fill_color": "#FFFFFF00",
+                    "get_line_color": "#696969",
+                    "get_line_width": 3,
+                    "opacity": 0.75,
+                    "stroked": True,
                 },
                 "amboseli_ranch_boundaries": {
-                    "fill_color": "#feb24c",
-                    "line_color": "#f03b20",
-                    "line_width": 1,
-                    "fill_opacity": 0.5,
+                    "get_elevation": 1000,
+                    "get_fill_color": "#FFFFFF00",
+                    "get_line_color": "#000000",
+                    "get_line_width": 2,
+                    "stroked": True,
+                    "opacity": 0.25,
                 },
                 "amboseli_swamps": {
-                    "fill_color": "#31a354",
-                    "line_color": "#006d2c",
-                    "line_width": 1,
-                    "fill_opacity": 0.5,
+                    "get_elevation": 1000,
+                    "get_fill_color": "#609cb5",
+                    "get_line_color": "#609cb5",
+                    "get_line_width": 2,
+                    "stroked": True,
+                    "opacity": 0.25,
                 },
                 "national_parks": {
-                    "fill_color": "#9e9ac8",
-                    "line_color": "#6a51a3",
-                    "line_width": 1,
-                    "fill_opacity": 0.5,
+                    "fill_color": "#4c8c2b",
+                    "line_color": "#4c8c2b",
+                    "line_width": 2,
+                    "stroked": True,
+                    "fill_opacity": 0.25,
                 },
             },
             "legend": {
@@ -487,7 +494,6 @@ rename_survey_columns = (
     .partial(
         df=normalize_event_details,
         drop_columns=[
-            "event_type",
             "event_category",
             "reported_by",
             "event_details__updates",
@@ -836,49 +842,6 @@ map_agree_disagree = (
 
 
 # %% [markdown]
-# ## Map Yes/No columns
-
-# %%
-# parameters
-
-map_yes_no_params = dict(
-    inplace=...,
-)
-
-# %%
-# call the task
-
-
-map_yes_no = (
-    map_survey_responses.handle_errors(task_instance_id="map_yes_no")
-    .partial(
-        df=map_agree_disagree,
-        columns=[
-            "Humans and elephants can live together",
-            "Importance of elephants living here",
-            "Elephants should only live inside parks",
-            "Elephants harm community members",
-            "Elephants negatively affect my livelihood",
-            "Elephants impact my emotional wellbeing",
-            "Benefit from enjoying seeing elephants",
-            "Elephants are important for a healthy ecosystem",
-            "Acceptable to harm elephants if they damage property or livestock",
-            "Acceptable to harm elephants if people are hurt",
-            "Receive livelihood benefits from elephants",
-        ],
-        value_map={
-            "yes": "Yes",
-            "no": "No",
-            "i_dont_know": "I don't know",
-            "prefer_not_to_answer": "Prefer not to answer",
-        },
-        **map_yes_no_params,
-    )
-    .call()
-)
-
-
-# %% [markdown]
 # ## Map true false columns
 
 # %%
@@ -895,7 +858,7 @@ map_true_false_params = dict(
 map_true_false = (
     map_survey_responses.handle_errors(task_instance_id="map_true_false")
     .partial(
-        df=map_yes_no,
+        df=map_agree_disagree,
         columns=[
             "Female elephants live in family groups",
             "Female elephants protect their young",
@@ -981,6 +944,17 @@ map_col_surveys = (
             "Which intervention would help you in future",
             "Marital status",
             "Land tenure",
+            "Humans and elephants can live together",
+            "Importance of elephants living here",
+            "Elephants should only live inside parks",
+            "Elephants harm community members",
+            "Elephants negatively affect my livelihood",
+            "Elephants impact my emotional wellbeing",
+            "Benefit from enjoying seeing elephants",
+            "Elephants are important for a healthy ecosystem",
+            "Acceptable to harm elephants if they damage property or livestock",
+            "Acceptable to harm elephants if people are hurt",
+            "Receive livelihood benefits from elephants",
         ],
         **map_col_surveys_params,
     )
@@ -2151,6 +2125,31 @@ remove_geom_ov_outliers = (
 
 
 # %% [markdown]
+# ## Apply colormap for overall survey
+
+# %%
+# parameters
+
+apply_ov_colormap_params = dict()
+
+# %%
+# call the task
+
+
+apply_ov_colormap = (
+    apply_color_map.handle_errors(task_instance_id="apply_ov_colormap")
+    .partial(
+        input_column_name="event_type",
+        output_column_name="event_type_colors",
+        colormap=["#C70039"],
+        df=remove_geom_ov_outliers,
+        **apply_ov_colormap_params,
+    )
+    .call()
+)
+
+
+# %% [markdown]
 # ## Generate overall point layers
 
 # %%
@@ -2175,9 +2174,9 @@ generate_ov_layers = (
         unpack_depth=1,
     )
     .partial(
-        layer_style={"get_fill_color": "#C70039"},
+        layer_style={"fill_color_column": "event_type_colors"},
         legend={"labels": ["Survey locations"], "colors": ["#C70039"]},
-        geodataframe=remove_geom_ov_outliers,
+        geodataframe=apply_ov_colormap,
         **generate_ov_layers_params,
     )
     .call()
@@ -2221,7 +2220,7 @@ zoom_ov_layers_params = dict()
 
 zoom_ov_layers = (
     create_view_state_from_gdf.handle_errors(task_instance_id="zoom_ov_layers")
-    .partial(pitch=0, bearing=0, gdf=bin_survey_cols, **zoom_ov_layers_params)
+    .partial(pitch=0, bearing=0, gdf=apply_ov_colormap, **zoom_ov_layers_params)
     .call()
 )
 
@@ -2422,6 +2421,8 @@ convt_ecohtml_png = (
             persist_att_ecomap_urls,
             persist_gn_ecomap_urls,
             persist_ov_ecomap_urls,
+            persist_likert,
+            persist_likert_eff,
         ],
         output_dir=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
         config={"wait_for_timeout": 20000},

@@ -270,13 +270,6 @@ class MapAgreeDisagree(BaseModel):
     inplace: Optional[bool] = Field(False, title="Inplace")
 
 
-class MapYesNo(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    inplace: Optional[bool] = Field(False, title="Inplace")
-
-
 class MapTrueFalse(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -516,7 +509,6 @@ class FormData(BaseModel):
     map_agree_disagree: Optional[MapAgreeDisagree] = Field(
         None, title="Map Agree/Disagree columns"
     )
-    map_yes_no: Optional[MapYesNo] = Field(None, title="Map Yes/No columns")
     map_true_false: Optional[MapTrueFalse] = Field(None, title="Map true false columns")
     map_no_effect: Optional[MapNoEffect] = Field(
         None, title="Map effective/not effective columns"

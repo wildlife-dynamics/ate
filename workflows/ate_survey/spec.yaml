@@ -97,28 +97,35 @@ workflow:
       style_config:
         styles:
           amboseli_ecosystem:
-            fill_color: "#a1dab4"
-            line_color: "#41b6c4"
-            line_width: 1
-            fill_opacity: 0.5
+            get_elevation: 1000
+            get_fill_color: '#FFFFFF00' # transparent fill
+            get_line_color: '#696969'
+            get_line_width: 3
+            opacity: 0.75
+            stroked: true
           
           amboseli_ranch_boundaries:
-            fill_color: "#feb24c"
-            line_color: "#f03b20"
-            line_width: 1
-            fill_opacity: 0.5
+            get_elevation: 1000
+            get_fill_color: '#FFFFFF00' # transparent fill
+            get_line_color: "#000000"
+            get_line_width: 2
+            stroked: true
+            opacity: 0.25
           
           amboseli_swamps:
-            fill_color: "#31a354"
-            line_color: "#006d2c"
-            line_width: 1
-            fill_opacity: 0.5
+            get_elevation: 1000
+            get_fill_color: '#609cb5' 
+            get_line_color: "#609cb5"
+            get_line_width: 2
+            stroked: true
+            opacity: 0.25
 
           national_parks:
-            fill_color: "#9e9ac8"
-            line_color: "#6a51a3"
-            line_width: 1
-            fill_opacity: 0.5
+            fill_color: "#4c8c2b"
+            line_color: "#4c8c2b"
+            line_width: 2
+            stroked: true
+            fill_opacity: 0.25
 
         legend:
           labels:
@@ -180,7 +187,6 @@ workflow:
     partial:
       df: ${{ workflow.normalize_event_details.return }}
       drop_columns:
-        - event_type
         - event_category
         - reported_by
         - event_details__updates
@@ -454,36 +460,36 @@ workflow:
         "i_dont_know": "I don't know"
         "prefer_not_to_answer": "Prefer not to answer"
 
-  - name: Map Yes/No columns
-    id: map_yes_no
-    task: map_survey_responses
-    partial:
-      df: ${{ workflow.map_agree_disagree.return }}
-      columns: 
-        - Humans and elephants can live together
-        - Importance of elephants living here
-        - Elephants should only live inside parks
-        - Elephants harm community members
-        - Elephants negatively affect my livelihood
-        - Elephants impact my emotional wellbeing
-        - Benefit from enjoying seeing elephants
-        - Elephants are important for a healthy ecosystem
-        - Acceptable to harm elephants if they damage property or livestock
-        - Acceptable to harm elephants if people are hurt
-        - Receive livelihood benefits from elephants
+  # - name: Map Yes/No columns
+  #   id: map_yes_no
+  #   task: map_survey_responses
+  #   partial:
+  #     df: ${{ workflow.map_agree_disagree.return }}
+  #     columns: 
+  #       - Humans and elephants can live together
+  #       - Importance of elephants living here
+  #       - Elephants should only live inside parks
+  #       - Elephants harm community members
+  #       - Elephants negatively affect my livelihood
+  #       - Elephants impact my emotional wellbeing
+  #       - Benefit from enjoying seeing elephants
+  #       - Elephants are important for a healthy ecosystem
+  #       - Acceptable to harm elephants if they damage property or livestock
+  #       - Acceptable to harm elephants if people are hurt
+  #       - Receive livelihood benefits from elephants
 
-      value_map:
-        "yes": "Yes"
-        "no": "No"
-        "i_dont_know": "I don't know"
-        "prefer_not_to_answer": "Prefer not to answer"
+  #     value_map:
+  #       "yes": "Yes"
+  #       "no": "No"
+  #       "i_dont_know": "I don't know"
+  #       "prefer_not_to_answer": "Prefer not to answer"
 
 
   - name: Map true false columns
     id: map_true_false
     task: map_survey_responses
     partial:
-      df: ${{ workflow.map_yes_no.return }}
+      df: ${{ workflow.map_agree_disagree.return }}
       columns: 
         - Female elephants live in family groups
         - Female elephants protect their young
@@ -538,6 +544,19 @@ workflow:
         - Which intervention would help you in future
         - Marital status
         - Land tenure
+        
+        # -- yes/no questions
+        - Humans and elephants can live together
+        - Importance of elephants living here
+        - Elephants should only live inside parks
+        - Elephants harm community members
+        - Elephants negatively affect my livelihood
+        - Elephants impact my emotional wellbeing
+        - Benefit from enjoying seeing elephants
+        - Elephants are important for a healthy ecosystem
+        - Acceptable to harm elephants if they damage property or livestock
+        - Acceptable to harm elephants if people are hurt
+        - Receive livelihood benefits from elephants
 
 # -- print df for testsewf
   - name: Print mapped values 
@@ -1071,11 +1090,24 @@ workflow:
       text: ${{ workflow.draw_gn_ecomap.return }}
       filename: gender_distribution_ecomap.html
 
+
+# -- Draw overall ecomap and persist
   - name: Exclude geom outliers from df
     id: remove_geom_ov_outliers
     task: exclude_geom_outliers
     partial:
       df: ${{ workflow.bin_survey_cols.return }}
+
+
+  - name: Apply colormap for overall survey 
+    id: apply_ov_colormap
+    task: apply_color_map
+    partial:
+      input_column_name: event_type
+      output_column_name: event_type_colors
+      colormap: 
+        - "#C70039"
+      df: ${{ workflow.remove_geom_ov_outliers.return }}
 
   - name: Generate overall point layers  
     id: generate_ov_layers
@@ -1086,13 +1118,14 @@ workflow:
         - any_dependency_skipped
     partial:
       layer_style:
-        get_fill_color: "#C70039"
+        #get_fill_color: "#C70039"
+        fill_color_column: event_type_colors
       legend:
         labels: 
           - Survey locations
         colors:
           - "#C70039"
-      geodataframe: ${{ workflow.remove_geom_ov_outliers.return }}
+      geodataframe: ${{ workflow.apply_ov_colormap.return }}
   
   - name: Combine overall map layers
     id: combine_ov_map_layers
@@ -1110,7 +1143,7 @@ workflow:
     partial:
       pitch: 0
       bearing: 0
-      gdf: ${{ workflow.bin_survey_cols.return }}
+      gdf: ${{ workflow.apply_ov_colormap.return }}
 
   - name: Draw overall ecomap
     id: draw_ov_ecomap
@@ -1200,10 +1233,15 @@ workflow:
         - ${{ workflow.persist_att_ecomap_urls.return }}
         - ${{ workflow.persist_gn_ecomap_urls.return }}
         - ${{ workflow.persist_ov_ecomap_urls.return }}
+        - ${{ workflow.persist_likert.return }}
+        - ${{ workflow.persist_likert_eff.return }}
 
       output_dir: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
       config:
         wait_for_timeout: 20000
+
+
+# -- Create context for word doc
 
   - name: Create survey dashboard
     id: survey_dashboard
