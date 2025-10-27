@@ -43,12 +43,6 @@ class MapProcessingConfig(BaseModel):
     target_crs: Union[int, str] = Field(default=4326, description="Target CRS to convert maps to")
     recursive: bool = Field(default=False, description="Whether to walk folders recursively")
 
-    @field_validator("path")
-    @classmethod
-    def validate_path_exists(cls, v):
-        if not os.path.exists(v):
-            raise ValueError(f"Invalid path: {v}")
-        return v
 
 class GeometrySummary(TypedDict):
     primary_type: Literal["Polygon", "Point", "LineString", "Other", "Mixed", "Line"]
