@@ -34,7 +34,7 @@ from ecoscope_workflows_core.tasks.skip import (
     any_is_empty_df,
     never,
 )
-from ecoscope_workflows_core.tasks.transformation import map_columns, map_values
+from ecoscope_workflows_core.tasks.transformation import map_columns
 from ecoscope_workflows_ext_ate.tasks import (
     bin_columns,
     calculate_elephant_sentiment_score,
@@ -49,7 +49,7 @@ from ecoscope_workflows_ext_ate.tasks import (
     fill_missing_values,
     filter_cols_df,
     format_demographic_table,
-    map_married_cols,
+    map_survey_columns,
     map_survey_responses,
     merge_dataframes,
     perform_anova_analysis,
@@ -273,17 +273,6 @@ def main(params: Params):
         .call()
     )
 
-    print_renamed_eventsdf = (
-        view_df.validate()
-        .handle_errors(task_instance_id="print_renamed_eventsdf")
-        .partial(
-            gdf=rename_survey_columns,
-            name="View renamed survey columns",
-            **(params_dict.get("print_renamed_eventsdf") or {}),
-        )
-        .call()
-    )
-
     convert_obj_to_num = (
         convert_object_to_value.validate()
         .handle_errors(task_instance_id="convert_obj_to_num")
@@ -368,17 +357,6 @@ def main(params: Params):
         .call()
     )
 
-    print_convtd_df = (
-        view_df.validate()
-        .handle_errors(task_instance_id="print_convtd_df")
-        .partial(
-            gdf=convert_obj_to_str,
-            name="View converted df",
-            **(params_dict.get("print_convtd_df") or {}),
-        )
-        .call()
-    )
-
     fill_values = (
         fill_missing_values.validate()
         .handle_errors(task_instance_id="fill_values")
@@ -455,17 +433,6 @@ def main(params: Params):
         .call()
     )
 
-    print_filled_df = (
-        view_df.validate()
-        .handle_errors(task_instance_id="print_filled_df")
-        .partial(
-            gdf=fill_values,
-            name="View filled missing df",
-            **(params_dict.get("print_filled_df") or {}),
-        )
-        .call()
-    )
-
     map_agree_disagree = (
         map_survey_responses.validate()
         .handle_errors(task_instance_id="map_agree_disagree")
@@ -527,9 +494,9 @@ def main(params: Params):
         .call()
     )
 
-    map_true_false = (
-        map_survey_responses.validate()
-        .handle_errors(task_instance_id="map_true_false")
+    map_col_surveys = (
+        map_survey_columns.validate()
+        .handle_errors(task_instance_id="map_col_surveys")
         .partial(
             df=map_yes_no,
             columns=[
@@ -540,30 +507,28 @@ def main(params: Params):
                 "Elephant signals awareness by raising trunk",
                 "Male elephants with secretions may be more aggressive",
                 "Elephants can smell and hear from far away",
-            ],
-            value_map={False: False, True: True, "i_dont_know": "I don't know"},
-            **(params_dict.get("map_true_false") or {}),
-        )
-        .call()
-    )
-
-    map_no_effect = (
-        map_survey_responses.validate()
-        .handle_errors(task_instance_id="map_no_effect")
-        .partial(
-            df=map_true_false,
-            columns=[
                 "Effectiveness rating of primary crop protection method",
                 "Effectiveness rating of that practice",
                 "Effectiveness rating of water protection",
+                "Participant age",
+                "Household size",
+                "Participant tribe",
+                "Participant gender",
+                "Participant age group",
+                "Years living in area",
+                "Overall feelings about wildlife",
+                "Opinion on having elephants in the area",
+                "How often seen elephants in the last year",
+                "What do you do when you encounter elephants on foot",
+                "Reaction to hearing about elephants being harmed",
+                "Highest level of education",
+                "Greatest threat to your livestock",
+                "Greatest threat to crop production",
+                "Which intervention would help you in future",
+                "Marital status",
+                "Land tenure",
             ],
-            value_map={
-                "highly_effective": "Highly effective",
-                "effective": "Effective",
-                "not_effective": "Not effective",
-                "i_dont_know": "I don't know",
-            },
-            **(params_dict.get("map_no_effect") or {}),
+            **(params_dict.get("map_col_surveys") or {}),
         )
         .call()
     )
@@ -572,338 +537,9 @@ def main(params: Params):
         view_df.validate()
         .handle_errors(task_instance_id="print_mapped_df")
         .partial(
-            gdf=map_no_effect,
+            gdf=map_col_surveys,
             name="View presently mapped df",
             **(params_dict.get("print_mapped_df") or {}),
-        )
-        .call()
-    )
-
-    map_part_age = (
-        map_values.validate()
-        .handle_errors(task_instance_id="map_part_age")
-        .partial(
-            df=map_no_effect,
-            column="Participant age",
-            value_map={8.0: 17.0},
-            missing_values="preserve",
-            **(params_dict.get("map_part_age") or {}),
-        )
-        .call()
-    )
-
-    map_house_size = (
-        map_values.validate()
-        .handle_errors(task_instance_id="map_house_size")
-        .partial(
-            df=map_part_age,
-            column="Household size",
-            value_map={-8.0: 8.0},
-            missing_values="preserve",
-            **(params_dict.get("map_house_size") or {}),
-        )
-        .call()
-    )
-
-    map_pat_tribe = (
-        map_values.validate()
-        .handle_errors(task_instance_id="map_pat_tribe")
-        .partial(
-            df=map_house_size,
-            column="Participant tribe",
-            value_map={
-                "luo": "Luo",
-                "masai": "Maasai",
-                "kikuya": "Kikuyu",
-                "kamba": "Kamba",
-                "prefer_not_to_answer": "Prefer not to answer",
-                "other": "Other",
-                "kisii": "Kisii",
-                "somalis": "Somali",
-                "luhya": "Luhya",
-                "tanzanians": "Tanzanians",
-            },
-            missing_values="preserve",
-            **(params_dict.get("map_pat_tribe") or {}),
-        )
-        .call()
-    )
-
-    map_part_gender = (
-        map_values.validate()
-        .handle_errors(task_instance_id="map_part_gender")
-        .partial(
-            df=map_pat_tribe,
-            column="Participant gender",
-            value_map={"female": "Female", "male": "Male", "unknown": "Unspecified"},
-            missing_values="preserve",
-            **(params_dict.get("map_part_gender") or {}),
-        )
-        .call()
-    )
-
-    map_part_age_group = (
-        map_values.validate()
-        .handle_errors(task_instance_id="map_part_age_group")
-        .partial(
-            df=map_part_gender,
-            column="Participant age group",
-            value_map={
-                "kidemi_mamas": "Kidemi Mamas",
-                "Moran": "Moran",
-                "senior_elder": "Senior Elder",
-                "elder": "Elder",
-                "junior_elder": "Junior Elder",
-                "prefer_not_to_answer": "Prefer not to answer",
-                "i_dont_know": "I don't know",
-            },
-            missing_values="preserve",
-            **(params_dict.get("map_part_age_group") or {}),
-        )
-        .call()
-    )
-
-    map_years_lived = (
-        map_values.validate()
-        .handle_errors(task_instance_id="map_years_lived")
-        .partial(
-            df=map_part_age_group,
-            column="Years living in area",
-            value_map={
-                110: "1–10 years",
-                1120: "11–20 years",
-                2130: "31–40 years",
-                4150: "41–50 years",
-                50: "Over 50 years",
-                "<1": "Less than 1 year",
-                "prefer_not_to_answer": "Prefer not to answer",
-            },
-            missing_values="preserve",
-            **(params_dict.get("map_years_lived") or {}),
-        )
-        .call()
-    )
-
-    map_overall_col = (
-        map_values.validate()
-        .handle_errors(task_instance_id="map_overall_col")
-        .partial(
-            df=map_years_lived,
-            column="Overall feelings about wildlife",
-            value_map={
-                "I_strongly_like_wildlife": "I strongly like wildlife",
-                "I_like_wildlife": "I like wildlife",
-                "I_am_neutral_toward_wildlife": "I am neutral toward wildlife",
-                "I_dislike_wildlife": "I dislike wildlife",
-                "I_strongly_dislike_wildlife": "I strongly dislike wildlife",
-                "I_don’t_know": "I don't know",
-                "prefer_not_to_answer": "Prefer not to answer",
-            },
-            missing_values="preserve",
-            **(params_dict.get("map_overall_col") or {}),
-        )
-        .call()
-    )
-
-    map_opinion_ele_col = (
-        map_values.validate()
-        .handle_errors(task_instance_id="map_opinion_ele_col")
-        .partial(
-            df=map_overall_col,
-            column="Opinion on having elephants in the area",
-            value_map={
-                "very_good": "Very good",
-                "good": "Good",
-                "neutral": "Neutral",
-                "bad": "Bad",
-                "very_bad": "Very bad",
-                "prefer_not_to_answer": "Prefer not to answer",
-                "i_dont_know": "I don't know",
-            },
-            missing_values="preserve",
-            **(params_dict.get("map_opinion_ele_col") or {}),
-        )
-        .call()
-    )
-
-    map_how_often = (
-        map_values.validate()
-        .handle_errors(task_instance_id="map_how_often")
-        .partial(
-            df=map_opinion_ele_col,
-            column="How often seen elephants in the last year",
-            value_map={
-                "every_day": "Every day",
-                "every_week": "Every week",
-                "every_month": "Every month",
-                "every_few months": "Every few months",
-                "every_year": "Every year",
-                "never": "Never",
-                "i_dont_know": "I don't know",
-            },
-            missing_values="preserve",
-            **(params_dict.get("map_how_often") or {}),
-        )
-        .call()
-    )
-
-    map_what_foot = (
-        map_values.validate()
-        .handle_errors(task_instance_id="map_what_foot")
-        .partial(
-            df=map_how_often,
-            column="What do you do when you encounter elephants on foot",
-            value_map={
-                "avoid_by_changing_route": "Avoid by changing route",
-                "run_away": "Run away",
-                "scare_it_away": "Scare it away",
-                "other": "Other",
-            },
-            missing_values="preserve",
-            **(params_dict.get("map_what_foot") or {}),
-        )
-        .call()
-    )
-
-    map_react_column = (
-        map_values.validate()
-        .handle_errors(task_instance_id="map_react_column")
-        .partial(
-            df=map_what_foot,
-            column="Reaction to hearing about elephants being harmed",
-            value_map={
-                "very_happy": "Very happy",
-                "happy": "Happy",
-                "neutral": "Neutral",
-                "upset": "Upset",
-                "very_upset": "Very upset",
-                "i_dont_know": "I don't know",
-                "prefer_not_to_answer": "Prefer not to answer",
-            },
-            missing_values="preserve",
-            **(params_dict.get("map_react_column") or {}),
-        )
-        .call()
-    )
-
-    map_high_ed_col = (
-        map_values.validate()
-        .handle_errors(task_instance_id="map_high_ed_col")
-        .partial(
-            df=map_react_column,
-            column="Highest level of education",
-            value_map={
-                "primary": "Primary",
-                "university": "University",
-                "secondary": "Secondary",
-                "none": "No formal education",
-                "post_grad": "Postgraduate",
-            },
-            missing_values="preserve",
-            **(params_dict.get("map_high_ed_col") or {}),
-        )
-        .call()
-    )
-
-    map_threat_col = (
-        map_values.validate()
-        .handle_errors(task_instance_id="map_threat_col")
-        .partial(
-            df=map_high_ed_col,
-            column="Greatest threat to your livestock",
-            value_map={
-                "drought": "Drought",
-                "loss_from_wildlife": "Loss from wildlife",
-                "disease": "Diseases",
-                "not_applicable": "Other",
-                "other": "Other",
-            },
-            missing_values="preserve",
-            **(params_dict.get("map_threat_col") or {}),
-        )
-        .call()
-    )
-
-    map_crop_threat = (
-        map_values.validate()
-        .handle_errors(task_instance_id="map_crop_threat")
-        .partial(
-            df=map_threat_col,
-            column="Greatest threat to crop production",
-            value_map={
-                "drought": "Drought",
-                "disease": "Crop disease",
-                "damage_by_insects": "Damage by insects",
-                "damage_by_wildlife": "Damage by wildlife",
-                "soil_health": "Poor soil health",
-                "labour_requirements": "Labour requirements",
-                "other": "Other",
-            },
-            missing_values="preserve",
-            **(params_dict.get("map_crop_threat") or {}),
-        )
-        .call()
-    )
-
-    map_future_col = (
-        map_values.validate()
-        .handle_errors(task_instance_id="map_future_col")
-        .partial(
-            df=map_crop_threat,
-            column="Which intervention would help you in future",
-            value_map={
-                "protection_for_water_pipes_tanks_or_boreholes": "Protection for water pipes, tanks, or boreholes",
-                "elephant_awareness_training": "Elephant awareness training",
-                "elephant_deterrent": "Elephant deterrent methods",
-                "adjustment_to_walking_patterns_for_daily_activities": "Adjust walking patterns for daily activities",
-                "adjustment_to_grazing_pattern": "Adjust grazing patterns",
-            },
-            missing_values="preserve",
-            **(params_dict.get("map_future_col") or {}),
-        )
-        .call()
-    )
-
-    map_marital_status = (
-        map_married_cols.validate()
-        .handle_errors(task_instance_id="map_marital_status")
-        .partial(
-            df=map_future_col,
-            column="Marital status",
-            **(params_dict.get("map_marital_status") or {}),
-        )
-        .call()
-    )
-
-    map_land_tenure = (
-        map_values.validate()
-        .handle_errors(task_instance_id="map_land_tenure")
-        .partial(
-            df=map_marital_status,
-            column="Land tenure",
-            value_map={
-                "own": "Own",
-                "prefer_not_to_say": "Prefer not to answer",
-                "seasonal_lease": "Seasonal lease",
-                "annual_lease": "Annual lease",
-                "profit_share": "Profit share",
-                "employed_labour": "Employed labour",
-                "not_applicable": "Not applicable",
-                "other": "Other",
-            },
-            missing_values="preserve",
-            **(params_dict.get("map_land_tenure") or {}),
-        )
-        .call()
-    )
-
-    print_map_values = (
-        view_df.validate()
-        .handle_errors(task_instance_id="print_map_values")
-        .partial(
-            gdf=map_land_tenure,
-            name="View mapped values df",
-            **(params_dict.get("print_map_values") or {}),
         )
         .call()
     )
@@ -912,7 +548,7 @@ def main(params: Params):
         convert_to_int.validate()
         .handle_errors(task_instance_id="convt_to_int")
         .partial(
-            df=map_land_tenure,
+            df=map_col_surveys,
             columns=[
                 "Participant age",
                 "Number of cows",

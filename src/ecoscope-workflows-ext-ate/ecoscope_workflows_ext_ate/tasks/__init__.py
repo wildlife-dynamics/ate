@@ -21,7 +21,7 @@ from ._survey import (
    draw_ols_scatterplot_and_persist,
    draw_tukey_plot,
    draw_tukey_plots_and_persist,
-   map_married_cols
+   map_survey_columns
 )
 from ._zip import zip_grouped_by_key ,flatten_tuple
 from ._inspect import print_output,view_df
@@ -43,7 +43,7 @@ from ._map_utils import (
 from ._zhtml import zhtml_to_png
 __all__ = [
     "zhtml_to_png",
-    "map_married_cols",
+    "map_survey_columns",
     "download_file_and_persist",
     "zip_grouped_by_key",
     "flatten_tuple",

@@ -183,16 +183,6 @@ workflow:
         event_details__crop_mitigation_3: Effectiveness rating of primary crop protection method
         event_details__livestock_mitigation_2: If yes, which methods do you use for livestock
 
-
-# -- print df for test
-  - name: Print renamed event details df 
-    id: print_renamed_eventsdf
-    task: view_df
-    partial:
-      gdf: ${{ workflow.rename_survey_columns.return }}
-      name: View renamed survey columns 
-
-
 # -- Convert objects to number
   - name: Convert objects to number 
     id: convert_obj_to_num
@@ -269,16 +259,6 @@ workflow:
         - Effectiveness rating of primary crop protection method
         - If yes, which methods do you use for livestock
 
-
-# -- print df for test
-  - name: Print converted df
-    id: print_convtd_df
-    task: view_df
-    partial:
-      gdf: ${{ workflow.convert_obj_to_str.return }}
-      name: View converted df
-
-
 # -- Fill missing values
   - name: Fill missing values with default values
     id: fill_values
@@ -350,13 +330,6 @@ workflow:
         - Effectiveness rating of primary crop protection method
         - If yes, which methods do you use for livestock
 
-# -- print df for test
-  - name: Print converted df
-    id: print_filled_df
-    task: view_df
-    partial:
-      gdf: ${{ workflow.fill_values.return }}
-      name: View filled missing df
 
 # -- map survey responses 
   - name: Map Agree/Disagree columns
@@ -410,12 +383,13 @@ workflow:
         i_dont_know: I don't know
         prefer_not_to_answer: Prefer not to answer
 
-  - name: Map True/False columns
-    id: map_true_false
-    task: map_survey_responses
+
+  - name: Map survey columns 
+    id: map_col_surveys
+    task: map_survey_columns
     partial:
       df: ${{ workflow.map_yes_no.return }}
-      columns: 
+      columns:
         - Female elephants live in family groups
         - Female elephants protect their young
         - Elephants move seasonally for food and water
@@ -423,327 +397,41 @@ workflow:
         - Elephant signals awareness by raising trunk
         - Male elephants with secretions may be more aggressive
         - Elephants can smell and hear from far away
-
-      value_map:
-        false: False
-        true: True
-        i_dont_know: I don't know
-
-  - name: Map effective/not effective columns
-    id: map_no_effect
-    task: map_survey_responses
-    partial:
-      df: ${{ workflow.map_true_false.return }}
-      columns: 
         - Effectiveness rating of primary crop protection method
         - Effectiveness rating of that practice
         - Effectiveness rating of water protection
+        - Participant age
+        - Household size
+        - Participant tribe
+        - Participant gender
+        - Participant age group
+        - Years living in area
+        - Overall feelings about wildlife
+        - Opinion on having elephants in the area
+        - How often seen elephants in the last year
+        - What do you do when you encounter elephants on foot
+        - Reaction to hearing about elephants being harmed
+        - Highest level of education
+        - Greatest threat to your livestock
+        - Greatest threat to crop production
+        - Which intervention would help you in future
+        - Marital status
+        - Land tenure
 
-      value_map:
-        highly_effective: Highly effective
-        effective: Effective
-        not_effective: Not effective
-        i_dont_know: I don't know
-
-# -- print df for test
+# -- print df for testsewf
   - name: Print mapped values 
     id: print_mapped_df
     task: view_df
     partial:
-      gdf: ${{ workflow.map_no_effect.return }}
+      gdf: ${{ workflow.map_col_surveys.return }}
       name: View presently mapped df
-
-# -- Map participant age
-  - name: Map participant age column
-    id: map_part_age
-    task: map_values
-    partial: 
-      df: ${{ workflow.map_no_effect.return }}
-      column: Participant age
-      value_map:
-        8.0: 17.0
-      missing_values: preserve
-  
-# -- Map household size
-  - name: Map household size column
-    id: map_house_size
-    task: map_values
-    partial:
-      df: ${{ workflow.map_part_age.return }}
-      column: Household size
-      value_map:
-        -8.0: 8.0
-      missing_values: preserve
-
-# -- Map participant tribe 
-  - name: Map participant tribe
-    id: map_pat_tribe
-    task: map_values
-    partial:
-      df: ${{ workflow.map_house_size.return }}
-      column: Participant tribe
-      value_map:
-        luo: Luo
-        masai: Maasai
-        kikuya: Kikuyu
-        kamba: Kamba
-        prefer_not_to_answer: Prefer not to answer
-        other: Other
-        kisii: Kisii
-        somalis: Somali
-        luhya: Luhya
-        tanzanians: Tanzanians
-
-      missing_values: preserve
-
-# -- Map participant gender
-  - name: Map participant gender 
-    id: map_part_gender
-    task: map_values
-    partial:
-      df: ${{ workflow.map_pat_tribe.return }}
-      column: Participant gender
-      value_map:
-        female: Female
-        male: Male
-        unknown: Unspecified
-
-      missing_values: preserve
-
-
-# -- Map participant age group 
-  - name: Map participant age group
-    id: map_part_age_group
-    task: map_values
-    partial:
-      df: ${{ workflow.map_part_gender.return }}
-      column: Participant age group
-      value_map:
-        kidemi_mamas: Kidemi Mamas
-        Moran: Moran
-        senior_elder: Senior Elder
-        elder: Elder
-        junior_elder: Junior Elder
-        prefer_not_to_answer: Prefer not to answer
-        i_dont_know: I don't know
-
-      missing_values: preserve
-
-# -- Map years living in area
-  - name: Map years living in area
-    id: map_years_lived
-    task: map_values
-    partial:
-      df: ${{ workflow.map_part_age_group.return }}
-      column: Years living in area
-      value_map:
-        1_10: 1–10 years
-        11_20: 11–20 years
-        21_30: 31–40 years
-        41_50: 41–50 years
-        50: Over 50 years
-        <1: Less than 1 year
-        prefer_not_to_answer: Prefer not to answer
-
-      missing_values: preserve
-
-# -- Map overall feelings about wildlife
-  - name: Map overall feelings about wildlife
-    id: map_overall_col
-    task: map_values
-    partial:
-      df: ${{ workflow.map_years_lived.return }}
-      column: Overall feelings about wildlife
-      value_map:
-        I_strongly_like_wildlife: I strongly like wildlife
-        I_like_wildlife: I like wildlife
-        I_am_neutral_toward_wildlife: I am neutral toward wildlife
-        I_dislike_wildlife: I dislike wildlife
-        I_strongly_dislike_wildlife: I strongly dislike wildlife
-        I_don’t_know: I don't know
-        prefer_not_to_answer: Prefer not to answer
-
-      missing_values: preserve
-
-# -- Map opinions on having elephants in the area
-  - name: Map opinions on having elephants in the area
-    id: map_opinion_ele_col
-    task: map_values
-    partial:
-      df: ${{ workflow.map_overall_col.return }}
-      column: Opinion on having elephants in the area
-      value_map:
-        very_good: Very good
-        good: Good
-        neutral: Neutral
-        bad: Bad
-        very_bad: Very bad
-        prefer_not_to_answer: Prefer not to answer
-        i_dont_know: I don't know
-
-      missing_values: preserve
-
-# -- Map How often seen elephants in the last year
-  - name : Map How often seen elephants in the last year
-    id: map_how_often
-    task: map_values
-    partial:
-      df: ${{ workflow.map_opinion_ele_col.return }}
-      column: How often seen elephants in the last year
-      value_map:
-        every_day: Every day
-        every_week: Every week
-        every_month: Every month
-        every_few months: Every few months
-        every_year: Every year
-        never: Never
-        i_dont_know: I don't know
-
-      missing_values: preserve
-
-
-# -- Map What do you do when you encounter elephants on foot
-  - name: Map What do you do when you encounter elephants on foot
-    id: map_what_foot
-    task: map_values
-    partial:
-      df: ${{ workflow.map_how_often.return }}
-      column: What do you do when you encounter elephants on foot
-      value_map:
-        avoid_by_changing_route: Avoid by changing route
-        run_away: Run away
-        scare_it_away: Scare it away
-        other: Other
-
-      missing_values: preserve
-
-# -- Map Reaction to hearing about elephants being harmed
-  - name: Map Reaction to hearing about elephants being harmed
-    id: map_react_column
-    task: map_values
-    partial:
-      df: ${{ workflow.map_what_foot.return }}
-      column: Reaction to hearing about elephants being harmed
-      value_map:
-        very_happy: Very happy
-        happy: Happy
-        neutral: Neutral
-        upset: Upset
-        very_upset: Very upset
-        i_dont_know: I don't know
-        prefer_not_to_answer: Prefer not to answer
-
-      missing_values: preserve
-
-# -- Map Highest level of education
-  - name: Map Highest level of education
-    id: map_high_ed_col
-    task: map_values
-    partial:
-      df: ${{ workflow.map_react_column.return }}
-      column: Highest level of education
-      value_map:
-        primary: Primary
-        university: University
-        secondary: Secondary
-        none: No formal education
-        post_grad: Postgraduate
-
-      missing_values: preserve
-
-# -- Map Greatest threat to your livestock
-  - name: Map Greatest threat to your livestock
-    id: map_threat_col
-    task: map_values
-    partial:
-      df: ${{ workflow.map_high_ed_col.return }}
-      column: Greatest threat to your livestock
-      value_map:
-        drought: Drought
-        loss_from_wildlife: Loss from wildlife
-        disease: Diseases
-        not_applicable: Other
-        other: Other
-
-      missing_values: preserve
-
-# -- Map Greatest threat to crop production
-  - name: Map Greatest threat to crop production
-    id: map_crop_threat
-    task: map_values
-    partial:
-      df: ${{ workflow.map_threat_col.return }}
-      column: Greatest threat to crop production
-      value_map:
-        drought: Drought
-        disease: Crop disease
-        damage_by_insects: Damage by insects
-        damage_by_wildlife: Damage by wildlife
-        soil_health: Poor soil health
-        labour_requirements: Labour requirements
-        other: Other
-
-      missing_values: preserve
-
-# -- Map Which intervention would help you in future
-  - name: Map Which intervention would help you in future
-    id: map_future_col
-    task: map_values
-    partial:
-      df: ${{ workflow.map_crop_threat.return }}
-      column: Which intervention would help you in future
-      value_map:
-        protection_for_water_pipes_tanks_or_boreholes: Protection for water pipes, tanks, or boreholes
-        elephant_awareness_training: Elephant awareness training
-        elephant_deterrent: Elephant deterrent methods
-        adjustment_to_walking_patterns_for_daily_activities: Adjust walking patterns for daily activities
-        adjustment_to_grazing_pattern: Adjust grazing patterns
-
-      missing_values: preserve
-
-# -- Map Marital status
-  - name: Map Marital status
-    id: map_marital_status
-    task: map_married_cols # tricky function
-    partial:
-      df: ${{ workflow.map_future_col.return }}
-      column: Marital status
-      
-
-# -- Map Land tenure
-  - name: Map Land tenure
-    id: map_land_tenure
-    task: map_values
-    partial:
-      df: ${{ workflow.map_marital_status.return }}
-      column: Land tenure
-      value_map:
-        own: Own
-        prefer_not_to_say: Prefer not to answer
-        seasonal_lease: Seasonal lease
-        annual_lease: Annual lease
-        profit_share: Profit share
-        employed_labour: Employed labour
-        not_applicable: Not applicable
-        other: Other
-
-      missing_values: preserve
-
-# -- print df for test
-  - name: Print mapped values df
-    id: print_map_values
-    task: view_df
-    partial:
-      gdf: ${{ workflow.map_land_tenure.return }}
-      name: View mapped values df 
-
 
 # -- Convert to int 
   - name: Convert columns to int 
     id: convt_to_int
     task: convert_to_int
     partial: 
-      df: ${{ workflow.map_land_tenure.return }}
+      df: ${{ workflow.map_col_surveys.return }}
       columns: 
         - Participant age
         - Number of cows
