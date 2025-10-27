@@ -287,25 +287,25 @@ def main(params: Params):
                 "file_dict": DependsOn("load_local_shapefiles"),
                 "style_config": {
                     "styles": {
-                        "Amboseli Ecosystem": {
+                        "Amboseli-Ecosystem": {
                             "fill_color": "#a1dab4",
                             "line_color": "#41b6c4",
                             "line_width": 1,
                             "fill_opacity": 0.5,
                         },
-                        "Amboseli Ranch Boundaries": {
+                        "Amboseli-Ranch-Boundaries": {
                             "fill_color": "#feb24c",
                             "line_color": "#f03b20",
                             "line_width": 1,
                             "fill_opacity": 0.5,
                         },
-                        "Amboseli Swamps": {
+                        "Amboseli-Swamps": {
                             "fill_color": "#31a354",
                             "line_color": "#006d2c",
                             "line_width": 1,
                             "fill_opacity": 0.5,
                         },
-                        "National Parks": {
+                        "National-Parks": {
                             "fill_color": "#9e9ac8",
                             "line_color": "#6a51a3",
                             "line_width": 1,
