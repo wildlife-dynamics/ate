@@ -198,20 +198,6 @@ class DownloadAteTpt(BaseModel):
     )
 
 
-class DowwnloadAmboEco(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    retries: Optional[conint(ge=0)] = Field(
-        3, description="Number of retries on failure", title="Retries"
-    )
-    unzip: Optional[bool] = Field(
-        False,
-        description="Whether to unzip the file if it's a zip archive",
-        title="Unzip",
-    )
-
-
 class DowwnloadRanchBnds(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -502,9 +488,6 @@ class FormData(BaseModel):
     )
     download_ate_tpt: Optional[DownloadAteTpt] = Field(
         None, title="Download ATE survey template"
-    )
-    dowwnload_ambo_eco: Optional[DowwnloadAmboEco] = Field(
-        None, title="Download amboseli ecosystem shapefiles"
     )
     dowwnload_ranch_bnds: Optional[DowwnloadRanchBnds] = Field(
         None, title="Download amboseli ranch boundaries shapefiles"

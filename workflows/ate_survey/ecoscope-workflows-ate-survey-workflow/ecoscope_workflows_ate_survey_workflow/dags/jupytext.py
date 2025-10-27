@@ -46,7 +46,6 @@ from ecoscope_workflows_ext_ate.tasks import (
     merge_dataframes,
     perform_anova_analysis,
     persist_survey_word,
-    view_df,
     zhtml_to_png,
 )
 from ecoscope_workflows_ext_ecoscope.tasks.io import get_events, persist_df
@@ -187,37 +186,10 @@ download_ate_tpt_params = dict(
 download_ate_tpt = (
     download_file_and_persist.handle_errors(task_instance_id="download_ate_tpt")
     .partial(
-        url="https://www.dropbox.com/scl/fi/1tau1alt2woo5c4efjjp3/ate_survey_template_v2.docx?rlkey=1f2h9tnp2eb9jxao70zt2xll1&st=8zjovig4&dl=0",
+        url="https://www.dropbox.com/scl/fi/8tw4x0a2rqagz5nb2nrvp/ate_survey_template_v5.docx?rlkey=o81prd8u97hlaeu95hnly7ze5&st=urhz1pc5&dl=0",
         output_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
         overwrite_existing=False,
         **download_ate_tpt_params,
-    )
-    .call()
-)
-
-
-# %% [markdown]
-# ## Download amboseli ecosystem shapefiles
-
-# %%
-# parameters
-
-dowwnload_ambo_eco_params = dict(
-    retries=...,
-    unzip=...,
-)
-
-# %%
-# call the task
-
-
-dowwnload_ambo_eco = (
-    download_file_and_persist.handle_errors(task_instance_id="dowwnload_ambo_eco")
-    .partial(
-        url="https://www.dropbox.com/scl/fi/3yvgk7va9pxm1k3qe5aue/Amboseli-Ecosystem.gpkg?rlkey=nx9udkzvghxxz76rzl5dgx922&st=14pq6124&dl=0",
-        output_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
-        overwrite_existing=False,
-        **dowwnload_ambo_eco_params,
     )
     .call()
 )
@@ -950,27 +922,6 @@ map_col_surveys = (
             "Receive livelihood benefits from elephants",
         ],
         **map_col_surveys_params,
-    )
-    .call()
-)
-
-
-# %% [markdown]
-# ## Print mapped values
-
-# %%
-# parameters
-
-print_mapped_df_params = dict()
-
-# %%
-# call the task
-
-
-print_mapped_df = (
-    view_df.handle_errors(task_instance_id="print_mapped_df")
-    .partial(
-        gdf=map_col_surveys, name="View presently mapped df", **print_mapped_df_params
     )
     .call()
 )

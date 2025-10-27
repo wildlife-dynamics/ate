@@ -56,7 +56,6 @@ from ecoscope_workflows_ext_ate.tasks import (
     merge_dataframes,
     perform_anova_analysis,
     persist_survey_word,
-    view_df,
     zhtml_to_png,
 )
 from ecoscope_workflows_ext_ecoscope.tasks.io import persist_df
@@ -84,7 +83,6 @@ def main(params: Params):
         "er_client_name": [],
         "configure_base_maps": [],
         "download_ate_tpt": [],
-        "dowwnload_ambo_eco": [],
         "dowwnload_ranch_bnds": [],
         "dowwnload_ambo_sws": [],
         "dowwnload_np_shp": [],
@@ -101,7 +99,6 @@ def main(params: Params):
         "map_true_false": ["map_agree_disagree"],
         "map_no_effect": ["map_true_false"],
         "map_col_surveys": ["map_no_effect"],
-        "print_mapped_df": ["map_col_surveys"],
         "convt_to_int": ["map_col_surveys"],
         "create_demo_table": ["convt_to_int"],
         "persist_demo_df": ["create_demo_table"],
@@ -218,23 +215,11 @@ def main(params: Params):
             .handle_errors(task_instance_id="download_ate_tpt")
             .set_executor("lithops"),
             partial={
-                "url": "https://www.dropbox.com/scl/fi/1tau1alt2woo5c4efjjp3/ate_survey_template_v2.docx?rlkey=1f2h9tnp2eb9jxao70zt2xll1&st=8zjovig4&dl=0",
+                "url": "https://www.dropbox.com/scl/fi/8tw4x0a2rqagz5nb2nrvp/ate_survey_template_v5.docx?rlkey=o81prd8u97hlaeu95hnly7ze5&st=urhz1pc5&dl=0",
                 "output_path": os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
                 "overwrite_existing": False,
             }
             | (params_dict.get("download_ate_tpt") or {}),
-            method="call",
-        ),
-        "dowwnload_ambo_eco": Node(
-            async_task=download_file_and_persist.validate()
-            .handle_errors(task_instance_id="dowwnload_ambo_eco")
-            .set_executor("lithops"),
-            partial={
-                "url": "https://www.dropbox.com/scl/fi/3yvgk7va9pxm1k3qe5aue/Amboseli-Ecosystem.gpkg?rlkey=nx9udkzvghxxz76rzl5dgx922&st=14pq6124&dl=0",
-                "output_path": os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
-                "overwrite_existing": False,
-            }
-            | (params_dict.get("dowwnload_ambo_eco") or {}),
             method="call",
         ),
         "dowwnload_ranch_bnds": Node(
@@ -766,17 +751,6 @@ def main(params: Params):
                 ],
             }
             | (params_dict.get("map_col_surveys") or {}),
-            method="call",
-        ),
-        "print_mapped_df": Node(
-            async_task=view_df.validate()
-            .handle_errors(task_instance_id="print_mapped_df")
-            .set_executor("lithops"),
-            partial={
-                "gdf": DependsOn("map_col_surveys"),
-                "name": "View presently mapped df",
-            }
-            | (params_dict.get("print_mapped_df") or {}),
             method="call",
         ),
         "convt_to_int": Node(

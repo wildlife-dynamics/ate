@@ -314,27 +314,6 @@
       "type": "object",
       "title": "Download ATE survey template"
     },
-    "dowwnload_ambo_eco": {
-      "additionalProperties": false,
-      "properties": {
-        "retries": {
-          "default": 3,
-          "minimum": 0,
-          "title": "Retries",
-          "type": "integer",
-          "description": "Number of retries on failure"
-        },
-        "unzip": {
-          "default": false,
-          "title": "Unzip",
-          "type": "boolean",
-          "description": "Whether to unzip the file if it's a zip archive"
-        }
-      },
-      "required": [],
-      "type": "object",
-      "title": "Download amboseli ecosystem shapefiles"
-    },
     "dowwnload_ranch_bnds": {
       "additionalProperties": false,
       "properties": {
@@ -883,12 +862,6 @@
         "unzip"
       ]
     },
-    "dowwnload_ambo_eco": {
-      "ui:order": [
-        "retries",
-        "unzip"
-      ]
-    },
     "dowwnload_ranch_bnds": {
       "ui:order": [
         "retries",
@@ -958,7 +931,6 @@
       "er_client_name",
       "configure_base_maps",
       "download_ate_tpt",
-      "dowwnload_ambo_eco",
       "dowwnload_ranch_bnds",
       "dowwnload_ambo_sws",
       "dowwnload_np_shp",
