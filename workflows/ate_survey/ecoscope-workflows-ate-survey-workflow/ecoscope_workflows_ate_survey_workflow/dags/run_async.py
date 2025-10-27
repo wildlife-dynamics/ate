@@ -71,16 +71,12 @@ def main(params: Params):
         "normalize_event_details": ["get_survey_events_data"],
         "rename_survey_columns": ["normalize_event_details"],
         "convert_obj_to_num": ["rename_survey_columns"],
-        "print_obj_int": ["convert_obj_to_num"],
         "convert_obj_to_str": ["convert_obj_to_num"],
-        "print_obj_str": ["convert_obj_to_str"],
         "fill_values": ["convert_obj_to_str"],
-        "print_filled_df": ["fill_values"],
         "map_agree_disagree": ["fill_values"],
         "map_yes_no": ["map_agree_disagree"],
         "map_true_false": ["map_yes_no"],
         "map_no_effect": ["map_true_false"],
-        "print_prior_df": ["map_no_effect"],
         "map_col_surveys": ["map_no_effect"],
         "print_mapped_df": ["map_col_surveys"],
         "convt_to_int": ["map_col_surveys"],
@@ -95,13 +91,12 @@ def main(params: Params):
         "persist_likert_eff": ["draw_likert_eff"],
         "draw_survey_pies": ["bin_survey_cols"],
         "draw_survey_bar": ["bin_survey_cols"],
-        "filter_attitude_cols": ["bin_survey_cols"],
+        "filter_attitude_cols": ["convt_to_int"],
         "calc_attitude_scores": ["filter_attitude_cols"],
         "persist_attitude_df": ["calc_attitude_scores"],
         "filter_stat_qs": ["bin_survey_cols"],
         "merge_stat_ele": ["filter_stat_qs", "calc_attitude_scores"],
         "map_stats_df": ["merge_stat_ele"],
-        "print_stats_df": ["map_stats_df"],
         "perform_anova": ["map_stats_df"],
         "persist_anova_df": ["perform_anova"],
         "draw_stat_box": ["map_stats_df"],
@@ -374,17 +369,6 @@ def main(params: Params):
             | (params_dict.get("convert_obj_to_num") or {}),
             method="call",
         ),
-        "print_obj_int": Node(
-            async_task=view_df.validate()
-            .handle_errors(task_instance_id="print_obj_int")
-            .set_executor("lithops"),
-            partial={
-                "gdf": DependsOn("convert_obj_to_num"),
-                "name": "checking converted objects to int",
-            }
-            | (params_dict.get("print_obj_int") or {}),
-            method="call",
-        ),
         "convert_obj_to_str": Node(
             async_task=convert_object_to_string.validate()
             .handle_errors(task_instance_id="convert_obj_to_str")
@@ -445,17 +429,6 @@ def main(params: Params):
                 ],
             }
             | (params_dict.get("convert_obj_to_str") or {}),
-            method="call",
-        ),
-        "print_obj_str": Node(
-            async_task=view_df.validate()
-            .handle_errors(task_instance_id="print_obj_str")
-            .set_executor("lithops"),
-            partial={
-                "gdf": DependsOn("convert_obj_to_str"),
-                "name": "view converted objects to string",
-            }
-            | (params_dict.get("print_obj_str") or {}),
             method="call",
         ),
         "fill_values": Node(
@@ -532,17 +505,6 @@ def main(params: Params):
                 ],
             }
             | (params_dict.get("fill_values") or {}),
-            method="call",
-        ),
-        "print_filled_df": Node(
-            async_task=view_df.validate()
-            .handle_errors(task_instance_id="print_filled_df")
-            .set_executor("lithops"),
-            partial={
-                "gdf": DependsOn("fill_values"),
-                "name": "checking filled values df",
-            }
-            | (params_dict.get("print_filled_df") or {}),
             method="call",
         ),
         "map_agree_disagree": Node(
@@ -649,17 +611,6 @@ def main(params: Params):
                 },
             }
             | (params_dict.get("map_no_effect") or {}),
-            method="call",
-        ),
-        "print_prior_df": Node(
-            async_task=view_df.validate()
-            .handle_errors(task_instance_id="print_prior_df")
-            .set_executor("lithops"),
-            partial={
-                "gdf": DependsOn("map_no_effect"),
-                "name": "checking existing mapped values",
-            }
-            | (params_dict.get("print_prior_df") or {}),
             method="call",
         ),
         "map_col_surveys": Node(
@@ -948,7 +899,7 @@ def main(params: Params):
             .handle_errors(task_instance_id="filter_attitude_cols")
             .set_executor("lithops"),
             partial={
-                "df": DependsOn("bin_survey_cols"),
+                "df": DependsOn("convt_to_int"),
                 "cols": [
                     "id",
                     "geometry",
@@ -1058,17 +1009,6 @@ def main(params: Params):
                 },
             }
             | (params_dict.get("map_stats_df") or {}),
-            method="call",
-        ),
-        "print_stats_df": Node(
-            async_task=view_df.validate()
-            .handle_errors(task_instance_id="print_stats_df")
-            .set_executor("lithops"),
-            partial={
-                "gdf": DependsOn("map_stats_df"),
-                "name": "View stats df",
-            }
-            | (params_dict.get("print_stats_df") or {}),
             method="call",
         ),
         "perform_anova": Node(
