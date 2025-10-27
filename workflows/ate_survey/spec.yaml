@@ -519,13 +519,13 @@ workflow:
         - I don't know
         - Unspecified
       colors:
-        Strongly disagree: #2c5282
-        Disagree: #4299e1
-        Neutral: #a0aec0
-        Unspecified: #a0aec0
-        I don't know: #a0aec0
-        Agree: #ed8936
-        Strongly agree: #c05621
+        "Strongly disagree": "#2c5282"
+        "Disagree": "#4299e1"
+        "Neutral": "#a0aec0"
+        "Unspecified": "#a0aec0"
+        "I don't know": "#a0aec0"
+        "Agree": "#ed8936"
+        "Strongly agree": "#c05621"
 
 # -- Persist likert chart
   - name: Persist likert chart  
@@ -562,11 +562,11 @@ workflow:
         - I don't know
         - Unspecified
       colors:
-        Not effective: #D64545
-        I don't know: #A8A8A8
-        Unspecified: #D4D4D4
-        Effective: #2A9D8F
-        Highly effective: #2E7D32
+        "Not effective": "#D64545"
+        "I don't know": "#A8A8A8"
+        "Unspecified": "#D4D4D4"
+        "Effective": "#2A9D8F"
+        "Highly effective": "#2E7D32"
 
 # -- Persist likert chart
   - name: Persist likert effective-not-effective chart 
