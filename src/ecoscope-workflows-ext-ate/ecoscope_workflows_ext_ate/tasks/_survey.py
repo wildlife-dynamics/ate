@@ -2174,6 +2174,9 @@ def persist_survey_word(
         try:
             df = pd.read_csv(demographic_path)
             
+            fresults = df.to_dict(orient='records')
+            print(f"fresults: {fresults}")
+            
             # Forward fill empty Demographic Variable cells
             df['Demographic Variable'] = df['Demographic Variable'].replace('', pd.NA).ffill()
             
@@ -2194,7 +2197,9 @@ def persist_survey_word(
             
             # Add to context
             result['demographics'] = demographics
-            
+            print(result)
+            print(result['demographics'])
+
             # Calculate total responses from first variable's total
             try:
                 # Extract n from first category of first variable
