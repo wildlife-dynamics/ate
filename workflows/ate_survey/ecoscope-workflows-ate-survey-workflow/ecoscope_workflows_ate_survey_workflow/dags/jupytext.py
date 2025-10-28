@@ -186,7 +186,7 @@ download_ate_tpt_params = dict(
 download_ate_tpt = (
     download_file_and_persist.handle_errors(task_instance_id="download_ate_tpt")
     .partial(
-        url="https://www.dropbox.com/scl/fi/nyexeyppis60v6p9wmiu3/ate_survey_template_updated.docx?rlkey=mgcln0f6ncjtzk9eeyipdo145&st=p7oiz0zm&dl=0",
+        url="https://www.dropbox.com/scl/fi/fakvobqsegudrfqxw6o8h/ATE_template.docx?rlkey=3hqhafuo91qfc1ocbceha4g4v&st=jbbtuvvi&dl=0",
         output_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
         overwrite_existing=False,
         **download_ate_tpt_params,
