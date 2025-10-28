@@ -1,5 +1,6 @@
 import os 
-import uuid
+import math
+import jinja2
 import warnings
 import numpy as np
 import pandas as pd
@@ -2104,6 +2105,17 @@ def exclude_value(df:AnyDataFrame,column:str , value:Union[str, int, float]) -> 
     df_filtered = df[df[column] != value].copy()
     return cast(AnyDataFrame, df_filtered)
 
+def nan_to_empty(value):
+    if (
+        value is None
+        or (isinstance(value, float) and math.isnan(value))
+        or value == "nan"
+    ):
+        return ""
+    print(value)
+    return value
+
+
 @task
 def persist_survey_word(
     template_path: str,
@@ -2124,6 +2136,9 @@ def persist_survey_word(
     print("=" * 80)
     print("STARTING MNC CONTEXT GENERATION")
     print("=" * 80)
+
+    jinja_env = jinja2.Environment()
+    jinja_env.filters["nan_to_empty"] = nan_to_empty
 
     # Normalize paths
     template_path = normalize_file_url(template_path)
@@ -2173,9 +2188,6 @@ def persist_survey_word(
         print(f"\nProcessing demographic table: {demographic_path}")
         try:
             df = pd.read_csv(demographic_path)
-            
-            fresults = df.to_dict(orient='records')
-            print(f"fresults: {fresults}")
             
             # Forward fill empty Demographic Variable cells
             df['Demographic Variable'] = df['Demographic Variable'].replace('', pd.NA).ffill()
@@ -2272,7 +2284,7 @@ def persist_survey_word(
     # Render and save
     # ========================================================================
     try:
-        tpl.render(result)
+        tpl.render(result,jinja_env)
         tpl.save(output_path)
         print(f"\nDocument generated successfully!")
         print(f"Output: {output_path}")

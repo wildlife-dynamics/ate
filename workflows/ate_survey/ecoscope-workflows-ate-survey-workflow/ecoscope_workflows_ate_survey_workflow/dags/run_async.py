@@ -195,7 +195,7 @@ def main(params: Params):
             .handle_errors(task_instance_id="download_ate_tpt")
             .set_executor("lithops"),
             partial={
-                "url": "https://www.dropbox.com/scl/fi/xjud2zk8f0ue1ldlnwaxw/ate_survey_template_280733.docx?rlkey=ptl1fbivs491xq0ru9a763qqh&st=h0s4zbmx&dl=0",
+                "url": "https://www.dropbox.com/scl/fi/w6tef8p7stj91shadgdey/ate_survey_template_280857.docx?rlkey=8ao2nk1z5hd4cbuskye84wx3p&st=v3divfq0&dl=0",
                 "output_path": os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
                 "overwrite_existing": False,
             }
