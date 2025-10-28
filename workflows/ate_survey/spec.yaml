@@ -5,7 +5,7 @@ requirements:
     channel: https://repo.prefix.dev/ecoscope-workflows/
   - name: ecoscope-workflows-ext-ate
     version: "*"
-    channel:  file:///tmp/ecoscope-workflows-custom/release/artifacts/
+    channel: https://repo.prefix.dev/ecoscope-workflows-custom/
   - name: ecoscope-workflows-ext-custom
     version: "*"
     channel: https://repo.prefix.dev/ecoscope-workflows-custom/
