@@ -10,10 +10,10 @@ echo "HATCH_VCS_VERSION=$HATCH_VCS_VERSION"
 
 echo "Building recipes: ${RECIPES[@]}"
 
-pixi clean cache --yes
+# pixi clean cache --yes
 
-rm -rf /tmp/ecoscope-workflows-custom/release/artifacts
-mkdir -p /tmp/ecoscope-workflows-custom/release/artifacts
+# rm -rf /tmp/ecoscope-workflows-custom/release/artifacts
+# mkdir -p /tmp/ecoscope-workflows-custom/release/artifacts
 
 for rec in "${RECIPES[@]}"; do
     echo "Building $rec"

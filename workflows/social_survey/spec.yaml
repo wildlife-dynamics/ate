@@ -1,0 +1,1368 @@
+id: social_survey
+requirements:
+  - name: ecoscope-workflows-core
+    version: "0.22.9.*"
+    channel: https://repo.prefix.dev/ecoscope-workflows/
+
+  - name: ecoscope-workflows-ext-ecoscope
+    version: "0.22.9.*"
+    channel: https://repo.prefix.dev/ecoscope-workflows/
+
+  - name: ecoscope-workflows-ext-custom
+    version: "0.0.27.*"
+    channel: https://repo.prefix.dev/ecoscope-workflows-custom/
+
+  - name: ecoscope-workflows-ext-ste
+    version: "0.0.14.*"
+    channel: https://repo.prefix.dev/ecoscope-workflows-custom/
+
+  - name: ecoscope-workflows-ext-mnc
+    version: "0.0.6.*"
+    channel: https://repo.prefix.dev/ecoscope-workflows-custom/
+
+  - name: ecoscope-workflows-ext-ate
+    version: "*"
+    channel: file:///tmp/ecoscope-workflows-custom/release/artifacts/
+
+task-instance-defaults:
+  skipif:
+    conditions:
+      - any_is_empty_df
+      - any_dependency_skipped
+
+workflow:
+  - name: Set workflow details 
+    id: workflow_details 
+    task: set_workflow_details
+
+  - name: Set time range 
+    id: time_range
+    task: set_time_range 
+
+  - name: Set groupers
+    id: groupers 
+    task: set_groupers 
+    partial:
+      groupers: []
+  
+  - name: Connect to ER 
+    id: er_client_name 
+    task: set_er_connection 
+
+  - name: Configure base map layers
+    id: configure_base_maps
+    task: set_base_maps_pydeck
+    partial:
+      base_maps:
+        - url: >-
+            https://server.arcgisonline.com/arcgis/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}
+          opacity: 1
+          max_zoom: 20
+        - url: >-
+            https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}
+          opacity: 0.25
+          max_zoom: 20
+
+  - name: Download ATE survey template 
+    id: download_ate_tpt 
+    task: fetch_and_persist_file
+    partial: 
+      url: https://www.dropbox.com/scl/fi/w6tef8p7stj91shadgdey/ate_survey_template_280857.docx?rlkey=8ao2nk1z5hd4cbuskye84wx3p&st=v3divfq0&dl=0
+      output_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      overwrite_existing: false
+      retries: 3
+      unzip: false
+
+  - name: Download amboseli ranch boundaries gpkg 
+    id: download_ranch_bnds
+    task: fetch_and_persist_file
+    partial: 
+      url: https://www.dropbox.com/scl/fi/b4yckfk2t077bhigb1k07/Amboseli-Ranch-Boundaries.gpkg?rlkey=kxiehp8f73j3y5g792jstwo0z&st=6hb6qwj9&dl=0
+      output_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      overwrite_existing: false
+      retries: 3
+      unzip: false
+
+  - name: Download amboseli swamps gpkg 
+    id: download_ambo_sws
+    task: fetch_and_persist_file
+    partial: 
+      url: https://www.dropbox.com/scl/fi/1x5imkkvesnxv35kp8ngw/Amboseli-Swamps.gpkg?rlkey=n5rtu313zh0cg7o0cmbbt1jf4&st=zebggl8l&dl=0
+      output_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      overwrite_existing: false
+      retries: 3
+      unzip: false
+
+  - name: Download national parks gpkg
+    id: download_national_parks
+    task: fetch_and_persist_file
+    partial: 
+      url: https://www.dropbox.com/scl/fi/7txo6s0tof8j0jp7j7lgk/National-Parks.gpkg?rlkey=yemiaztgu5scvlcdwapbkek9j&st=m9lz6abw&dl=0
+      output_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      overwrite_existing: false
+      retries: 3
+      unzip: false
+
+  - name : Load ranch boundaries 
+    id: load_ranch_boundaries 
+    task: load_df
+    partial:
+      file_path: ${{ workflow.download_ranch_bnds.return }}
+      layer: null
+      deserialize_json: false
+
+  - name : Load ambo swamps 
+    id: load_ambo_swamps 
+    task: load_df
+    partial:
+      file_path: ${{ workflow.download_ambo_sws.return }}
+      layer: null
+      deserialize_json: false
+
+  - name : Load national parks 
+    id: load_national_parks  
+    task: load_df
+    partial:
+      file_path: ${{ workflow.download_national_parks.return }}
+      layer: null
+      deserialize_json: false
+
+  - name: Reproject ranch boundaries to 4326
+    id: reproject_ranch_boundaries 
+    task: reproject_gdf 
+    partial: 
+      gdf: ${{ workflow.load_ranch_boundaries.return }}
+      target_crs: epsg:4326
+
+  - name: Reproject amboseli swamps to 4326
+    id: reproject_ambo_swamps
+    task: reproject_gdf 
+    partial: 
+      gdf: ${{ workflow.load_ambo_swamps.return }}
+      target_crs: epsg:4326
+
+  - name: Reproject national parks to 4326
+    id: reproject_national_parks
+    task: reproject_gdf 
+    partial: 
+      gdf: ${{ workflow.load_national_parks.return }}
+      target_crs: epsg:4326
+
+  - name: Assign geom type to ranch boundaries
+    id: assign_ranch_boundaries
+    task: get_gdf_geom_type 
+    partial:
+      gdf: ${{ workflow.reproject_ranch_boundaries.return }}
+
+  - name: Assign geom type to amboseli swamps
+    id: assign_ambo_swamps
+    task: get_gdf_geom_type 
+    partial:
+      gdf: ${{ workflow.reproject_ambo_swamps.return }}
+
+  - name: Assign geom type to national parks
+    id: assign_national_parks
+    task: get_gdf_geom_type 
+    partial:
+      gdf: ${{ workflow.reproject_national_parks.return }}
+
+  - name: Create ranch boundaries layers
+    id: create_ranch_bnds_layers
+    task: create_deckgl_layer_from_gdf 
+    partial:
+      gdf: ${{ workflow.assign_ranch_boundaries.return }}
+      style: 
+        extruded: false
+        get_fill_color: [0,0,0]
+        get_line_color: [0,0,0]
+        get_line_width: 2.25
+        stroked: true 
+        filled: false
+        opacity: 0.45
+      legend: 
+        title: "Map layers"
+        values: 
+          - label: Ranch boundaries
+            color: "#000000"
+
+  - name: Create amboseli swamp layers
+    id: create_ambo_swamp_layers
+    task: create_deckgl_layer_from_gdf 
+    partial:
+      gdf: ${{ workflow.assign_ambo_swamps.return }}
+      style: 
+        extruded: false
+        get_fill_color: [96, 156, 181]
+        get_line_color: [96, 156, 181]
+        get_line_width: 0.5
+        stroked: true 
+        filled: true
+        opacity: 0.45
+      legend: 
+        title: ""
+        values: 
+          - label: Swamps
+            color: "#609cb5"
+
+  - name: Create national park layers
+    id: create_national_layers
+    task: create_deckgl_layer_from_gdf 
+    partial:
+      gdf: ${{ workflow.assign_national_parks.return }}
+      style: 
+        extruded: false
+        get_fill_color: [76, 140, 43]
+        get_line_color: [76, 140, 43]
+        get_line_width: 0.75
+        stroked: true 
+        filled: true
+        opacity: 0.45
+      legend: 
+        title: ""
+        values: 
+          - label: National parks
+            color: "#4c8c2b"
+
+  - name: Retrieve survey events 
+    id: get_survey_events 
+    task: get_events 
+    partial:
+      client: ${{ workflow.er_client_name.return }}
+      time_range: ${{ workflow.time_range.return }}
+      event_columns:
+        - id
+        - time
+        - event_type
+        - event_category
+        - reported_by
+        - serial_number
+        - geometry
+        - created_at
+        - event_details
+        - patrols
+      event_types:
+        - atequestionnaire_rep
+      raise_on_empty: true
+      include_details: true
+      include_updates: false
+      include_related_events: false
+      include_null_geometry: false
+      include_display_values: false
+
+  - name: Exclude invalid questionnaire record
+    id: filter_events
+    task: exclude_value
+    partial:  
+      df: ${{ workflow.get_survey_events.return }}
+      column: event_details
+      value: 46283
+
+  - name: Normalize event details columns 
+    id: normalize_event_details
+    task: normalize_json_column
+    partial:
+      column: event_details
+      df: ${{ workflow.filter_events.return }}
+      skip_if_not_exists: true 
+      sort_columns: true 
+
+  - name: Retain columns and rename columns 
+    id: rename_survey_columns
+    task: map_columns
+    partial:
+      raise_if_not_found: true
+      df: ${{ workflow.normalize_event_details.return }}
+      drop_columns:
+        - event_category
+        - reported_by
+        - event_details__updates
+        - event_details__end_time
+        - event_details__closing_statement
+        - event_details__participant_occupationifother
+        - event_details__livestock_health_1_otheranimals
+        - event_details__livestock_health_3_otheranimals
+        - event_details__participant_tribeifother
+        - event_details__participant_land_tenureifother
+        - event_details__behaviour_2
+        - event_details__behaviour_4_ifyes
+        - event_details__one_health_7
+        - event_details__livestock_health_4
+        - event_details__livestock_health_5
+        - event_details__livestock_health_6
+        - event_details__behaviour_killing_2
+        - event_details__behaviour_killing_3
+        - event_details__perception_challenges
+        - event_details__participant_occupation
+        - event_details__water_mitigation_use_2
+        - event_details__livestock_health_3_cattle
+        - event_details__livestock_health_3_donkies
+        - event_details__livestock_health_3_sheepgoat
+        - event_details__perception_conservation_interventions_6
+        - event_details__perception_conservation_interventions_4ifyes
+        - event_details__perception_conservation_interventions_2_ifnowhy
+        - event_details__belief_costs_4
+        - event_details__belief_benefits_4
+        - event_details__crop_mitigation_2
+        - event_details__perception_crop_production_threatsifother
+        - event_details__perception_conservation_interventions_5ifother
+        - event_details__one_health_8_ifyes
+        - event_details__participant_tribeifother
+        - event_details__participant_land_tenureifother
+        - event_details__livestock_health_3_dogs
+      retain_columns: []
+      rename_columns:
+        event_details__participant_age: Participant age
+        event_details__participant_tribe: Participant tribe
+        event_details__participant_gender: Participant gender
+        event_details__elephant_knowledge_1: Female elephants live in family groups
+        event_details__elephant_knowledge_2: Female elephants protect their young
+        event_details__participant_num_cows: Number of cows
+        event_details__participant_age_range: Participant age group
+        event_details__participant_agreement: Respondent agreed to interview
+        event_details__participant_household: Household size
+        event_details__participant_land_owned: Land owned (acres)
+        event_details__participant_num_shoats: Number of shoats
+        event_details__participant_agricultural_land: Agricultural land (acres)
+        event_details__participant_duration_in_amboseli: Years living in area
+        event_details__belief_1: Humans and elephants can live together
+        event_details__attitude_0: Overall feelings about wildlife
+        event_details__attitude_1: Opinion on having elephants in the area
+        event_details__attitude_2: Importance of elephants living here
+        event_details__attitude_3: Elephants should only live inside parks
+        event_details__exposure_1: How often seen elephants in the last year
+        event_details__exposure_2: See more elephants now than before
+        event_details__behaviour_1: Do you change routes or schedules because of elephants
+        event_details__behaviour_3: Effectiveness rating of that practice
+        event_details__behaviour_4: What do you do when you encounter elephants on foot
+        event_details__one_health_8: Noticed signs of illness in wild animals
+        event_details__belief_costs_1: Elephants harm community members
+        event_details__belief_costs_2: Elephants negatively affect my livelihood
+        event_details__belief_costs_3: Elephants impact my emotional wellbeing
+        event_details__future_activity: Willingness to join future community dialogue
+        event_details__attitude_killing: Reaction to hearing about elephants being harmed
+        event_details__belief_benefits_1: Receive livelihood benefits from elephants
+        event_details__belief_benefits_2: Benefit from enjoying seeing elephants
+        event_details__belief_benefits_3: Elephants are important for a healthy ecosystem
+        event_details__crop_mitigation_1: Use measures to protect crops from elephants
+        event_details__behaviour_killing_1: Ever been involved in or witnessed an elephant harmed
+        event_details__hazard_acceptance_1: Acceptable to harm elephants if they damage property or livestock
+        event_details__hazard_acceptance_2: Acceptable to harm elephants if people are hurt
+        event_details__elephant_knowledge_3: Elephants can smell and hear from far away
+        event_details__elephant_knowledge_4: Elephants move seasonally for food and water
+        event_details__elephant_knowledge_6: Elephant may shake its head when annoyed
+        event_details__elephant_knowledge_7: Elephant signals awareness by raising trunk
+        event_details__elephant_knowledge_8: Male elephants with secretions may be more aggressive
+        event_details__participant_education: Highest level of education
+        event_details__livestock_mitigation_1: Use measures to protect livestock from elephants
+        event_details__water_mitigation_use_1: Protect water sources from elephants
+        event_details__water_mitigation_use_3: Effectiveness rating of water protection
+        event_details__livestock_health_1_dogs: Number of dogs
+        event_details__participant_land_tenure: Land tenure
+        event_details__livestock_health_1_cattle: Number of cattle
+        event_details__livestock_health_1_donkies: Number of donkeys
+        event_details__participant_marital_status: Marital status
+        event_details__livestock_health_1_sheepgoat: Number of sheep or goats
+        event_details__perception_livestock_threats: Greatest threat to your livestock
+        event_details__perception_crop_production_threats: Greatest threat to crop production
+        event_details__perception_conservation_interventions_1: Benefit from the KCCDT Big Life electric fence
+        event_details__perception_conservation_interventions_2: Pay into fence maintenance fund
+        event_details__perception_conservation_interventions_4: Do you report elephant conflict incidents
+        event_details__perception_conservation_interventions_5: Which intervention would help you in future
+        event_details__crop_mitigation_3: Effectiveness rating of primary crop protection method
+        event_details__livestock_mitigation_2: If yes, which methods do you use for livestock
+
+# -- Convert objects to number
+  - name: Convert objects to number 
+    id: convert_obj_to_num
+    task: convert_object_to_value
+    partial:
+      df: ${{ workflow.rename_survey_columns.return }}
+      columns:
+        - Participant age
+        - Number of cows
+        - Household size
+        - Land owned (acres)
+        - Number of shoats
+        - Agricultural land (acres)
+        - Number of sheep or goats
+        - Number of dogs
+        - Number of cattle
+        - Number of donkeys  
+
+# -- Convert objects to string
+  - name: Convert objects to string
+    id: convert_obj_to_str
+    task: convert_object_to_string
+    partial:
+      df: ${{ workflow.convert_obj_to_num.return }}
+      columns:
+        - id
+        - Participant tribe
+        - Participant gender
+        - Female elephants live in family groups
+        - Female elephants protect their young
+        - Participant age group
+        - Respondent agreed to interview
+        - Years living in area
+        - Humans and elephants can live together
+        - Overall feelings about wildlife
+        - Opinion on having elephants in the area
+        - Importance of elephants living here
+        - Elephants should only live inside parks
+        - How often seen elephants in the last year
+        - See more elephants now than before
+        - Do you change routes or schedules because of elephants
+        - Effectiveness rating of that practice
+        - What do you do when you encounter elephants on foot
+        - Noticed signs of illness in wild animals
+        - Elephants harm community members
+        - Elephants negatively affect my livelihood
+        - Elephants impact my emotional wellbeing
+        - Willingness to join future community dialogue
+        - Reaction to hearing about elephants being harmed
+        - Receive livelihood benefits from elephants
+        - Benefit from enjoying seeing elephants
+        - Elephants are important for a healthy ecosystem
+        - Use measures to protect crops from elephants
+        - Ever been involved in or witnessed an elephant harmed
+        - Acceptable to harm elephants if they damage property or livestock
+        - Acceptable to harm elephants if people are hurt
+        - Elephants can smell and hear from far away
+        - Elephants move seasonally for food and water
+        - Elephant may shake its head when annoyed
+        - Elephant signals awareness by raising trunk
+        - Male elephants with secretions may be more aggressive
+        - Highest level of education
+        - Use measures to protect livestock from elephants
+        - Protect water sources from elephants
+        - Effectiveness rating of water protection
+        - Land tenure
+        - Marital status
+        - Greatest threat to your livestock
+        - Greatest threat to crop production
+        - Benefit from the KCCDT Big Life electric fence
+        - Pay into fence maintenance fund
+        - Do you report elephant conflict incidents
+        - Which intervention would help you in future
+        - Effectiveness rating of primary crop protection method
+        - If yes, which methods do you use for livestock
+
+# -- Fill missing values
+  - name: Fill missing values with default values
+    id: fill_values
+    task: fill_missing_values
+    partial:
+      dataframe: ${{ workflow.convert_obj_to_str.return }}
+      numeric_fill_value: 0
+      categorical_fill_value: Unspecified
+      numeric_columns: 
+        - Participant age
+        - Number of cows
+        - Household size
+        - Land owned (acres)
+        - Number of shoats
+        - Agricultural land (acres)
+        - Number of sheep or goats
+        - Number of dogs
+        - Number of cattle
+        - Number of donkeys
+      categorical_columns:
+        - id
+        - Participant tribe
+        - Participant gender
+        - Female elephants live in family groups
+        - Female elephants protect their young
+        - Participant age group
+        - Respondent agreed to interview
+        - Years living in area
+        - Humans and elephants can live together
+        - Overall feelings about wildlife
+        - Opinion on having elephants in the area
+        - Importance of elephants living here
+        - Elephants should only live inside parks
+        - How often seen elephants in the last year
+        - See more elephants now than before
+        - Do you change routes or schedules because of elephants
+        - Effectiveness rating of that practice
+        - What do you do when you encounter elephants on foot
+        - Noticed signs of illness in wild animals
+        - Elephants harm community members
+        - Elephants negatively affect my livelihood
+        - Elephants impact my emotional wellbeing
+        - Willingness to join future community dialogue
+        - Reaction to hearing about elephants being harmed
+        - Receive livelihood benefits from elephants
+        - Benefit from enjoying seeing elephants
+        - Elephants are important for a healthy ecosystem
+        - Use measures to protect crops from elephants
+        - Ever been involved in or witnessed an elephant harmed
+        - Acceptable to harm elephants if they damage property or livestock
+        - Acceptable to harm elephants if people are hurt
+        - Elephants can smell and hear from far away
+        - Elephants move seasonally for food and water
+        - Elephant may shake its head when annoyed
+        - Elephant signals awareness by raising trunk
+        - Male elephants with secretions may be more aggressive
+        - Highest level of education
+        - Use measures to protect livestock from elephants
+        - Protect water sources from elephants
+        - Effectiveness rating of water protection
+        - Land tenure
+        - Marital status
+        - Greatest threat to your livestock
+        - Greatest threat to crop production
+        - Benefit from the KCCDT Big Life electric fence
+        - Pay into fence maintenance fund
+        - Do you report elephant conflict incidents
+        - Which intervention would help you in future
+        - Effectiveness rating of primary crop protection method
+        - If yes, which methods do you use for livestock
+
+# -- map survey responses 
+  - name: Map Agree/Disagree columns
+    id: map_agree_disagree
+    task: map_survey_responses
+    partial:
+      inplace: false
+      df: ${{ workflow.fill_values.return }}
+      columns: 
+        - Humans and elephants can live together
+        - Importance of elephants living here
+        - Elephants should only live inside parks
+        - Elephants harm community members
+        - Elephants negatively affect my livelihood
+        - Elephants impact my emotional wellbeing
+        - Benefit from enjoying seeing elephants
+        - Elephants are important for a healthy ecosystem
+        - Acceptable to harm elephants if they damage property or livestock
+        - Acceptable to harm elephants if people are hurt
+        - Receive livelihood benefits from elephants
+
+      value_map:
+        "strongly_agree": "Strongly agree"
+        "agree": "Agree"
+        "neutral": "Neutral"
+        "disagree": "Disagree"
+        "strongly_disagree": "Strongly disagree"
+        "i_dont_know": "I dont know"
+        "prefer_not_to_answer": "Prefer not to answer"
+
+
+  - name: Map true false columns
+    id: map_true_false
+    task: map_survey_responses
+    partial:
+      inplace: false
+      df: ${{ workflow.map_agree_disagree.return }}
+      columns: 
+        - Female elephants live in family groups
+        - Female elephants protect their young
+        - Elephants move seasonally for food and water
+        - Elephant may shake its head when annoyed
+        - Elephant signals awareness by raising trunk
+        - Male elephants with secretions may be more aggressive
+        - Elephants can smell and hear from far away
+
+      value_map:
+        "false": "False"
+        "true": "True"
+        "i_dont_know": "I dont know"
+
+  - name: Map effective/not effective columns
+    id: map_no_effect
+    task: map_survey_responses
+    partial:
+      inplace: false
+      df: ${{ workflow.map_true_false.return }}
+      columns: 
+        - Effectiveness rating of primary crop protection method
+        - Effectiveness rating of that practice
+        - Effectiveness rating of water protection
+      value_map:
+        highly_effective: Highly effective
+        effective: Effective
+        not_effective: Not effective
+        i_dont_know: I dont know
+
+  - name: Map survey columns 
+    id: map_col_surveys
+    task: map_survey_columns
+    partial:
+      df: ${{ workflow.map_no_effect.return }}
+      cols:
+        - Participant age
+        - Household size
+        - Participant tribe
+        - Participant gender
+        - Participant age group
+        - Years living in area
+        - Overall feelings about wildlife
+        - Opinion on having elephants in the area
+        - How often seen elephants in the last year
+        - What do you do when you encounter elephants on foot
+        - Reaction to hearing about elephants being harmed
+        - Highest level of education
+        - Greatest threat to your livestock
+        - Greatest threat to crop production
+        - Which intervention would help you in future
+        - Marital status
+        - Land tenure
+        - Humans and elephants can live together
+        - Importance of elephants living here
+        - Elephants should only live inside parks
+        - Elephants harm community members
+        - Elephants negatively affect my livelihood
+        - Elephants impact my emotional wellbeing
+        - Benefit from enjoying seeing elephants
+        - Elephants are important for a healthy ecosystem
+        - Acceptable to harm elephants if they damage property or livestock
+        - Acceptable to harm elephants if people are hurt
+        - Receive livelihood benefits from elephants
+
+# -- Convert to int 
+  - name: Convert columns to int 
+    id: convt_to_int
+    task: convert_to_int
+    partial: 
+      errors: coerce 
+      fill_value: 0
+      inplace: false
+      df: ${{ workflow.map_col_surveys.return }}
+      columns: 
+        - Participant age
+        - Number of cows
+        - Household size
+        - Number of shoats
+        - Agricultural land (acres)
+        - Number of sheep or goats
+        - Number of dogs
+        - Number of cattle
+        - Number of donkeys
+
+# -- Create demographic table and persist
+  - name: Create demographic table 
+    id: create_demo_table
+    task: format_demographic_table
+    partial: 
+      df: ${{ workflow.convt_to_int.return }}
+      columns_of_interest: 
+        - Participant gender
+        - Participant age
+        - Participant tribe
+        - Household size
+        - Highest level of education
+
+  - name: Persist demographic table to disk
+    id: persist_demo_df
+    task: persist_df
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      df: ${{ workflow.create_demo_table.return }}
+      filetype: csv
+      filename: demographic_table
+
+# -- Bin columns 
+  - name: Bin columns on survey 
+    id: bin_survey_cols
+    task: bin_columns
+    partial:
+      df: ${{ workflow.convt_to_int.return }}
+      bins: 5
+      suffix: bins 
+      inplace: true
+      columns:
+        - Participant age
+        - Number of cows
+        - Household size
+        - Number of shoats
+        - Land owned (acres)
+        - Agricultural land (acres)
+        - Number of dogs
+        - Number of cattle
+        - Number of donkeys
+        - Number of sheep or goats
+
+  - name: Categorize household_size bins 
+    id: categorize_household
+    task: categorize_bins
+    partial: 
+      df: ${{ workflow.bin_survey_cols.return }}
+      col: Household sizebins
+
+  - name: Categorize participant age bins 
+    id: categorize_age
+    task: categorize_bins
+    partial: 
+      df: ${{ workflow.bin_survey_cols.return }}
+      col: Participant agebins
+
+# -- Filter elephant relevant columns to draw likert chart 
+  - name: Filter elephant relevant questions
+    id: filter_elephant_qs
+    task: filter_columns
+    partial:
+      df: ${{ workflow.categorize_age.return }}
+      exclude: null
+      columns:
+        - Humans and elephants can live together
+        - Importance of elephants living here
+        - Elephants should only live inside parks
+        - Elephants harm community members
+        - Elephants negatively affect my livelihood
+        - Elephants impact my emotional wellbeing
+        - Benefit from enjoying seeing elephants
+        - Elephants are important for a healthy ecosystem
+        - Acceptable to harm elephants if they damage property or livestock
+        - Acceptable to harm elephants if people are hurt
+        - Receive livelihood benefits from elephants
+
+# -- Draw likert chart and persist
+  - name: Draw likert chart 
+    id: draw_likert_chart
+    task: create_likert_chart
+    partial:
+      df: ${{ workflow.filter_elephant_qs.return}}
+      title: Agree/Disagree
+      height_per_question: 60 
+      min_height: 400 
+      width: 1200 
+      show_percentages: true 
+      sort_questions: false
+      sort_by: positive
+      response_order:
+        - Strongly disagree
+        - Disagree
+        - Neutral
+        - Agree
+        - Strongly agree
+
+      neutral_categories:
+        - Neutral
+
+      colors:
+        "Strongly disagree": "#2c5282"
+        "Disagree": "#4299e1"
+        "Neutral": "#a0aec0"
+        "Unspecified": "#a0aec0"
+        "I dont know": "#a0aec0"
+        "Agree": "#ed8936"
+        "Strongly agree": "#c05621"
+
+# -- Persist likert chart
+  - name: Persist likert chart  
+    id: persist_likert
+    task: persist_text
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      text: ${{ workflow.draw_likert_chart.return }}
+      filename: elephants_relationship_likert.html
+
+# -- Filter effective / not effective df
+  - name: Filter effective / not effective df
+    id: filter_eff_noeff
+    task: filter_columns
+    partial:
+      df: ${{ workflow.bin_survey_cols.return }}
+      exclude: null
+      columns:
+        - Effectiveness rating of primary crop protection method
+        - Effectiveness rating of that practice
+        - Effectiveness rating of water protection
+
+# -- Draw likert chart and persist
+  - name: Draw likert chart 
+    id: draw_likert_eff
+    task: create_likert_chart
+    partial:
+      df: ${{ workflow.filter_eff_noeff.return}}
+      title: Effective/Not effective
+      height_per_question: 60 
+      min_height: 400 
+      width: 1200 
+      show_percentages: true 
+      sort_questions: false
+      sort_by: positive
+      response_order:
+        - Not effective
+        - Effective
+        - Highly effective
+
+      neutral_categories:
+        - I dont know
+      #  - Unspecified
+      colors:
+        "Not effective": "#D64545"
+        "I dont know": "#A8A8A8"
+        "Unspecified": "#D4D4D4"
+        "Effective": "#2A9D8F"
+        "Highly effective": "#2E7D32"
+
+# -- Persist likert chart
+  - name: Persist likert effective-not-effective chart 
+    id: persist_likert_eff
+    task: persist_text
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      text: ${{ workflow.draw_likert_eff.return }}
+      filename: effectiveness_mitigation_methods.html
+
+  - name: Draw survey pie charts and persist  
+    id: draw_survey_pies
+    task: draw_pie_and_persist
+    partial:
+      output_dir: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      df: ${{ workflow.bin_survey_cols.return }}
+      columns: 
+        - Participant gender
+        - Female elephants live in family groups
+        - Female elephants protect their young
+        - Participant age group
+        - See more elephants now than before
+        - Do you change routes or schedules because of elephants
+        - What do you do when you encounter elephants on foot
+        - Noticed signs of illness in wild animals
+        - Willingness to join future community dialogue
+        - Use measures to protect crops from elephants
+        - Ever been involved in or witnessed an elephant harmed
+        - Elephants can smell and hear from far away
+        - Elephants move seasonally for food and water
+        - Elephant may shake its head when annoyed
+        - Elephant signals awareness by raising trunk
+        - Male elephants with secretions may be more aggressive
+        - Highest level of education
+        - Use measures to protect livestock from elephants
+        - Protect water sources from elephants
+        - Marital status
+        - Greatest threat to your livestock
+        - Benefit from the KCCDT Big Life electric fence
+        - Pay into fence maintenance fund
+        - Do you report elephant conflict incidents
+        - Which intervention would help you in future
+        - Opinion on having elephants in the area
+
+# -- Draw survey bar charts and persist 
+  - name: Draw survey bar charts and persist  
+    id: draw_survey_bar
+    task: draw_bar_and_persist
+    partial:
+      output_dir: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      df: ${{ workflow.bin_survey_cols.return }}
+      columns: 
+        - Participant tribe
+        - Years living in area
+        - Overall feelings about wildlife
+        - How often seen elephants in the last year
+        - Reaction to hearing about elephants being harmed
+        - Land tenure
+        - Greatest threat to crop production
+        - Household sizebins
+        - Participant agebins
+
+# -- filter attitude score columns 
+  - name: Filter attitude score columns
+    id: filter_attitude_cols
+    task: filter_columns
+    partial:
+      df: ${{ workflow.convt_to_int.return }}
+      exclude: null
+      columns:
+        - id
+        - geometry
+        - Humans and elephants can live together
+        - Importance of elephants living here
+        - Elephants should only live inside parks
+        - Elephants harm community members
+        - Elephants negatively affect my livelihood
+        - Elephants impact my emotional wellbeing
+        - Benefit from enjoying seeing elephants
+        - Elephants are important for a healthy ecosystem
+        - Acceptable to harm elephants if they damage property or livestock
+        - Acceptable to harm elephants if people are hurt
+        - Receive livelihood benefits from elephants
+
+# -- Calculate elephant sentiment scores  --> draw ecomap after
+  - name: Calculate elephant sentiment scores
+    id: calc_attitude_scores
+    task: calculate_elephant_sentiment_score
+    partial:
+      df: ${{ workflow.filter_attitude_cols.return }}
+      positive_columns:
+        - Humans and elephants can live together
+        - Importance of elephants living here
+        - Benefit from enjoying seeing elephants
+        - Elephants are important for a healthy ecosystem
+        - Receive livelihood benefits from elephants
+
+      negative_columns:
+        - Elephants should only live inside parks
+        - Elephants harm community members
+        - Elephants negatively affect my livelihood
+        - Elephants impact my emotional wellbeing
+        - Acceptable to harm elephants if they damage property or livestock
+        - Acceptable to harm elephants if people are hurt
+
+# -- Persist attitude scores df 
+  - name: Persist attitude scores df
+    id: persist_attitude_df
+    task: persist_df
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      df: ${{ workflow.calc_attitude_scores.return }}
+      filename: elephant_sentiment_scores
+      filetype: csv
+
+# -- Stats section
+  - name: Filter stat relevant questions
+    id: filter_stat_qs
+    task: filter_columns
+    partial:
+      df: ${{ workflow.bin_survey_cols.return }}
+      exclude: null
+      columns:
+        - id
+        - Participant age
+        - Marital status
+        - Highest level of education
+        - Participant tribe
+        - Household size
+        - Participant age group
+        - Participant gender
+
+# -- Merge stat and elephant sentiment df
+  - name: Merge stat and elephant attitude scores df
+    id: merge_stat_ele
+    task: merge_dataframes
+    partial:
+      left_df: ${{ workflow.filter_stat_qs.return }}
+      right_df: ${{ workflow.calc_attitude_scores.return }}
+      on: id 
+      how: left
+      preserve_left_index: false
+
+# -- Map columns after merge
+  - name: Map stats df
+    id: map_stats_df
+    task: map_columns
+    partial:
+      raise_if_not_found: true
+      df: ${{ workflow.merge_stat_ele.return}}
+      drop_columns: []
+      retain_columns: []
+      rename_columns:
+        id: id
+        Participant age: age
+        Marital status: marital_status
+        Highest level of education: education_level
+        Participant tribe: tribe
+        Household size: household_size
+        Participant age group: age_group_distribution
+        Participant gender: gender_of_participant
+
+# -- Perform anova analysis
+  - name: Perform anova analysis and persist  
+    id: perform_anova
+    task: perform_anova_analysis
+    partial:
+      dataframe: ${{ workflow.map_stats_df.return }}
+      target_column: elephant_sentiment_score
+      factor_columns:
+        - gender_of_participant
+        - age_group_distribution
+        - education_level
+        - marital_status
+
+      anova_type: 2
+
+# -- Persist anova df 
+  - name: Persist anova df to disk 
+    id: persist_anova_df
+    task: persist_df
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      df: ${{ workflow.perform_anova.return }}
+      filename: anova_results
+      filetype: csv 
+
+# -- Draw boxplots and persist
+  - name: Draw boxplots and persist
+    id: draw_stat_box
+    task: draw_boxplot_and_persist
+    partial:
+      output_dir: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      df: ${{ workflow.map_stats_df.return }}
+      columns:
+        - marital_status
+        - education_level
+        - tribe
+        - age_group_distribution
+        - gender_of_participant
+      y_column: elephant_sentiment_score
+
+# -- Draw OLS scatterplot and persist
+  - name: Draw OLS scatterplot and persist
+    id: draw_ols_plots
+    task: draw_ols_scatterplot_and_persist
+    partial:
+      output_dir: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      df: ${{ workflow.map_stats_df.return }}
+      columns: 
+        - age	
+        - household_size
+      y_column: elephant_sentiment_score
+
+# -- Draw tukey plots and persist 
+  - name: Draw tukey plots and persist
+    id: draw_tukey_plots
+    task: draw_tukey_plots_and_persist
+    partial:
+      output_dir: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      df: ${{ workflow.map_stats_df.return }}
+      columns:
+        - education_level
+        - age_group_distribution	
+        - gender_of_participant
+        - marital_status
+      value_column: elephant_sentiment_score
+
+# -- Draw Attitude scores ecomap and persist
+  - name: Exclude geom outliers from df 
+    id: remove_geom_outliers
+    task: exclude_geom_outliers
+    partial:
+      df: ${{ workflow.calc_attitude_scores.return }}
+      z_threshold: 3
+
+  - name: Apply colormap to attitude scores df
+    id: apply_att_colormap
+    task: apply_color_map
+    partial:
+      input_column_name: overall_attitude
+      output_column_name: attitude_colors
+      colormap: 
+        - "#FF0000"
+        - "#FFA500"
+        - "#FFFF00"
+        - "#00FF00"
+        - "#0000FF"
+      df: ${{ workflow.remove_geom_outliers.return }}
+
+  - name: Generate attitude score point layers 
+    id: generate_attitude_layers 
+    task: create_scatterplot_layer
+    partial:
+      layer_style:
+        get_fill_color: attitude_colors 
+        get_line_color: [0,0,0]
+        get_radius : 4
+        get_line_width: 0.25
+        opacity: 0.75
+        stroked: true 
+      legend: 
+        title: Attitude scores
+        label_column: overall_attitude
+        color_column: attitude_colors 
+        sort: ascending
+      geodataframe: ${{ workflow.apply_att_colormap.return }}
+
+  - name: Combine styled layers with attitude score events 
+    id: combine_attitude_scores
+    task: combine_deckgl_map_layers
+    partial:
+      static_layers: 
+        - ${{ workflow.create_ranch_bnds_layers.return }}
+        - ${{ workflow.create_ambo_swamp_layers.return }}
+        - ${{ workflow.create_national_layers.return }}
+
+      grouped_layers: ${{ workflow.generate_attitude_layers.return }}
+
+  - name: Zoom to ranch boundaries
+    id: global_zoom
+    task: view_state_deck_gdf
+    partial:
+      pitch: 0
+      bearing: 0
+      gdf: ${{ workflow.reproject_ranch_boundaries.return }}
+
+  - name: Draw attitude scores map 
+    id: draw_att_map
+    task: draw_map
+    partial:
+      tile_layers: ${{ workflow.configure_base_maps.return }}
+      static: false
+      title: null
+      max_zoom: 10
+      legend_style:
+        placement: "bottom-right"
+      geo_layers: ${{ workflow.combine_attitude_scores.return }}
+      view_state: ${{ workflow.global_zoom.return }} 
+
+  - name: Persist attitude scores ecomap html paths
+    id: persist_att_ecomap_urls
+    task: persist_text
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      text: ${{ workflow.draw_att_map.return }}
+      filename: attitude_scores_community.html
+
+# -- Draw Gender distribution ecomap and persist
+  - name: Exclude geom outliers from df
+    id: remove_geom_gn_outliers
+    task: exclude_geom_outliers
+    partial:
+      df: ${{ workflow.bin_survey_cols.return }}
+      z_threshold: 3
+
+  - name: Apply colormap for gender distribution
+    id: apply_gn_colormap
+    task: apply_color_map
+    partial:
+      input_column_name: Participant gender
+      output_column_name: gender_colors
+      colormap: 
+        - "#FFC0CB"
+        - "#0000FF"
+        - "#DC143C"
+      df: ${{ workflow.remove_geom_gn_outliers.return }}
+
+  - name: Generate gender point layers 
+    id: generate_gender_layers 
+    task: create_scatterplot_layer
+    partial:
+      layer_style:
+        get_fill_color: gender_colors 
+        get_line_color: [0,0,0]
+        get_line_width: 0.25
+        get_radius : 4
+        opacity: 0.75
+        stroked: true 
+      legend: 
+        title: Gender
+        label_column: Participant gender
+        color_column: gender_colors 
+        sort: ascending
+      geodataframe: ${{ workflow.apply_gn_colormap.return }}
+
+  - name: Combine styled layers with gender events 
+    id: combine_gender_layers
+    task: combine_deckgl_map_layers
+    partial:
+      static_layers: 
+        - ${{ workflow.create_ranch_bnds_layers.return }}
+        - ${{ workflow.create_ambo_swamp_layers.return }}
+        - ${{ workflow.create_national_layers.return }}
+
+      grouped_layers: ${{ workflow.generate_gender_layers.return }}
+
+  - name: Draw gender map 
+    id: draw_gender_map
+    task: draw_map
+    partial:
+      tile_layers: ${{ workflow.configure_base_maps.return }}
+      static: false
+      title: null
+      max_zoom: 10
+      legend_style:
+        placement: "bottom-right"
+      geo_layers: ${{ workflow.combine_gender_layers.return }}
+      view_state: ${{ workflow.global_zoom.return }} 
+
+  - name: Persist gender html paths
+    id: persist_gn_ecomap_urls
+    task: persist_text
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      text: ${{ workflow.draw_gender_map.return }}
+      filename: gender_distribution_ecomap.html
+
+# -- Draw overall map and persist
+  - name: Exclude geom outliers from df
+    id: remove_geom_ov_outliers
+    task: exclude_geom_outliers
+    partial:
+      df: ${{ workflow.bin_survey_cols.return }}
+      z_threshold: 3
+
+  - name: Generate overall survey point layers 
+    id: generate_survey_layers 
+    task: create_scatterplot_layer
+    partial:
+      layer_style:
+        get_fill_color: [199, 0, 57]
+        get_line_color: [0,0,0]
+        get_line_width: 0.25
+        get_radius : 4
+        opacity: 0.75
+        stroked: true 
+      legend: 
+        title: Legend
+        values: 
+          - label: Survey location
+            color: "#C70039"
+      geodataframe: ${{ workflow.remove_geom_ov_outliers.return }}
+
+  - name: Combine styled layers with overall survey location events 
+    id: combine_survey_locations
+    task: combine_deckgl_map_layers
+    partial:
+      static_layers: 
+        - ${{ workflow.create_ranch_bnds_layers.return }}
+        - ${{ workflow.create_ambo_swamp_layers.return }}
+        - ${{ workflow.create_national_layers.return }}
+
+      grouped_layers: ${{ workflow.generate_survey_layers.return }}
+
+  - name: Draw survey locations map 
+    id: draw_survey_map
+    task: draw_map
+    partial:
+      tile_layers: ${{ workflow.configure_base_maps.return }}
+      static: false
+      title: null
+      max_zoom: 10
+      legend_style:
+        placement: "bottom-right"
+      geo_layers: ${{ workflow.combine_survey_locations.return }}
+      view_state: ${{ workflow.global_zoom.return }} 
+
+  - name: Persist overall  ecomap html paths
+    id: persist_ov_ecomap_urls
+    task: persist_text
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      text: ${{ workflow.draw_survey_map.return }}
+      filename: survey_locations_ecomap.html
+
+  - name: Convert  pie chart html to png 
+    id: convt_pie_html_png
+    task: html_to_png
+    partial:
+      html_path: ${{ workflow.draw_survey_pies.return }}
+      output_dir: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      config:
+        full_page: false
+        device_scale_factor: 2.0
+        wait_for_timeout: 25
+        max_concurrent_pages: 1
+  
+  - name: Convert bar chart html to png 
+    id: convt_bar_html_png
+    task: html_to_png
+    partial:
+      html_path: ${{ workflow.draw_survey_bar.return }}
+
+      output_dir: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      config:
+        full_page: false
+        device_scale_factor: 2.0
+        wait_for_timeout: 25
+        max_concurrent_pages: 1
+
+  - name: Convert stats html to png 
+    id: convt_stats_html_png
+    task: html_to_png
+    partial:
+      html_path: ${{ workflow.draw_stat_box.return }}
+      output_dir: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      config:
+        full_page: false
+        device_scale_factor: 2.0
+        wait_for_timeout: 25
+        max_concurrent_pages: 1
+
+  - name: Convert  ols html to png 
+    id: convt_ols_html_png
+    task: html_to_png
+    partial:
+      html_path: ${{ workflow.draw_ols_plots.return }}
+      output_dir: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      config:
+        full_page: false
+        device_scale_factor: 2.0
+        wait_for_timeout: 25
+        max_concurrent_pages: 1
+
+  - name: Convert tukey html to png 
+    id: convt_tuk_html_png
+    task: html_to_png
+    partial:
+      html_path: ${{ workflow.draw_tukey_plots.return }}
+      output_dir: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      config:
+        full_page: false
+        device_scale_factor: 2.0
+        wait_for_timeout: 25
+        max_concurrent_pages: 1
+
+  - name: Convert likert html to png
+    id: convt_likert_png
+    task: html_to_png
+    partial:
+      html_path: 
+        - ${{ workflow.persist_likert.return }}
+        - ${{ workflow.persist_likert_eff.return }}
+
+      output_dir: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      config:
+        full_page: false
+        device_scale_factor: 2.0
+        wait_for_timeout: 25
+        max_concurrent_pages: 1
+
+  - name: Convert attitude html to png
+    id: convt_attitude_png
+    task: html_to_png
+    partial:
+      html_path: ${{ workflow.persist_att_ecomap_urls.return }}
+      output_dir: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      config:
+        full_page: false
+        device_scale_factor: 2.0
+        wait_for_timeout: 40000
+        max_concurrent_pages: 1
+
+  - name: Convert gender html to png
+    id: convt_gender_png
+    task: html_to_png
+    partial:
+      html_path: ${{ workflow.persist_gn_ecomap_urls.return }}
+      output_dir: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      config:
+        full_page: false
+        device_scale_factor: 2.0
+        wait_for_timeout: 40000
+        max_concurrent_pages: 1
+
+  - name: Convert overall html to png
+    id: convt_overall_png
+    task: html_to_png
+    partial:
+      html_path: ${{ workflow.persist_ov_ecomap_urls.return }}
+      output_dir: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      config:
+        full_page: false
+        device_scale_factor: 2.0
+        wait_for_timeout: 40000
+        max_concurrent_pages: 1
+
+# -- Create context for word doc
+  - name: Persist word doc context
+    id: persist_survey_context
+    task: persist_survey_word
+    partial:
+      template_path: ${{ workflow.download_ate_tpt.return }}
+      output_dir: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      time_period: ${{ workflow.time_range.return }}
+      box_h_cm: 6.5 
+      box_w_cm: 11.11 
+      filename: social_survey.docx
+      demographic_csv: demographic_table.csv
+
+# -- Produces no widgets
+  - name: Create survey dashboard
+    id: survey_dashboard
+    task: gather_dashboard
+    partial:
+      details: ${{ workflow.workflow_details.return}}
+      widgets: []
+      time_range: ${{ workflow.time_range.return}}
+      groupers: ${{ workflow.groupers.return }}

@@ -24,7 +24,20 @@ requirements:
     - pip
   run:
     - python
+    - ecoscope
     - ecoscope-workflows-core
+    - ecoscope-workflows-ext-ecoscope
+    - ecoscope-workflows-ext-custom
+    - geopandas
+    - shapely
+    - python-igraph
+    - earthengine-api
+    - docxtpl
+    - docxcompose
+    - playwright
+    - setuptools <=81.0.0
+    - pillow
+    - statsmodels
 
 about:
   license: BSD-3-Clause
