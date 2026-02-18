@@ -9,7 +9,7 @@ from ._tabular import (
     fill_missing_values,
     calculate_elephant_sentiment_score,
     map_survey_columns,
-    exclude_value
+    exclude_value,
 )
 
 from ._stats import perform_anova_analysis
@@ -23,12 +23,12 @@ from ._plot import (
     draw_scatter_chart,
     draw_ols_scatterplot_and_persist,
     draw_tukey_plot,
-    draw_tukey_plots_and_persist
+    draw_tukey_plots_and_persist,
 )
+
 __all__ = [
     "add_one_thousand",
     "persist_survey_word",
-        
     "convert_object_to_value",
     "convert_object_to_string",
     "format_demographic_table",
@@ -36,9 +36,7 @@ __all__ = [
     "fill_missing_values",
     "calculate_elephant_sentiment_score",
     "map_survey_columns",
-    
     "perform_anova_analysis",
-    
     "create_likert_chart",
     "get_chart_recommendations",
     "draw_pie_and_persist",
@@ -49,6 +47,5 @@ __all__ = [
     "draw_ols_scatterplot_and_persist",
     "draw_tukey_plot",
     "draw_tukey_plots_and_persist",
-    
-    
+    "exclude_value",
 ]

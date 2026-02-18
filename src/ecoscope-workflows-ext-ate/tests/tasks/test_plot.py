@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 import pandas as pd
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock
 
 from ecoscope_workflows_ext_ate.tasks._plot import (  # update import path as needed
     _infer_response_order,
@@ -24,78 +24,93 @@ from ecoscope_workflows_ext_ate.tasks._plot import (  # update import path as ne
 # Shared Fixtures
 # ══════════════════════════════════════════════════════════════════
 
+
 @pytest.fixture
 def likert_df():
     np.random.seed(42)
     choices = ["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"]
-    return pd.DataFrame({
-        "Q1: Elephants are important": np.random.choice(choices, 50),
-        "Q2: Coexistence is possible":  np.random.choice(choices, 50),
-        "Q3: I feel safe near elephants": np.random.choice(choices, 50),
-    })
+    return pd.DataFrame(
+        {
+            "Q1: Elephants are important": np.random.choice(choices, 50),
+            "Q2: Coexistence is possible": np.random.choice(choices, 50),
+            "Q3: I feel safe near elephants": np.random.choice(choices, 50),
+        }
+    )
 
 
 @pytest.fixture
 def numeric_df():
     np.random.seed(0)
-    return pd.DataFrame({
-        "score":  np.random.normal(50, 10, 100),
-        "age":    np.random.randint(18, 70, 100),
-        "income": np.random.exponential(30000, 100),
-        "group":  np.random.choice(["A", "B", "C"], 100),
-        "region": np.random.choice(["North", "South"], 100),
-        "id":     range(100),
-    })
+    return pd.DataFrame(
+        {
+            "score": np.random.normal(50, 10, 100),
+            "age": np.random.randint(18, 70, 100),
+            "income": np.random.exponential(30000, 100),
+            "group": np.random.choice(["A", "B", "C"], 100),
+            "region": np.random.choice(["North", "South"], 100),
+            "id": range(100),
+        }
+    )
 
 
 @pytest.fixture
 def mixed_types_df():
-    return pd.DataFrame({
-        "cat_low":   ["A", "B", "C"] * 10,
-        "cat_high":  [f"val_{i}" for i in range(30)],
-        "bool_col":  [True, False] * 15,
-        "int_few":   [1, 2, 3, 4, 5] * 6,
-        "int_many":  list(range(30)),
-        "float_col": np.linspace(0, 100, 30),
-        "dt_col":    pd.date_range("2020-01-01", periods=30, freq="D"),
-        "all_null":  [None] * 30,
-    })
+    return pd.DataFrame(
+        {
+            "cat_low": ["A", "B", "C"] * 10,
+            "cat_high": [f"val_{i}" for i in range(30)],
+            "bool_col": [True, False] * 15,
+            "int_few": [1, 2, 3, 4, 5] * 6,
+            "int_many": list(range(30)),
+            "float_col": np.linspace(0, 100, 30),
+            "dt_col": pd.date_range("2020-01-01", periods=30, freq="D"),
+            "all_null": [None] * 30,
+        }
+    )
 
 
 # ══════════════════════════════════════════════════════════════════
 # _infer_response_order
 # ══════════════════════════════════════════════════════════════════
 
-class TestInferResponseOrder:
 
+class TestInferResponseOrder:
     def test_detects_likert_pattern(self):
-        df = pd.DataFrame({
-            "q1": ["Strongly Disagree", "Agree", "Neutral"],
-            "q2": ["Disagree", "Strongly Agree", "Neutral"],
-        })
+        df = pd.DataFrame(
+            {
+                "q1": ["Strongly Disagree", "Agree", "Neutral"],
+                "q2": ["Disagree", "Strongly Agree", "Neutral"],
+            }
+        )
         order = _infer_response_order(df)
         assert order == ["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"]
 
     def test_detects_satisfaction_pattern(self):
-        df = pd.DataFrame({
-            "q1": ["Very Dissatisfied", "Satisfied", "Neutral"],
-        })
+        df = pd.DataFrame(
+            {
+                "q1": ["Very Dissatisfied", "Satisfied", "Neutral"],
+            }
+        )
         order = _infer_response_order(df)
         assert "Satisfied" in order
         assert order.index("Very Dissatisfied") < order.index("Satisfied")
 
     def test_falls_back_to_frequency_order(self):
-        df = pd.DataFrame({
-            "q1": ["Foo", "Bar", "Foo", "Baz"],
-        })
+        df = pd.DataFrame(
+            {
+                "q1": ["Foo", "Bar", "Foo", "Baz"],
+            }
+        )
         order = _infer_response_order(df)
         assert "Foo" in order
         assert order[0] == "Foo"  # Most frequent first
 
     def test_ignores_nan_values(self):
-        df = pd.DataFrame({
-            "q1": ["Agree", None, "Neutral", "Disagree"],
-        })
+        df = pd.DataFrame(
+            {
+                "q1": ["Agree", None, "Neutral", "Disagree"],
+            }
+        )
         order = _infer_response_order(df)
         assert None not in order
         assert np.nan not in order
@@ -113,8 +128,8 @@ class TestInferResponseOrder:
 # _generate_color_scheme
 # ══════════════════════════════════════════════════════════════════
 
-class TestGenerateColorScheme:
 
+class TestGenerateColorScheme:
     def test_five_point_returns_five_colors(self):
         responses = ["SD", "D", "N", "A", "SA"]
         colors = _generate_color_scheme(responses)
@@ -155,8 +170,8 @@ class TestGenerateColorScheme:
 # _sort_dataframe
 # ══════════════════════════════════════════════════════════════════
 
-class TestSortDataframe:
 
+class TestSortDataframe:
     def test_sort_by_name(self, likert_df):
         result = _sort_dataframe(likert_df, [], [], sort_by="name")
         assert list(result.columns) == sorted(likert_df.columns)
@@ -186,8 +201,8 @@ class TestSortDataframe:
 # create_likert_chart
 # ══════════════════════════════════════════════════════════════════
 
-class TestCreateLikertChart:
 
+class TestCreateLikertChart:
     def test_returns_html_string(self, likert_df):
         result = create_likert_chart(likert_df)
         assert isinstance(result, str)
@@ -234,10 +249,12 @@ class TestCreateLikertChart:
         assert isinstance(result, str)
 
     def test_even_number_of_responses(self):
-        df = pd.DataFrame({
-            "Q1": ["Disagree", "Agree", "Disagree", "Agree"] * 10,
-            "Q2": ["Agree", "Agree", "Disagree", "Disagree"] * 10,
-        })
+        df = pd.DataFrame(
+            {
+                "Q1": ["Disagree", "Agree", "Disagree", "Agree"] * 10,
+                "Q2": ["Agree", "Agree", "Disagree", "Disagree"] * 10,
+            }
+        )
         result = create_likert_chart(df, response_order=["Disagree", "Agree"])
         assert isinstance(result, str)
 
@@ -245,7 +262,7 @@ class TestCreateLikertChart:
         result = create_likert_chart(
             likert_df,
             neutral_categories=["Neutral"],
-            response_order=["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"]
+            response_order=["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"],
         )
         assert isinstance(result, str)
 
@@ -254,8 +271,8 @@ class TestCreateLikertChart:
 # get_chart_recommendations
 # ══════════════════════════════════════════════════════════════════
 
-class TestGetChartRecommendations:
 
+class TestGetChartRecommendations:
     def test_returns_dataframe(self, mixed_types_df):
         result = get_chart_recommendations(mixed_types_df)
         assert isinstance(result, pd.DataFrame)
@@ -314,8 +331,8 @@ class TestGetChartRecommendations:
 # draw_boxplot
 # ══════════════════════════════════════════════════════════════════
 
-class TestDrawBoxplot:
 
+class TestDrawBoxplot:
     def test_returns_html_string(self, numeric_df):
         result = draw_boxplot(numeric_df, y_column="score")
         assert isinstance(result, str)
@@ -349,11 +366,12 @@ class TestDrawBoxplot:
 
     def test_with_marker_colors_and_x_column(self, numeric_df):
         from ecoscope_workflows_ext_ecoscope.tasks.results._ecoplot import PlotStyle
+
         result = draw_boxplot(
             numeric_df,
             y_column="score",
             x_column="group",
-            plot_style=PlotStyle(marker_colors=["#ff0000", "#00ff00", "#0000ff"])
+            plot_style=PlotStyle(marker_colors=["#ff0000", "#00ff00", "#0000ff"]),
         )
         assert isinstance(result, str)
 
@@ -366,6 +384,7 @@ class TestDrawBoxplot:
 # draw_scatter_chart
 # ══════════════════════════════════════════════════════════════════
 
+
 class TestDrawScatterChart:
     from ecoscope_workflows_ext_ate.tasks._plot import ScatterStyle, TrendlineStyle
 
@@ -375,21 +394,17 @@ class TestDrawScatterChart:
 
     def test_with_ols_trendline(self, numeric_df):
         from ecoscope_workflows_ext_ate.tasks._plot import TrendlineStyle
+
         result = draw_scatter_chart(
-            numeric_df,
-            x_column="age",
-            y_column="score",
-            trendline_style=TrendlineStyle(enabled=True, type="ols")
+            numeric_df, x_column="age", y_column="score", trendline_style=TrendlineStyle(enabled=True, type="ols")
         )
         assert isinstance(result, str)
 
     def test_with_lowess_trendline(self, numeric_df):
         from ecoscope_workflows_ext_ate.tasks._plot import TrendlineStyle
+
         result = draw_scatter_chart(
-            numeric_df,
-            x_column="age",
-            y_column="score",
-            trendline_style=TrendlineStyle(enabled=True, type="lowess")
+            numeric_df, x_column="age", y_column="score", trendline_style=TrendlineStyle(enabled=True, type="lowess")
         )
         assert isinstance(result, str)
 
@@ -412,19 +427,18 @@ class TestDrawScatterChart:
             draw_scatter_chart(df, x_column="age", y_column="score")
 
     def test_scatter_style_applied(self, numeric_df):
-        from ecoscope_workflows_ext_ate.tasks._plot  import ScatterStyle
+        from ecoscope_workflows_ext_ate.tasks._plot import ScatterStyle
+
         result = draw_scatter_chart(
             numeric_df,
             x_column="age",
             y_column="score",
-            scatter_style=ScatterStyle(marker_color="#abc123", marker_size=12, marker_opacity=0.5)
+            scatter_style=ScatterStyle(marker_color="#abc123", marker_size=12, marker_opacity=0.5),
         )
         assert isinstance(result, str)
 
     def test_widget_id_in_output(self, numeric_df):
-        result = draw_scatter_chart(
-            numeric_df, x_column="age", y_column="score", widget_id="scatter-1"
-        )
+        result = draw_scatter_chart(numeric_df, x_column="age", y_column="score", widget_id="scatter-1")
         assert isinstance(result, str)
 
 
@@ -432,8 +446,8 @@ class TestDrawScatterChart:
 # draw_tukey_plot
 # ══════════════════════════════════════════════════════════════════
 
-class TestDrawTukeyPlot:
 
+class TestDrawTukeyPlot:
     def test_returns_html_string(self, numeric_df):
         result = draw_tukey_plot(numeric_df, value_column="score", group_column="group")
         assert isinstance(result, str)
@@ -451,6 +465,7 @@ class TestDrawTukeyPlot:
 
     def test_custom_tukey_style(self, numeric_df):
         from ecoscope_workflows_ext_ate.tasks._plot import TukeyPlotStyle
+
         result = draw_tukey_plot(
             numeric_df,
             value_column="score",
@@ -461,34 +476,38 @@ class TestDrawTukeyPlot:
                 confidence_level=0.99,
                 marker_size=12,
                 line_width=3,
-            )
+            ),
         )
         assert isinstance(result, str)
 
     def test_widget_id_accepted(self, numeric_df):
-        result = draw_tukey_plot(
-            numeric_df, value_column="score", group_column="group", widget_id="tukey-widget"
-        )
+        result = draw_tukey_plot(numeric_df, value_column="score", group_column="group", widget_id="tukey-widget")
         assert isinstance(result, str)
 
     def test_significantly_different_groups_detected(self):
         """Groups with very different means should be flagged as significant."""
-        df = pd.DataFrame({
-            "value": [1.0] * 20 + [100.0] * 20,
-            "group": ["low"] * 20 + ["high"] * 20,
-        })
+        df = pd.DataFrame(
+            {
+                "value": [1.0] * 20 + [100.0] * 20,
+                "group": ["low"] * 20 + ["high"] * 20,
+            }
+        )
         result = draw_tukey_plot(df, value_column="value", group_column="group")
         assert "Significant" in result  # legend label should appear in HTML
 
     def test_similar_groups_not_significant(self):
         np.random.seed(42)
-        df = pd.DataFrame({
-            "value": np.concatenate([
-                np.random.normal(50, 1, 30),
-                np.random.normal(50.01, 1, 30),  # Nearly identical means
-            ]),
-            "group": ["A"] * 30 + ["B"] * 30,
-        })
+        df = pd.DataFrame(
+            {
+                "value": np.concatenate(
+                    [
+                        np.random.normal(50, 1, 30),
+                        np.random.normal(50.01, 1, 30),  # Nearly identical means
+                    ]
+                ),
+                "group": ["A"] * 30 + ["B"] * 30,
+            }
+        )
         result = draw_tukey_plot(df, value_column="value", group_column="group")
         assert "Not Significant" in result
 
@@ -516,21 +535,20 @@ def mock_persist(monkeypatch):
 @pytest.fixture
 def mock_draw_pie(monkeypatch):
     monkeypatch.setattr(
-        "ecoscope_workflows_ext_ecoscope.tasks.results._ecoplot.draw_pie_chart", 
-        MagicMock(return_value="<html>pie</html>")
-        )
+        "ecoscope_workflows_ext_ecoscope.tasks.results._ecoplot.draw_pie_chart",
+        MagicMock(return_value="<html>pie</html>"),
+    )
 
 
 @pytest.fixture
 def mock_draw_bar(monkeypatch):
     monkeypatch.setattr(
-        "ecoscope_workflows_ext_ecoscope.tasks.results._ecoplot.draw_bar_chart", 
-        MagicMock(return_value="<html>bar</html>")
-        )
+        "ecoscope_workflows_ext_ecoscope.tasks.results._ecoplot.draw_bar_chart",
+        MagicMock(return_value="<html>bar</html>"),
+    )
 
 
 class TestDrawPieAndPersist:
-
     def test_returns_list(self, numeric_df, mock_persist, mock_draw_pie):
         result = draw_pie_and_persist("/tmp", numeric_df, ["group"])
         assert isinstance(result, list)
@@ -568,7 +586,6 @@ class TestDrawPieAndPersist:
 
 
 class TestDrawBarAndPersist:
-
     def test_returns_list(self, numeric_df, mock_persist, mock_draw_bar):
         result = draw_bar_and_persist("/tmp", numeric_df, ["group"])
         assert isinstance(result, list)
@@ -591,7 +608,6 @@ class TestDrawBarAndPersist:
 
 
 class TestDrawBoxplotAndPersist:
-
     def test_returns_list(self, numeric_df, mock_persist):
         result = draw_boxplot_and_persist("/tmp", numeric_df, ["group"], y_column="score")
         assert isinstance(result, list)
@@ -614,7 +630,6 @@ class TestDrawBoxplotAndPersist:
 
 
 class TestDrawOlsScatterplotAndPersist:
-
     def test_returns_list(self, numeric_df, mock_persist):
         result = draw_ols_scatterplot_and_persist("/tmp", numeric_df, ["age"], y_column="score")
         assert isinstance(result, list)
@@ -632,14 +647,11 @@ class TestDrawOlsScatterplotAndPersist:
             draw_ols_scatterplot_and_persist("/tmp", numeric_df, ["no_col"], y_column="score")
 
     def test_multiple_columns(self, numeric_df, mock_persist):
-        result = draw_ols_scatterplot_and_persist(
-            "/tmp", numeric_df, ["age", "income"], y_column="score"
-        )
+        result = draw_ols_scatterplot_and_persist("/tmp", numeric_df, ["age", "income"], y_column="score")
         assert len(result) == 2
 
 
 class TestDrawTukeyPlotsAndPersist:
-
     def test_returns_list(self, numeric_df, mock_persist):
         result = draw_tukey_plots_and_persist("/tmp", numeric_df, ["group"], value_column="score")
         assert isinstance(result, list)
@@ -657,9 +669,7 @@ class TestDrawTukeyPlotsAndPersist:
             draw_tukey_plots_and_persist("/tmp", numeric_df, ["no_col"], value_column="score")
 
     def test_multiple_columns_produce_multiple_files(self, numeric_df, mock_persist):
-        result = draw_tukey_plots_and_persist(
-            "/tmp", numeric_df, ["group", "region"], value_column="score"
-        )
+        result = draw_tukey_plots_and_persist("/tmp", numeric_df, ["group", "region"], value_column="score")
         assert len(result) == 2
 
     def test_string_column_accepted(self, numeric_df, mock_persist):

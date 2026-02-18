@@ -1,4 +1,3 @@
-
 import warnings
 import statsmodels.api as sm
 from typing_extensions import Literal
@@ -9,6 +8,7 @@ from typing import List
 
 warnings.filterwarnings("ignore")
 
+
 @task
 def perform_anova_analysis(
     dataframe: AnyDataFrame,
@@ -18,14 +18,14 @@ def perform_anova_analysis(
 ) -> AnyDataFrame:
     if target_column not in dataframe.columns:
         raise ValueError(f"Target column '{target_column}' not found in dataframe")
-    
+
     missing_cols = [col for col in factor_columns if col not in dataframe.columns]
     if missing_cols:
         raise ValueError(f"Factor columns not found in dataframe: {missing_cols}")
-    
+
     columns_to_check = [target_column] + factor_columns
     clean_df = dataframe[columns_to_check].dropna()
-    
+
     if clean_df.empty:
         raise ValueError("No valid data after removing NaN values")
 

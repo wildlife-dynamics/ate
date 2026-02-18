@@ -2,23 +2,26 @@ import pytest
 import numpy as np
 import pandas as pd
 
-from ecoscope_workflows_ext_ate.tasks._stats import perform_anova_analysis 
+from ecoscope_workflows_ext_ate.tasks._stats import perform_anova_analysis
 
 
 # ──────────────────────────────────────────────
 # Fixtures
 # ──────────────────────────────────────────────
 
+
 @pytest.fixture
 def basic_df():
     """Well-formed dataframe with two categorical factors and a numeric target."""
     np.random.seed(42)
     n = 120
-    return pd.DataFrame({
-        "score":   np.random.normal(loc=50, scale=10, size=n),
-        "group":   np.tile(["A", "B", "C"], n // 3),
-        "region":  np.tile(["North", "South"], n // 2),
-    })
+    return pd.DataFrame(
+        {
+            "score": np.random.normal(loc=50, scale=10, size=n),
+            "group": np.tile(["A", "B", "C"], n // 3),
+            "region": np.tile(["North", "South"], n // 2),
+        }
+    )
 
 
 @pytest.fixture
@@ -26,7 +29,7 @@ def df_with_nans(basic_df):
     """Same dataframe but with some NaN values scattered in."""
     df = basic_df.copy()
     df.loc[[0, 5, 10], "score"] = np.nan
-    df.loc[[2, 8],     "group"] = np.nan
+    df.loc[[2, 8], "group"] = np.nan
     return df
 
 
@@ -34,15 +37,18 @@ def df_with_nans(basic_df):
 def single_factor_df():
     """Minimal dataframe with one factor column."""
     np.random.seed(0)
-    return pd.DataFrame({
-        "value": np.random.normal(size=60),
-        "category": np.tile(["X", "Y", "Z"], 20),
-    })
+    return pd.DataFrame(
+        {
+            "value": np.random.normal(size=60),
+            "category": np.tile(["X", "Y", "Z"], 20),
+        }
+    )
 
 
 # ──────────────────────────────────────────────
 # Happy-path tests
 # ──────────────────────────────────────────────
+
 
 class TestReturnsValidDataFrame:
     def test_returns_dataframe(self, basic_df):
@@ -62,7 +68,7 @@ class TestReturnsValidDataFrame:
     def test_expected_factors_present(self, basic_df):
         result = perform_anova_analysis(basic_df, "score", ["group", "region"])
         factors = result["factor"].tolist()
-        assert "group"  in factors
+        assert "group" in factors
         assert "region" in factors
 
     def test_single_factor(self, single_factor_df):
@@ -79,16 +85,14 @@ class TestReturnsValidDataFrame:
 class TestAnovaTypes:
     @pytest.mark.parametrize("anova_type", [1, 2, 3])
     def test_all_anova_types_succeed(self, basic_df, anova_type):
-        result = perform_anova_analysis(
-            basic_df, "score", ["group", "region"], anova_type=anova_type
-        )
+        result = perform_anova_analysis(basic_df, "score", ["group", "region"], anova_type=anova_type)
         assert isinstance(result, pd.DataFrame)
         assert not result.empty
 
     def test_default_type_is_2(self, basic_df):
         """Calling without anova_type should behave the same as anova_type=2."""
         result_default = perform_anova_analysis(basic_df, "score", ["group"])
-        result_type2   = perform_anova_analysis(basic_df, "score", ["group"], anova_type=2)
+        result_type2 = perform_anova_analysis(basic_df, "score", ["group"], anova_type=2)
         pd.testing.assert_frame_equal(result_default, result_type2)
 
 
@@ -101,16 +105,17 @@ class TestNaNHandling:
 
     def test_nan_rows_are_excluded(self, basic_df, df_with_nans):
         """Results may differ when NaNs are present (fewer rows used)."""
-        result_clean = perform_anova_analysis(basic_df,     "score", ["group"])
-        result_nan   = perform_anova_analysis(df_with_nans, "score", ["group"])
+        result_clean = perform_anova_analysis(basic_df, "score", ["group"])
+        result_nan = perform_anova_analysis(df_with_nans, "score", ["group"])
         # Both should succeed but need not be identical
         assert isinstance(result_clean, pd.DataFrame)
-        assert isinstance(result_nan,   pd.DataFrame)
+        assert isinstance(result_nan, pd.DataFrame)
 
 
 # ──────────────────────────────────────────────
 # Error / edge-case tests
 # ──────────────────────────────────────────────
+
 
 class TestValidationErrors:
     def test_missing_target_column(self, basic_df):
@@ -147,6 +152,7 @@ class TestValidationErrors:
 # ──────────────────────────────────────────────
 # Output structure tests
 # ──────────────────────────────────────────────
+
 
 class TestOutputStructure:
     def test_reset_index_applied(self, basic_df):

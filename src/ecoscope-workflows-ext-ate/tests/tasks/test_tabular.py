@@ -17,40 +17,47 @@ from ecoscope_workflows_ext_ate.tasks._tabular import (  # update import path as
 # Shared Fixtures
 # ══════════════════════════════════════════════════════════════════
 
+
 @pytest.fixture
 def mixed_df():
-    return pd.DataFrame({
-        "age":      ["25", "30", "forty", None, "22"],
-        "income":   ["1000", "2000.5", "abc", "3000", None],
-        "category": ["A", "B", "C", "A", "B"],
-    })
+    return pd.DataFrame(
+        {
+            "age": ["25", "30", "forty", None, "22"],
+            "income": ["1000", "2000.5", "abc", "3000", None],
+            "category": ["A", "B", "C", "A", "B"],
+        }
+    )
 
 
 @pytest.fixture
 def sentiment_df():
-    return pd.DataFrame({
-        "q1": ["Strongly agree", "Agree", "Neutral", "Disagree", "Strongly disagree"],
-        "q2": ["Agree", "Neutral", "Strongly agree", "Strongly disagree", "I dont know"],
-        "q3": ["Strongly disagree", "Disagree", "Neutral", "Agree", "Strongly agree"],
-    })
+    return pd.DataFrame(
+        {
+            "q1": ["Strongly agree", "Agree", "Neutral", "Disagree", "Strongly disagree"],
+            "q2": ["Agree", "Neutral", "Strongly agree", "Strongly disagree", "I dont know"],
+            "q3": ["Strongly disagree", "Disagree", "Neutral", "Agree", "Strongly agree"],
+        }
+    )
 
 
 @pytest.fixture
 def demographic_df():
     np.random.seed(1)
-    return pd.DataFrame({
-        "age":    np.random.randint(18, 70, size=100),
-        "gender": np.random.choice(["Male", "Female", "Other"], size=100),
-        "region": np.random.choice(["North", "South", "East", "West"], size=100),
-    })
+    return pd.DataFrame(
+        {
+            "age": np.random.randint(18, 70, size=100),
+            "gender": np.random.choice(["Male", "Female", "Other"], size=100),
+            "region": np.random.choice(["North", "South", "East", "West"], size=100),
+        }
+    )
 
 
 # ══════════════════════════════════════════════════════════════════
 # convert_object_to_value
 # ══════════════════════════════════════════════════════════════════
 
-class TestConvertObjectToValue:
 
+class TestConvertObjectToValue:
     def test_converts_numeric_strings(self, mixed_df):
         result = convert_object_to_value(mixed_df.copy(), columns=["age"])
         assert pd.api.types.is_float_dtype(result["age"]) or pd.api.types.is_numeric_dtype(result["age"])
@@ -104,8 +111,8 @@ class TestConvertObjectToValue:
 # convert_object_to_string
 # ══════════════════════════════════════════════════════════════════
 
-class TestConvertObjectToString:
 
+class TestConvertObjectToString:
     def test_converts_to_string_dtype(self, mixed_df):
         result = convert_object_to_string(mixed_df.copy(), columns=["age"])
         assert pd.api.types.is_string_dtype(result["age"])
@@ -142,8 +149,8 @@ class TestConvertObjectToString:
 # format_demographic_table
 # ══════════════════════════════════════════════════════════════════
 
-class TestFormatDemographicTable:
 
+class TestFormatDemographicTable:
     def test_returns_dataframe(self, demographic_df):
         result = format_demographic_table(demographic_df, ["age", "gender"])
         assert isinstance(result, pd.DataFrame)
@@ -203,14 +210,16 @@ class TestFormatDemographicTable:
 # map_survey_responses
 # ══════════════════════════════════════════════════════════════════
 
-class TestMapSurveyResponses:
 
+class TestMapSurveyResponses:
     @pytest.fixture
     def survey_df(self):
-        return pd.DataFrame({
-            "q1": ["yes", "no", "i_dont_know", "yes"],
-            "q2": ["no", "yes", "prefer_not_to_answer", None],
-        })
+        return pd.DataFrame(
+            {
+                "q1": ["yes", "no", "i_dont_know", "yes"],
+                "q2": ["no", "yes", "prefer_not_to_answer", None],
+            }
+        )
 
     def test_maps_values_correctly(self, survey_df):
         value_map = {"yes": "Yes", "no": "No"}
@@ -257,16 +266,18 @@ class TestMapSurveyResponses:
 # fill_missing_values
 # ══════════════════════════════════════════════════════════════════
 
-class TestFillMissingValues:
 
+class TestFillMissingValues:
     @pytest.fixture
     def nulls_df(self):
-        return pd.DataFrame({
-            "score":    [1.0, None, 3.0, None, 5.0],
-            "count":    [10, None, 30, None, 50],
-            "category": ["A", None, "B", None, "C"],
-            "label":    ["x", "y", None, "z", None],
-        })
+        return pd.DataFrame(
+            {
+                "score": [1.0, None, 3.0, None, 5.0],
+                "count": [10, None, 30, None, 50],
+                "category": ["A", None, "B", None, "C"],
+                "label": ["x", "y", None, "z", None],
+            }
+        )
 
     def test_fills_numeric_with_default_zero(self, nulls_df):
         result = fill_missing_values(nulls_df)
@@ -319,8 +330,8 @@ class TestFillMissingValues:
 # calculate_elephant_sentiment_score
 # ══════════════════════════════════════════════════════════════════
 
-class TestCalculateElephantSentimentScore:
 
+class TestCalculateElephantSentimentScore:
     def test_returns_dataframe(self, sentiment_df):
         result = calculate_elephant_sentiment_score(sentiment_df, ["q1", "q2"], ["q3"])
         assert isinstance(result, pd.DataFrame)
@@ -407,13 +418,16 @@ class TestCalculateElephantSentimentScore:
         result = calculate_elephant_sentiment_score(sentiment_df, ["q1"], ["q3"])
         assert result["q1_score"].dtype == pd.Int64Dtype()
 
-    @pytest.mark.parametrize("attitude,expected", [
-        ("Strongly agree",    "Strongly agree"),
-        ("Agree",             "Agree"),
-        ("Neutral",           "Neutral"),
-        ("Disagree",          "Disagree"),
-        ("Strongly disagree", "Strongly disagree"),
-    ])
+    @pytest.mark.parametrize(
+        "attitude,expected",
+        [
+            ("Strongly agree", "Strongly agree"),
+            ("Agree", "Agree"),
+            ("Neutral", "Neutral"),
+            ("Disagree", "Disagree"),
+            ("Strongly disagree", "Strongly disagree"),
+        ],
+    )
     def test_overall_attitude_all_labels(self, attitude, expected):
         df = pd.DataFrame({"q1": [attitude]})
         result = calculate_elephant_sentiment_score(df, ["q1"], [])
@@ -424,14 +438,16 @@ class TestCalculateElephantSentimentScore:
 # exclude_value
 # ══════════════════════════════════════════════════════════════════
 
-class TestExcludeValue:
 
+class TestExcludeValue:
     @pytest.fixture
     def base_df(self):
-        return pd.DataFrame({
-            "status": ["active", "inactive", "active", "pending", "inactive"],
-            "count":  [10, 20, 30, 40, 50],
-        })
+        return pd.DataFrame(
+            {
+                "status": ["active", "inactive", "active", "pending", "inactive"],
+                "count": [10, 20, 30, 40, 50],
+            }
+        )
 
     def test_excludes_string_value(self, base_df):
         result = exclude_value(base_df, "status", "inactive")

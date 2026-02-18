@@ -1,4 +1,4 @@
-import os 
+import os
 import math
 import jinja2
 import warnings
@@ -16,15 +16,13 @@ IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".gif", ".bmp", ".tiff"}
 
 warnings.filterwarnings("ignore")
 
+
 def nan_to_empty(value):
-    if (
-        value is None
-        or (isinstance(value, float) and math.isnan(value))
-        or value == "nan"
-    ):
+    if value is None or (isinstance(value, float) and math.isnan(value)) or value == "nan":
         return ""
     print(value)
     return value
+
 
 @task
 def persist_survey_word(
@@ -40,7 +38,7 @@ def persist_survey_word(
     Render a docx template and inject images found in `output_dir` into the Jinja context.
     Image variable names = image filename stem without extension.
     e.g. output_dir/survey_locations_ecomap.png  -> context key 'survey_locations_ecomap'
-    
+
     Also processes demographic_table.csv if present and adds to context as 'demographics'
     """
     jinja_env = jinja2.Environment()
@@ -70,7 +68,7 @@ def persist_survey_word(
     if time_period:
         fmt = getattr(time_period, "time_format", "%Y-%m-%d")
         time_period_str = f"{time_period.since.strftime(fmt)} to {time_period.until.strftime(fmt)}"
-    
+
     base_context = {
         "report_period": time_period_str,
         "time_generated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -88,54 +86,55 @@ def persist_survey_word(
     if demographic_path.exists():
         try:
             df = pd.read_csv(demographic_path)
-            
+
             # Forward fill empty Demographic Variable cells
-            df['Demographic Variable'] = df['Demographic Variable'].replace('', pd.NA).ffill()
-            
+            df["Demographic Variable"] = df["Demographic Variable"].replace("", pd.NA).ffill()
+
             # Transform to nested structure for Jinja
             demographics = []
-            for var_name, group in df.groupby('Demographic Variable', sort=False):
+            for var_name, group in df.groupby("Demographic Variable", sort=False):
                 categories = []
                 for _, row in group.iterrows():
-                    categories.append({
-                        'category': row['Categories'] if row['Categories'] else 'Statistics',
-                        'formatted_response': row['Number of responses']
-                    })
-                
-                demographics.append({
-                    'variable': var_name,
-                    'categories': categories
-                })
-            
+                    categories.append(
+                        {
+                            "category": row["Categories"] if row["Categories"] else "Statistics",
+                            "formatted_response": row["Number of responses"],
+                        }
+                    )
+
+                demographics.append({"variable": var_name, "categories": categories})
+
             # Add to context
-            result['demographics'] = demographics
+            result["demographics"] = demographics
 
             # Calculate total responses from first variable's total
             try:
                 # Extract n from first category of first variable
-                first_response = demographics[0]['categories'][0]['formatted_response']
+                first_response = demographics[0]["categories"][0]["formatted_response"]
                 import re
-                match = re.search(r'n=(\d+)', first_response)
+
+                match = re.search(r"n=(\d+)", first_response)
                 if match:
                     # Sum all n values to get total
                     total = 0
                     for demo in demographics:
-                        for cat in demo['categories']:
-                            n_match = re.search(r'n=(\d+)', cat['formatted_response'])
+                        for cat in demo["categories"]:
+                            n_match = re.search(r"n=(\d+)", cat["formatted_response"])
                             if n_match:
                                 total = max(total, int(n_match.group(1)))
-                    result['total_responses'] = total
+                    result["total_responses"] = total
                 else:
-                    result['total_responses'] = None
-            except:
-                result['total_responses'] = None
-                
+                    result["total_responses"] = None
+            except Exception as e:
+                print(f"{e}")
+                result["total_responses"] = None
+
         except Exception as e:
             print(f"Failed to process demographic CSV: {e}")
-            result['demographics'] = []
+            result["demographics"] = []
     else:
         print(f"\nDemographic CSV not found: {demographic_path}")
-        result['demographics'] = []
+        result["demographics"] = []
 
     # ========================================================================
     # Process images (existing code)
@@ -176,7 +175,7 @@ def persist_survey_word(
     # Render and save
     # ========================================================================
     try:
-        tpl.render(result,jinja_env)
+        tpl.render(result, jinja_env)
         tpl.save(output_path)
         return str(output_path)
     except Exception as e:
