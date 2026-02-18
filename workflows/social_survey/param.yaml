@@ -1,0 +1,15 @@
+workflow_details:
+  description: ''
+  name: custom_social_survey
+time_range:
+  timezone:
+    label: UTC
+    tzCode: UTC
+    name: UTC
+    utc: '+03:00'
+  time_format: '%d %b %Y %H:%M:%S'
+  since: '2024-01-31T21:00:00.000Z'
+  until: '2025-11-15T21:00:00.000Z'
+er_client_name:
+  data_source:
+    name: ate
