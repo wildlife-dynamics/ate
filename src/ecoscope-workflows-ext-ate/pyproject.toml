@@ -76,7 +76,7 @@ pillow ="*"
 statsmodels="*"
 ecoscope-workflows-ext-ste = "0.0.14.*"
 ecoscope-workflows-ext-mnc = "0.0.6.*"
-
+libsqlite = ">3.51.2"  
 
 [tool.mypy]
 plugins = ["pandera.mypy", "pydantic.mypy"]
