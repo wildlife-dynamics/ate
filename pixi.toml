@@ -3,7 +3,7 @@ name = "ate"
 channels = [
     # Uncomment the following lines to use local channels for development.
     # "file:///tmp/ecoscope-workflows/release/artifacts/",
-    "file:///tmp/ecoscope-workflows-custom/release/artifacts/",
+    #"file:///tmp/ecoscope-workflows-custom/release/artifacts/",
     'https://repo.prefix.dev/ecoscope-workflows/',
     'https://repo.prefix.dev/ecoscope-workflows-custom/',
     'conda-forge',
@@ -22,7 +22,7 @@ playwright = ">=1.58.2,<2"
 [feature.compile.dependencies]
 # Include this if you add new tasks and the package has been built
 
-ecoscope-workflows-ext-ate = "*"
+ecoscope-workflows-ext-ate = "0.0.3.*"
 ecoscope-workflows-core = "0.22.17.*"
 ecoscope-workflows-ext-custom = "0.0.39.*"
 ecoscope-workflows-ext-ste = "0.0.17.*"
