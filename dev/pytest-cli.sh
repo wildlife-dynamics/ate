@@ -45,7 +45,7 @@ if [ "$skip_setup" = false ]; then
         echo "Windows detected - installing playwright via pip first..."
         pixi run --manifest-path $manifest_path --locked -e default pip install playwright
     fi
-    pixi run --manifest-path $manifest_path --locked -e default bash -c "pixi global install playwright && playwright install --with-deps chromium"
+    pixi run --manifest-path $manifest_path --locked -e default bash -c "playwright install --with-deps chromium"
 else
     echo "Skipping pixi update and playwright-install (--skip-setup flag provided)"
 fi
