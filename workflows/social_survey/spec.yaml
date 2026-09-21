@@ -1178,4 +1178,1716 @@ workflow:
       filename: "gender_of_participant_pie_chart.html"
       filename_suffix: null 
 
-  - name:
+  - name: Create age bins classification 
+    id: age_bins
+    task: apply_classification 
+    partial: 
+      input_column_name: "What is your Age"
+      output_column_name: age_bins
+      df: ${{ workflow.replace_marital_status.return }}
+      label_options: 
+        label_ranges: true 
+        label_decimals: 0 
+      classification_options: 
+        scheme: "natural_breaks"
+        k: 5
+
+  - name: Create cattle bins classification 
+    id: cattle_bins
+    task: apply_classification 
+    partial: 
+      input_column_name: "How many Cattle does Your Household Own"
+      output_column_name: cattle_bins
+      df: ${{ workflow.age_bins.return }}
+      label_options: 
+        label_ranges: true 
+        label_decimals: 0 
+      classification_options: 
+        scheme: "natural_breaks"
+        k: 5
+
+  - name: Create dog bins classification 
+    id: dog_bins
+    task: apply_classification 
+    partial: 
+      input_column_name: "How many Cattle does Your Household Own"
+      output_column_name: dog_bins
+      df: ${{ workflow.cattle_bins.return }}
+      label_options: 
+        label_ranges: true 
+        label_decimals: 0 
+      classification_options: 
+        scheme: "natural_breaks"
+        k: 5
+
+  - name: Create dog bins classification 
+    id: donkey_bins
+    task: apply_classification 
+    partial: 
+      input_column_name: "How many Donkey does Your Household Own"
+      output_column_name: donkey_bins
+      df: ${{ workflow.dog_bins.return }}
+      label_options: 
+        label_ranges: true 
+        label_decimals: 0 
+      classification_options: 
+        scheme: "natural_breaks"
+        k: 5
+
+  - name: Create other animal bins classification 
+    id: other_animals_bins
+    task: apply_classification 
+    partial: 
+      input_column_name: "How many Other Animals does Your Household Own"
+      output_column_name: other_animals_bins
+      df: ${{ workflow.donkey_bins.return }}
+      label_options: 
+        label_ranges: true 
+        label_decimals: 0 
+      classification_options: 
+        scheme: "natural_breaks"
+        k: 5
+
+  - name: Create household bins classification 
+    id: people_bins
+    task: apply_classification 
+    partial: 
+      input_column_name: "How many People are there in your Household"
+      output_column_name: other_people_bins
+      df: ${{ workflow.other_animals_bins.return }}
+      label_options: 
+        label_ranges: true 
+        label_decimals: 0 
+      classification_options: 
+        scheme: "natural_breaks"
+        k: 5
+
+  - name: Create sheep/goats bins classification 
+    id: sheep_goats_bins
+    task: apply_classification 
+    partial: 
+      input_column_name: "How many Sheep/Goats does Your Household Own"
+      output_column_name: sheep_goats_bins
+      df: ${{ workflow.people_bins.return }}
+      label_options: 
+        label_ranges: true 
+        label_decimals: 0 
+      classification_options: 
+        scheme: "natural_breaks"
+        k: 5
+
+  - name: Create land-grown crop bins classification 
+    id: land_grown_bins
+    task: apply_classification 
+    partial: 
+      input_column_name: "How much Land do you Grow Crops on each Season (in Acres)"
+      output_column_name: land_grown_crops_bins
+      df: ${{ workflow.sheep_goats_bins.return }}
+      label_options: 
+        label_ranges: true 
+        label_decimals: 0 
+      classification_options: 
+        scheme: "natural_breaks"
+        k: 5
+        
+  - name: Create land-owned bins classification 
+    id: land_owned_bins
+    task: apply_classification 
+    partial: 
+      input_column_name: "How much Land do you Own (in Acres)"
+      output_column_name: land_owned_bins
+      df: ${{ workflow.land_grown_bins.return }}
+      label_options: 
+        label_ranges: true 
+        label_decimals: 0 
+      classification_options: 
+        scheme: "natural_breaks"
+        k: 5
+
+  - name: Order binned herd size for elephants
+    id: order_bins
+    task: order_categorical_by_number 
+    partial:  
+      df: ${{ workflow.land_owned_bins.return }}
+      columns: [
+        "age_bins",
+        "cattle_bins",
+        "dog_bins",
+        "donkey_bins",
+        "other_animal_bins",
+        "other_people_bins",
+        "sheep_goats_bins",
+        "land_grown_crops_bins",
+        "land_owned_bins",
+      ]
+      errors: ignore
+
+  # Draw Bar Charts
+  - name: Draw age bins bar chart 
+    id: draw_age_bins
+    task: ecoscope_workflows_ext_wwf_virunga.tasks.plot.draw_bar_chart
+    partial:
+      dataframe: ${{ workflow.order_bins.return }}
+      category: age_bins
+      mode: grouped
+      y_axis: null 
+      stack_column: null 
+      agg_function: sum
+      stack_order: null 
+      ascending: true 
+      color_column: null 
+      plot_style: null 
+      bar_chart_configs:
+        - column: "id"
+          agg_func: count
+          label: "Count"
+          show_label: true
+          style:
+            marker_color: "#6495ed"
+            textposition": null
+            texttemplate": null
+      overlay_opacity: 0.6
+      category_order: null 
+      layout_style: 
+        bargap: 0.05
+        bargroupgap: 0.05 
+        title: null 
+        title_x: 0.01 
+        title_y: 0.95 
+        showlegend: false
+        font_size: 11
+        font_color: "#222222"
+        plot_bgcolor: "#f5f5f5"
+        xaxis:
+          title: "Age of Participants"
+          range: null
+        yaxis:
+          title: "Count"
+          range: null 
+      widget_id: null
+
+  - name: Persist age bins bar chart
+    id: persist_age_bins_bar
+    task: persist_text
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      text: ${{ workflow.draw_age_bins.return }}
+      filename: "age_bins_bar_chart.html"
+
+  - name: Draw cattle bins bar chart 
+    id: draw_cattle_bins
+    task: ecoscope_workflows_ext_wwf_virunga.tasks.plot.draw_bar_chart
+    partial:
+      dataframe: ${{ workflow.order_bins.return }}
+      category: cattle_bins
+      mode: grouped
+      y_axis: null 
+      stack_column: null 
+      agg_function: sum
+      stack_order: null 
+      ascending: true 
+      color_column: null 
+      plot_style: null 
+      bar_chart_configs:
+        - column: "id"
+          agg_func: count
+          label: "Count"
+          show_label: true
+          style:
+            marker_color: "#6495ed"
+            textposition": null
+            texttemplate": null
+      overlay_opacity: 0.6
+      category_order: null 
+      layout_style: 
+        bargap: 0.05
+        bargroupgap: 0.05 
+        title: null 
+        title_x: 0.01 
+        title_y: 0.95 
+        showlegend: false
+        font_size: 11
+        font_color: "#222222"
+        plot_bgcolor: "#f5f5f5"
+        xaxis:
+          title: "Number of Cattle"
+          range: null
+        yaxis:
+          title: "Count"
+          range: null 
+      widget_id: null
+
+  - name: Persist cattle bins bar chart
+    id: persist_cattle_bins_bar
+    task: persist_text
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      text: ${{ workflow.draw_cattle_bins.return }}
+      filename: "cattle_bins_bar_chart.html"
+
+  - name: Draw dog bins bar chart 
+    id: draw_dog_bins
+    task: ecoscope_workflows_ext_wwf_virunga.tasks.plot.draw_bar_chart
+    partial:
+      dataframe: ${{ workflow.order_bins.return }}
+      category: dog_bins
+      mode: grouped
+      y_axis: null 
+      stack_column: null 
+      agg_function: sum
+      stack_order: null 
+      ascending: true 
+      color_column: null 
+      plot_style: null 
+      bar_chart_configs:
+        - column: "id"
+          agg_func: count
+          label: "Count"
+          show_label: true
+          style:
+            marker_color: "#6495ed"
+            textposition": null
+            texttemplate": null
+      overlay_opacity: 0.6
+      category_order: null 
+      layout_style: 
+        bargap: 0.05
+        bargroupgap: 0.05 
+        title: null 
+        title_x: 0.01 
+        title_y: 0.95 
+        showlegend: false
+        font_size: 11
+        font_color: "#222222"
+        plot_bgcolor: "#f5f5f5"
+        xaxis:
+          title: "Number of Dogs"
+          range: null
+        yaxis:
+          title: "Count"
+          range: null 
+      widget_id: null
+
+  - name: Persist dogs bins bar chart
+    id: persist_dog_bins_bar
+    task: persist_text
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      text: ${{ workflow.draw_dog_bins.return }}
+      filename: "dog_bins_bar_chart.html"
+
+  - name: Draw donkey bins bar chart 
+    id: draw_donkey_bins
+    task: ecoscope_workflows_ext_wwf_virunga.tasks.plot.draw_bar_chart
+    partial:
+      dataframe: ${{ workflow.order_bins.return }}
+      category: dog_bins
+      mode: grouped
+      y_axis: null 
+      stack_column: null 
+      agg_function: sum
+      stack_order: null 
+      ascending: true 
+      color_column: null 
+      plot_style: null 
+      bar_chart_configs:
+        - column: "id"
+          agg_func: count
+          label: "Count"
+          show_label: true
+          style:
+            marker_color: "#6495ed"
+            textposition": null
+            texttemplate": null
+      overlay_opacity: 0.6
+      category_order: null 
+      layout_style: 
+        bargap: 0.05
+        bargroupgap: 0.05 
+        title: null 
+        title_x: 0.01 
+        title_y: 0.95 
+        showlegend: false
+        font_size: 11
+        font_color: "#222222"
+        plot_bgcolor: "#f5f5f5"
+        xaxis:
+          title: "Number of Donkeys"
+          range: null
+        yaxis:
+          title: "Count"
+          range: null 
+      widget_id: null
+
+  - name: Persist donkeys bins bar chart
+    id: persist_donkey_bins_bar
+    task: persist_text
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      text: ${{ workflow.draw_donkey_bins.return }}
+      filename: "donkey_bins_bar_chart.html"
+
+  - name: Draw other animals bins bar chart 
+    id: draw_other_bins
+    task: ecoscope_workflows_ext_wwf_virunga.tasks.plot.draw_bar_chart
+    partial:
+      dataframe: ${{ workflow.order_bins.return }}
+      category: dog_bins
+      mode: grouped
+      y_axis: null 
+      stack_column: null 
+      agg_function: sum
+      stack_order: null 
+      ascending: true 
+      color_column: null 
+      plot_style: null 
+      bar_chart_configs:
+        - column: "id"
+          agg_func: count
+          label: "Count"
+          show_label: true
+          style:
+            marker_color: "#6495ed"
+            textposition": null
+            texttemplate": null
+      overlay_opacity: 0.6
+      category_order: null 
+      layout_style: 
+        bargap: 0.05
+        bargroupgap: 0.05 
+        title: null 
+        title_x: 0.01 
+        title_y: 0.95 
+        showlegend: false
+        font_size: 11
+        font_color: "#222222"
+        plot_bgcolor: "#f5f5f5"
+        xaxis:
+          title: "Number of Other Animals"
+          range: null
+        yaxis:
+          title: "Count"
+          range: null 
+      widget_id: null
+
+  - name: Persist other animals bins bar chart
+    id: persist_other_bins_bar
+    task: persist_text
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      text: ${{ workflow.draw_other_bins.return }}
+      filename: "other_animal_bins_bar_chart.html"
+
+  - name: Draw household-people bins bar chart 
+    id: draw_people_bins
+    task: ecoscope_workflows_ext_wwf_virunga.tasks.plot.draw_bar_chart
+    partial:
+      dataframe: ${{ workflow.order_bins.return }}
+      category: dog_bins
+      mode: grouped
+      y_axis: null 
+      stack_column: null 
+      agg_function: sum
+      stack_order: null 
+      ascending: true 
+      color_column: null 
+      plot_style: null 
+      bar_chart_configs:
+        - column: "id"
+          agg_func: count
+          label: "Count"
+          show_label: true
+          style:
+            marker_color: "#6495ed"
+            textposition": null
+            texttemplate": null
+      overlay_opacity: 0.6
+      category_order: null 
+      layout_style: 
+        bargap: 0.05
+        bargroupgap: 0.05 
+        title: null 
+        title_x: 0.01 
+        title_y: 0.95 
+        showlegend: false
+        font_size: 11
+        font_color: "#222222"
+        plot_bgcolor: "#f5f5f5"
+        xaxis:
+          title: "Household Size"
+          range: null
+        yaxis:
+          title: "Count"
+          range: null 
+      widget_id: null
+
+  - name: Persist household-size bins bar chart
+    id: persist_household_bar
+    task: persist_text
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      text: ${{ workflow.draw_people_bins.return }}
+      filename: "other_people_bins_bar_chart.html"
+
+  - name: Draw sheep-goats bins bar chart 
+    id: draw_sheep_goats_bins
+    task: ecoscope_workflows_ext_wwf_virunga.tasks.plot.draw_bar_chart
+    partial:
+      dataframe: ${{ workflow.order_bins.return }}
+      category: sheep_goats_bins
+      mode: grouped
+      y_axis: null 
+      stack_column: null 
+      agg_function: sum
+      stack_order: null 
+      ascending: true 
+      color_column: null 
+      plot_style: null 
+      bar_chart_configs:
+        - column: "id"
+          agg_func: count
+          label: "Count"
+          show_label: true
+          style:
+            marker_color: "#6495ed"
+            textposition": null
+            texttemplate": null
+      overlay_opacity: 0.6
+      category_order: null 
+      layout_style: 
+        bargap: 0.05
+        bargroupgap: 0.05 
+        title: null 
+        title_x: 0.01 
+        title_y: 0.95 
+        showlegend: false
+        font_size: 11
+        font_color: "#222222"
+        plot_bgcolor: "#f5f5f5"
+        xaxis:
+          title: "Number of Sheep and Shoats"
+          range: null
+        yaxis:
+          title: "Count"
+          range: null 
+      widget_id: null
+
+  - name: Persist sheep-goats bins bar chart
+    id: persist_sheep_goats_bar
+    task: persist_text
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      text: ${{ workflow.draw_sheep_goats_bins.return }}
+      filename: "sheep_goats_bins_bar_chart.html"
+
+  - name: Draw land-grown-crops bins bar chart 
+    id: draw_land_grown_bins
+    task: ecoscope_workflows_ext_wwf_virunga.tasks.plot.draw_bar_chart
+    partial:
+      dataframe: ${{ workflow.order_bins.return }}
+      category: "land_grown_crops_bins"
+      mode: grouped
+      y_axis: null 
+      stack_column: null 
+      agg_function: sum
+      stack_order: null 
+      ascending: true 
+      color_column: null 
+      plot_style: null 
+      bar_chart_configs:
+        - column: "id"
+          agg_func: count
+          label: "Count"
+          show_label: true
+          style:
+            marker_color: "#6495ed"
+            textposition": null
+            texttemplate": null
+      overlay_opacity: 0.6
+      category_order: null 
+      layout_style: 
+        bargap: 0.05
+        bargroupgap: 0.05 
+        title: null 
+        title_x: 0.01 
+        title_y: 0.95 
+        showlegend: false
+        font_size: 11
+        font_color: "#222222"
+        plot_bgcolor: "#f5f5f5"
+        xaxis:
+          title: "Land Grown (Acres)"
+          range: null
+        yaxis:
+          title: "Count"
+          range: null 
+      widget_id: null
+
+  - name: Persist land grown  bins bar chart
+    id: persist_land_grown_bar
+    task: persist_text
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      text: ${{ workflow.draw_land_grown_bins.return }}
+      filename: "land_grown_crops_bins_bar_chart.html"
+
+  - name: Draw land-owned-crops bins bar chart 
+    id: draw_land_owned_bins
+    task: ecoscope_workflows_ext_wwf_virunga.tasks.plot.draw_bar_chart
+    partial:
+      dataframe: ${{ workflow.order_bins.return }}
+      category: "lland_owned_bins"
+      mode: grouped
+      y_axis: null 
+      stack_column: null 
+      agg_function: sum
+      stack_order: null 
+      ascending: true 
+      color_column: null 
+      plot_style: null 
+      bar_chart_configs:
+        - column: "id"
+          agg_func: count
+          label: "Count"
+          show_label: true
+          style:
+            marker_color: "#6495ed"
+            textposition": null
+            texttemplate": null
+      overlay_opacity: 0.6
+      category_order: null 
+      layout_style: 
+        bargap: 0.05
+        bargroupgap: 0.05 
+        title: null 
+        title_x: 0.01 
+        title_y: 0.95 
+        showlegend: false
+        font_size: 11
+        font_color: "#222222"
+        plot_bgcolor: "#f5f5f5"
+        xaxis:
+          title: "Land Owned (Acres)"
+          range: null
+        yaxis:
+          title: "Count"
+          range: null 
+      widget_id: null
+
+  - name: Persist land owned bins bar chart
+    id: persist_land_owned_bar
+    task: persist_text
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      text: ${{ workflow.draw_land_owned_bins.return }}
+      filename: "land_owned_bins_bar_chart.html"
+
+  - name: Format Demographic Table 
+    id: format_demo_table 
+    task: format_demographic_table 
+    partial: 
+      df: ${{ workflow.order_bins.return }}
+      columns_of_interest: [
+        "Gender of Participant",
+        "What is your Age",
+        "What is your Tribe",
+        "How many People are there in your Household",
+        "What is your Highest Level of Completed Education", 
+        ]
+
+  - name: Persist formatted demographic table
+    id: persist_demo_table
+    task: persist_df 
+    partial:
+      df: ${{ workflow.format_demo_table.return }}
+      filename: "demographic-data"
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      filetype: "geoparquet"
+
+# Filter out only agree-disagree columns 
+  - name: Retain agree disagree columns
+    id: retain_agree_disagree 
+    task: map_columns
+    partial: 
+      df: ${{ workflow.order_bins.return }}
+      drop_columns: []
+      retain_columns: [
+        "id",
+        "time",
+        "serial_number",
+        "geometry",
+        "What is your Age Group",
+        "What is your Highest Level of Completed Education",
+        "What is your Tribe",
+        "What is your marital status",
+        "Gender of Participant",
+
+        "How many People are there in your Household",
+        "What is your Age",
+        "Elephants Hurt Members of my Community",
+        "Elephants Negatively Impact my Emotional Wellbeing",
+        "Elephants are Important for a Healthy Ecosystem",
+        "Elephants have a Negative Effect on my Income/Livelihood",
+        "Elephants should only Live Inside the Parks",
+
+        "It is Acceptable to Harm Elephants if they have Damaged Physical Property or Livestock",
+        "It is Acceptable to Harm Elephants if they have Hurt People",
+        "It is Important for Elephants to Live in this Area",
+        "It is Possible for both Humans and Elephants to Live Together in this Area",
+      ]
+      rename_columns: {}
+      raise_if_not_found: false
+
+  - name: Retain true-false columns
+    id: retain_true_false 
+    task: map_columns
+    partial: 
+      df: ${{ workflow.order_bins.return }}
+      drop_columns: []
+      retain_columns: [
+        "id",
+        "time",
+        "serial_number",
+        "geometry",
+
+        "A Male Elephant that has a Secretion on its Face and Dribbling Urine from his Penis may be More Aggressive",
+        "An Elephant is Aware of a Person's Presence when it Raises its Trunk Above its Head and Pointing in the Direction of the Person",
+        "An Elephant may Shake its Head if it is Annoyed by your Presence",
+        "Elephants can Smell and Hear from Very Far Away",
+        "Elephants move to Different Areas depending on the Season for Food and Water",
+        "Female Elephants are Protective over their Young",
+        "Female Elephants live in Family Groups",
+        "Have You ever been Involved in or Witnessed an Elephant being Harmed",
+      ]
+      rename_columns: {}
+      raise_if_not_found: false
+
+  - name: Retain yes-no columns
+    id: retain_yes_no
+    task: map_columns
+    partial: 
+      df: ${{ workflow.order_bins.return }}
+      drop_columns: []
+      retain_columns: [
+        "id",
+        "time",
+        "serial_number",
+        "geometry",
+
+        "Do you Benefit from the KCCDT Big Life Electric Fence",
+        "Do you Choose Walking/Grazing Routes Walking Schedules, or Fetching Water based on Elephant Presence",
+        "Do you Protect where you Get Water from Elephants",
+        "Do you See More Elephants now Compared to the Past",
+        
+        "Do you and your Family use any Measures to Prevent Elephants from Causing Damage to your Crops",
+        "Do you and your Family use any Measures to Prevent Injuring your Livestock",
+        "Have You Noticed any Signs or Symptoms of Illness in the Wild Animals (Elephant, Lion, Hyena, etc.)",
+        "Have You ever been Involved in or Witnessed an Elephant being Harmed",
+
+        "If you Experience Conflict with Elephants in this Area, do you Report it",
+        "In the Future, Would You be Interested in Sharing Your Experiences and Views on Elephants as Part of a Community Dialogue",
+      ]
+      rename_columns: {}
+      raise_if_not_found: false
+
+  - name: Draw benefit from electric fence bar chart 
+    id: benefit_from_fence
+    task: ecoscope_workflows_ext_wwf_virunga.tasks.plot.draw_bar_chart
+    partial:
+      dataframe: ${{ workflow.retain_yes_no.return }}
+      category: "Do you Benefit from the KCCDT Big Life Electric Fence"
+      mode: grouped
+      y_axis: null 
+      stack_column: null 
+      agg_function: sum
+      stack_order: null 
+      ascending: true 
+      color_column: null 
+      plot_style: null 
+      bar_chart_configs:
+        - column: "id"
+          agg_func: count
+          label: "Count"
+          show_label: true
+          style:
+            marker_color: "#6495ed"
+            textposition": null
+            texttemplate": null
+      overlay_opacity: 0.6
+      category_order: null 
+      layout_style: 
+        bargap: 0.05
+        bargroupgap: 0.05 
+        title: null 
+        title_x: 0.01 
+        title_y: 0.95 
+        showlegend: false
+        font_size: 11
+        font_color: "#222222"
+        plot_bgcolor: "#f5f5f5"
+        xaxis:
+          title: "Do you Benefit from the KCCDT Big Life Electric Fence"
+          range: null
+        yaxis:
+          title: "Count"
+          range: null 
+      widget_id: null
+
+  - name: Persist benefit from electric fence bar chart
+    id: persist_benefit_electric_bar
+    task: persist_text
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      text: ${{ workflow.benefit_from_fence.return }}
+      filename: "do_you_benefit_from_electric_fence_bar_chart.html"
+
+  - name: Draw change route based on elephants bar chart 
+    id: route_base_ele
+    task: ecoscope_workflows_ext_wwf_virunga.tasks.plot.draw_bar_chart
+    partial:
+      dataframe: ${{ workflow.retain_yes_no.return }}
+      category: "Do you Choose Walking/Grazing Routes Walking Schedules, or Fetching Water based on Elephant Presence"
+      mode: grouped
+      y_axis: null 
+      stack_column: null 
+      agg_function: sum
+      stack_order: null 
+      ascending: true 
+      color_column: null 
+      plot_style: null 
+      bar_chart_configs:
+        - column: "id"
+          agg_func: count
+          label: "Count"
+          show_label: true
+          style:
+            marker_color: "#6495ed"
+            textposition": null
+            texttemplate": null
+      overlay_opacity: 0.6
+      category_order: null 
+      layout_style: 
+        bargap: 0.05
+        bargroupgap: 0.05 
+        title: null 
+        title_x: 0.01 
+        title_y: 0.95 
+        showlegend: false
+        font_size: 11
+        font_color: "#222222"
+        plot_bgcolor: "#f5f5f5"
+        xaxis:
+          title: "Do you Choose Walking/Grazing Routes Walking Schedules, or Fetching Water based on Elephant Presence"
+          range: null
+        yaxis:
+          title: "Count"
+          range: null 
+      widget_id: null
+
+  - name: Persist change route based on elephants bar chart
+    id: persist_route_base_ele_bar
+    task: persist_text
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      text: ${{ workflow.benefit_from_fence.return }}
+      filename: "activities_altered_elephant_presence_bar_chart.html"
+
+  - name: Draw protect water sight bar chart 
+    id: protect_water_sight
+    task: ecoscope_workflows_ext_wwf_virunga.tasks.plot.draw_bar_chart
+    partial:
+      dataframe: ${{ workflow.retain_yes_no.return }}
+      category: "Do you Protect where you Get Water from Elephants"
+      mode: grouped
+      y_axis: null 
+      stack_column: null 
+      agg_function: sum
+      stack_order: null 
+      ascending: true 
+      color_column: null 
+      plot_style: null 
+      bar_chart_configs:
+        - column: "id"
+          agg_func: count
+          label: "Count"
+          show_label: true
+          style:
+            marker_color: "#6495ed"
+            textposition": null
+            texttemplate": null
+      overlay_opacity: 0.6
+      category_order: null 
+      layout_style: 
+        bargap: 0.05
+        bargroupgap: 0.05 
+        title: null 
+        title_x: 0.01 
+        title_y: 0.95 
+        showlegend: false
+        font_size: 11
+        font_color: "#222222"
+        plot_bgcolor: "#f5f5f5"
+        xaxis:
+          title: "Do you Protect where you Get Water from Elephants"
+          range: null
+        yaxis:
+          title: "Count"
+          range: null 
+      widget_id: null
+
+  - name: Persist protect water sight based on elephants bar chart
+    id: persist_water_sight_bar
+    task: persist_text
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      text: ${{ workflow.protect_water_sight.return }}
+      filename: "activities_altered_elephant_presence_bar_chart.html"
+
+
+  - name: Draw see more elephants bar chart 
+    id: see_more_eles
+    task: ecoscope_workflows_ext_wwf_virunga.tasks.plot.draw_bar_chart
+    partial:
+      dataframe: ${{ workflow.retain_yes_no.return }}
+      category: "Do you See More Elephants now Compared to the Past"
+      mode: grouped
+      y_axis: null 
+      stack_column: null 
+      agg_function: sum
+      stack_order: null 
+      ascending: true 
+      color_column: null 
+      plot_style: null 
+      bar_chart_configs:
+        - column: "id"
+          agg_func: count
+          label: "Count"
+          show_label: true
+          style:
+            marker_color: "#6495ed"
+            textposition": null
+            texttemplate": null
+      overlay_opacity: 0.6
+      category_order: null 
+      layout_style: 
+        bargap: 0.05
+        bargroupgap: 0.05 
+        title: null 
+        title_x: 0.01 
+        title_y: 0.95 
+        showlegend: false
+        font_size: 11
+        font_color: "#222222"
+        plot_bgcolor: "#f5f5f5"
+        xaxis:
+          title: "Do you See More Elephants now Compared to the Past"
+          range: null
+        yaxis:
+          title: "Count"
+          range: null 
+      widget_id: null
+
+  - name: Persist see more elephants as before bar chart
+    id: persist_see_eles_bar
+    task: persist_text
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      text: ${{ workflow.see_more_eles.return }}
+      filename: "more_eles_past_bar_chart.html"
+
+  - name: Draw measures to prevent elephant damage bar chart 
+    id: prevent_ele_damage
+    task: ecoscope_workflows_ext_wwf_virunga.tasks.plot.draw_bar_chart
+    partial:
+      dataframe: ${{ workflow.retain_yes_no.return }}
+      category: "Do you and your Family use any Measures to Prevent Elephants from Causing Damage to your Crops"
+      mode: grouped
+      y_axis: null 
+      stack_column: null 
+      agg_function: sum
+      stack_order: null 
+      ascending: true 
+      color_column: null 
+      plot_style: null 
+      bar_chart_configs:
+        - column: "id"
+          agg_func: count
+          label: "Count"
+          show_label: true
+          style:
+            marker_color: "#6495ed"
+            textposition": null
+            texttemplate": null
+      overlay_opacity: 0.6
+      category_order: null 
+      layout_style: 
+        bargap: 0.05
+        bargroupgap: 0.05 
+        title: null 
+        title_x: 0.01 
+        title_y: 0.95 
+        showlegend: false
+        font_size: 11
+        font_color: "#222222"
+        plot_bgcolor: "#f5f5f5"
+        xaxis:
+          title: "Do you and your Family use any Measures to Prevent Elephants from Causing Damage to your Crops"
+          range: null
+        yaxis:
+          title: "Count"
+          range: null 
+      widget_id: null
+
+  - name: Persist prevent elephant damage bar chart
+    id: persist_ele_damage_bar
+    task: persist_text
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      text: ${{ workflow.prevent_ele_damage.return }}
+      filename: "family_protection_eles_bar_chart.html"
+
+
+  - name: Draw Do you and your Family use any Measures to Prevent Injuring your Livestock
+    id: ele_livestock_damage
+    task: ecoscope_workflows_ext_wwf_virunga.tasks.plot.draw_bar_chart
+    partial:
+      dataframe: ${{ workflow.retain_yes_no.return }}
+      category: "Do you and your Family use any Measures to Prevent Injuring your Livestock"
+      mode: grouped
+      y_axis: null 
+      stack_column: null 
+      agg_function: sum
+      stack_order: null 
+      ascending: true 
+      color_column: null 
+      plot_style: null 
+      bar_chart_configs:
+        - column: "id"
+          agg_func: count
+          label: "Count"
+          show_label: true
+          style:
+            marker_color: "#6495ed"
+            textposition": null
+            texttemplate": null
+      overlay_opacity: 0.6
+      category_order: null 
+      layout_style: 
+        bargap: 0.05
+        bargroupgap: 0.05 
+        title: null 
+        title_x: 0.01 
+        title_y: 0.95 
+        showlegend: false
+        font_size: 11
+        font_color: "#222222"
+        plot_bgcolor: "#f5f5f5"
+        xaxis:
+          title: "Do you and your Family use any Measures to Prevent Injuring your Livestock"
+          range: null
+        yaxis:
+          title: "Count"
+          range: null 
+      widget_id: null
+
+  - name: Persist Do you and your Family use any Measures to Prevent Injuring your Livestock
+    id: persist_ele_livestock_bar
+    task: persist_text
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      text: ${{ workflow.ele_livestock_damage.return }}
+      filename: "ffamily_protection_eles_livestock_bar_chart.html"
+
+
+  - name: Draw Have You Noticed any Signs or Symptoms of Illness in the Wild Animals (Elephant, Lion, Hyena, etc.)
+    id: illness_wild
+    task: ecoscope_workflows_ext_wwf_virunga.tasks.plot.draw_bar_chart
+    partial:
+      dataframe: ${{ workflow.retain_yes_no.return }}
+      category: "Have You Noticed any Signs or Symptoms of Illness in the Wild Animals (Elephant, Lion, Hyena, etc.)"
+      mode: grouped
+      y_axis: null 
+      stack_column: null 
+      agg_function: sum
+      stack_order: null 
+      ascending: true 
+      color_column: null 
+      plot_style: null 
+      bar_chart_configs:
+        - column: "id"
+          agg_func: count
+          label: "Count"
+          show_label: true
+          style:
+            marker_color: "#6495ed"
+            textposition": null
+            texttemplate": null
+      overlay_opacity: 0.6
+      category_order: null 
+      layout_style: 
+        bargap: 0.05
+        bargroupgap: 0.05 
+        title: null 
+        title_x: 0.01 
+        title_y: 0.95 
+        showlegend: false
+        font_size: 11
+        font_color: "#222222"
+        plot_bgcolor: "#f5f5f5"
+        xaxis:
+          title: "Have You Noticed any Signs or Symptoms of Illness in the Wild Animals (Elephant, Lion, Hyena, etc.)"
+          range: null
+        yaxis:
+          title: "Count"
+          range: null 
+      widget_id: null
+
+  - name: Persist Have You Noticed any Signs or Symptoms of Illness in the Wild Animals (Elephant, Lion, Hyena, etc.)
+    id: persist_illness_wild
+    task: persist_text
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      text: ${{ workflow.illness_wild.return }}
+      filename: "illness_wild_bar_chart.html"
+
+
+  - name: Draw Have You ever been Involved in or Witnessed an Elephant being Harmed"
+    id: harmed_elephant
+    task: ecoscope_workflows_ext_wwf_virunga.tasks.plot.draw_bar_chart
+    partial:
+      dataframe: ${{ workflow.retain_yes_no.return }}
+      category: "Have You ever been Involved in or Witnessed an Elephant being Harmed"
+      mode: grouped
+      y_axis: null 
+      stack_column: null 
+      agg_function: sum
+      stack_order: null 
+      ascending: true 
+      color_column: null 
+      plot_style: null 
+      bar_chart_configs:
+        - column: "id"
+          agg_func: count
+          label: "Count"
+          show_label: true
+          style:
+            marker_color: "#6495ed"
+            textposition": null
+            texttemplate": null
+      overlay_opacity: 0.6
+      category_order: null 
+      layout_style: 
+        bargap: 0.05
+        bargroupgap: 0.05 
+        title: null 
+        title_x: 0.01 
+        title_y: 0.95 
+        showlegend: false
+        font_size: 11
+        font_color: "#222222"
+        plot_bgcolor: "#f5f5f5"
+        xaxis:
+          title: "Have You ever been Involved in or Witnessed an Elephant being Harmed"
+          range: null
+        yaxis:
+          title: "Count"
+          range: null 
+      widget_id: null
+
+  - name: Persist Have You ever been Involved in or Witnessed an Elephant being Harmed"
+    id: persist_harmed_ele
+    task: persist_text
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      text: ${{ workflow.harmed_elephant.return }}
+      filename: "elephant_harmed_bar_chart.html"
+
+
+  - name: Draw If you Experience Conflict with Elephants in this Area, do you Report it
+    id: report_ele_conflict
+    task: ecoscope_workflows_ext_wwf_virunga.tasks.plot.draw_bar_chart
+    partial:
+      dataframe: ${{ workflow.retain_yes_no.return }}
+      category: "If you Experience Conflict with Elephants in this Area, do you Report it"
+      mode: grouped
+      y_axis: null 
+      stack_column: null 
+      agg_function: sum
+      stack_order: null 
+      ascending: true 
+      color_column: null 
+      plot_style: null 
+      bar_chart_configs:
+        - column: "id"
+          agg_func: count
+          label: "Count"
+          show_label: true
+          style:
+            marker_color: "#6495ed"
+            textposition": null
+            texttemplate": null
+      overlay_opacity: 0.6
+      category_order: null 
+      layout_style: 
+        bargap: 0.05
+        bargroupgap: 0.05 
+        title: null 
+        title_x: 0.01 
+        title_y: 0.95 
+        showlegend: false
+        font_size: 11
+        font_color: "#222222"
+        plot_bgcolor: "#f5f5f5"
+        xaxis:
+          title: "If you Experience Conflict with Elephants in this Area, do you Report it"
+          range: null
+        yaxis:
+          title: "Count"
+          range: null 
+      widget_id: null
+
+  - name: Persist If you Experience Conflict with Elephants in this Area, do you Report it
+    id: persist_ele_conflict
+    task: persist_text
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      text: ${{ workflow.report_ele_conflict.return }}
+      filename: "report_elephant_conflict_bar_chart.html"
+
+  - name: Draw In the Future, Would You be Interested in Sharing Your Experiences and Views on Elephants as Part of a Community Dialogue
+    id: ele_comm_dialogue
+    task: ecoscope_workflows_ext_wwf_virunga.tasks.plot.draw_bar_chart
+    partial:
+      dataframe: ${{ workflow.retain_yes_no.return }}
+      category: "In the Future, Would You be Interested in Sharing Your Experiences and Views on Elephants as Part of a Community Dialogue"
+      mode: grouped
+      y_axis: null 
+      stack_column: null 
+      agg_function: sum
+      stack_order: null 
+      ascending: true 
+      color_column: null 
+      plot_style: null 
+      bar_chart_configs:
+        - column: "id"
+          agg_func: count
+          label: "Count"
+          show_label: true
+          style:
+            marker_color: "#6495ed"
+            textposition": null
+            texttemplate": null
+      overlay_opacity: 0.6
+      category_order: null 
+      layout_style: 
+        bargap: 0.05
+        bargroupgap: 0.05 
+        title: null 
+        title_x: 0.01 
+        title_y: 0.95 
+        showlegend: false
+        font_size: 11
+        font_color: "#222222"
+        plot_bgcolor: "#f5f5f5"
+        xaxis:
+          title: "In the Future, Would You be Interested in Sharing Your Experiences and Views on Elephants as Part of a Community Dialogue"
+          range: null
+        yaxis:
+          title: "Count"
+          range: null 
+      widget_id: null
+
+  - name: Persist In the Future, Would You be Interested in Sharing Your Experiences and Views on Elephants as Part of a Community Dialogue
+    id: persist_ele_comm_bar
+    task: persist_text
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      text: ${{ workflow.ele_comm_dialogue.return }}
+      filename: "elephant_community_dialogue_bar_chart.html"
+
+# True-False
+  - name: Draw A Male Elephant that has a Secretion on its Face and Dribbling Urine from his Penis may be More Aggressive
+    id: ele_secretion
+    task: ecoscope_workflows_ext_wwf_virunga.tasks.plot.draw_bar_chart
+    partial:
+      dataframe: ${{ workflow.retain_true_false.return }}
+      category: "A Male Elephant that has a Secretion on its Face and Dribbling Urine from his Penis may be More Aggressive"
+      mode: grouped
+      y_axis: null 
+      stack_column: null 
+      agg_function: sum
+      stack_order: null 
+      ascending: true 
+      color_column: null 
+      plot_style: null 
+      bar_chart_configs:
+        - column: "id"
+          agg_func: count
+          label: "Count"
+          show_label: true
+          style:
+            marker_color: "#6495ed"
+            textposition": null
+            texttemplate": null
+      overlay_opacity: 0.6
+      category_order: null 
+      layout_style: 
+        bargap: 0.05
+        bargroupgap: 0.05 
+        title: null 
+        title_x: 0.01 
+        title_y: 0.95 
+        showlegend: false
+        font_size: 11
+        font_color: "#222222"
+        plot_bgcolor: "#f5f5f5"
+        xaxis:
+          title: "A Male Elephant that has a Secretion on its Face and Dribbling Urine from his Penis may be More Aggressive"
+          range: null
+        yaxis:
+          title: "Count"
+          range: null 
+      widget_id: null
+
+  - name: Persist A Male Elephant that has a Secretion on its Face and Dribbling Urine from his Penis may be More Aggressive
+    id: persist_ele_secretion
+    task: persist_text
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      text: ${{ workflow.ele_secretion.return }}
+      filename: "male_elephant_secretion_bar_chart.html"
+
+
+  - name: Draw An Elephant is Aware of a Person's Presence when it Raises its Trunk Above its Head and Pointing in the Direction of the Person
+    id: ele_presence
+    task: ecoscope_workflows_ext_wwf_virunga.tasks.plot.draw_bar_chart
+    partial:
+      dataframe: ${{ workflow.retain_true_false.return }}
+      category: "An Elephant is Aware of a Person's Presence when it Raises its Trunk Above its Head and Pointing in the Direction of the Person"
+      mode: grouped
+      y_axis: null 
+      stack_column: null 
+      agg_function: sum
+      stack_order: null 
+      ascending: true 
+      color_column: null 
+      plot_style: null 
+      bar_chart_configs:
+        - column: "id"
+          agg_func: count
+          label: "Count"
+          show_label: true
+          style:
+            marker_color: "#6495ed"
+            textposition": null
+            texttemplate": null
+      overlay_opacity: 0.6
+      category_order: null 
+      layout_style: 
+        bargap: 0.05
+        bargroupgap: 0.05 
+        title: null 
+        title_x: 0.01 
+        title_y: 0.95 
+        showlegend: false
+        font_size: 11
+        font_color: "#222222"
+        plot_bgcolor: "#f5f5f5"
+        xaxis:
+          title: "An Elephant is Aware of a Person's Presence when it Raises its Trunk Above its Head and Pointing in the Direction of the Person"
+          range: null
+        yaxis:
+          title: "Count"
+          range: null 
+      widget_id: null
+
+  - name: Persist An Elephant is Aware of a Person's Presence when it Raises its Trunk Above its Head and Pointing in the Direction of the Person
+    id: persist_ele_presence
+    task: persist_text
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      text: ${{ workflow.ele_presence.return }}
+      filename: "elephant_human_awareness_bar_chart.html"
+
+
+  - name: Draw An Elephant may Shake its Head if it is Annoyed by your Presence
+    id: ele_annoyed
+    task: ecoscope_workflows_ext_wwf_virunga.tasks.plot.draw_bar_chart
+    partial:
+      dataframe: ${{ workflow.retain_true_false.return }}
+      category: "An Elephant may Shake its Head if it is Annoyed by your Presence"
+      mode: grouped
+      y_axis: null 
+      stack_column: null 
+      agg_function: sum
+      stack_order: null 
+      ascending: true 
+      color_column: null 
+      plot_style: null 
+      bar_chart_configs:
+        - column: "id"
+          agg_func: count
+          label: "Count"
+          show_label: true
+          style:
+            marker_color: "#6495ed"
+            textposition": null
+            texttemplate": null
+      overlay_opacity: 0.6
+      category_order: null 
+      layout_style: 
+        bargap: 0.05
+        bargroupgap: 0.05 
+        title: null 
+        title_x: 0.01 
+        title_y: 0.95 
+        showlegend: false
+        font_size: 11
+        font_color: "#222222"
+        plot_bgcolor: "#f5f5f5"
+        xaxis:
+          title: "An Elephant may Shake its Head if it is Annoyed by your Presence"
+          range: null
+        yaxis:
+          title: "Count"
+          range: null 
+      widget_id: null
+
+  - name: Persist An Elephant may Shake its Head if it is Annoyed by your Presence
+    id: persist_ele_annoyed
+    task: persist_text
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      text: ${{ workflow.ele_annoyed.return }}
+      filename: "elephant_shake_head_bar_chart.html"
+
+
+  - name: Draw Elephants can Smell and Hear from Very Far Away
+    id: ele_smell_far_away
+    task: ecoscope_workflows_ext_wwf_virunga.tasks.plot.draw_bar_chart
+    partial:
+      dataframe: ${{ workflow.retain_true_false.return }}
+      category: "Elephants can Smell and Hear from Very Far Away"
+      mode: grouped
+      y_axis: null 
+      stack_column: null 
+      agg_function: sum
+      stack_order: null 
+      ascending: true 
+      color_column: null 
+      plot_style: null 
+      bar_chart_configs:
+        - column: "id"
+          agg_func: count
+          label: "Count"
+          show_label: true
+          style:
+            marker_color: "#6495ed"
+            textposition": null
+            texttemplate": null
+      overlay_opacity: 0.6
+      category_order: null 
+      layout_style: 
+        bargap: 0.05
+        bargroupgap: 0.05 
+        title: null 
+        title_x: 0.01 
+        title_y: 0.95 
+        showlegend: false
+        font_size: 11
+        font_color: "#222222"
+        plot_bgcolor: "#f5f5f5"
+        xaxis:
+          title: "Elephants can Smell and Hear from Very Far Away"
+          range: null
+        yaxis:
+          title: "Count"
+          range: null 
+      widget_id: null
+
+  - name: Persist Elephants can Smell and Hear from Very Far Away
+    id: persist_ele_secretion
+    task: persist_text
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      text: ${{ workflow.ele_smell_far_away.return }}
+      filename: "elephant_smell_far_away_bar_chart.html"
+
+  - name: Draw Elephants move to Different Areas depending on the Season for Food and Water
+    id: ele_seasonal
+    task: ecoscope_workflows_ext_wwf_virunga.tasks.plot.draw_bar_chart
+    partial:
+      dataframe: ${{ workflow.retain_true_false.return }}
+      category: "Elephants move to Different Areas depending on the Season for Food and Water"
+      mode: grouped
+      y_axis: null 
+      stack_column: null 
+      agg_function: sum
+      stack_order: null 
+      ascending: true 
+      color_column: null 
+      plot_style: null 
+      bar_chart_configs:
+        - column: "id"
+          agg_func: count
+          label: "Count"
+          show_label: true
+          style:
+            marker_color: "#6495ed"
+            textposition": null
+            texttemplate": null
+      overlay_opacity: 0.6
+      category_order: null 
+      layout_style: 
+        bargap: 0.05
+        bargroupgap: 0.05 
+        title: null 
+        title_x: 0.01 
+        title_y: 0.95 
+        showlegend: false
+        font_size: 11
+        font_color: "#222222"
+        plot_bgcolor: "#f5f5f5"
+        xaxis:
+          title: "Elephants move to Different Areas depending on the Season for Food and Water"
+          range: null
+        yaxis:
+          title: "Count"
+          range: null 
+      widget_id: null
+
+  - name: Persist Elephants move to Different Areas depending on the Season for Food and Water
+    id: persist_ele_seasonal
+    task: persist_text
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      text: ${{ workflow.ele_seasonal.return }}
+      filename: "male_elephant_secretion_bar_chart.html"
+
+  - name: Draw Female Elephants are Protective over their Young
+    id: female_young
+    task: ecoscope_workflows_ext_wwf_virunga.tasks.plot.draw_bar_chart
+    partial:
+      dataframe: ${{ workflow.retain_true_false.return }}
+      category: "Female Elephants are Protective over their Young"
+      mode: grouped
+      y_axis: null 
+      stack_column: null 
+      agg_function: sum
+      stack_order: null 
+      ascending: true 
+      color_column: null 
+      plot_style: null 
+      bar_chart_configs:
+        - column: "id"
+          agg_func: count
+          label: "Count"
+          show_label: true
+          style:
+            marker_color: "#6495ed"
+            textposition": null
+            texttemplate": null
+      overlay_opacity: 0.6
+      category_order: null 
+      layout_style: 
+        bargap: 0.05
+        bargroupgap: 0.05 
+        title: null 
+        title_x: 0.01 
+        title_y: 0.95 
+        showlegend: false
+        font_size: 11
+        font_color: "#222222"
+        plot_bgcolor: "#f5f5f5"
+        xaxis:
+          title: "Female Elephants are Protective over their Young"
+          range: null
+        yaxis:
+          title: "Count"
+          range: null 
+      widget_id: null
+
+  - name: Persist Female Elephants are Protective over their Young
+    id: persist_female_young
+    task: persist_text
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      text: ${{ workflow.female_young.return }}
+      filename: "female_elephants_protective_bar_chart.html"
+
+  - name: Draw Female Elephants live in Family Groups
+    id: female_family_groups
+    task: ecoscope_workflows_ext_wwf_virunga.tasks.plot.draw_bar_chart
+    partial:
+      dataframe: ${{ workflow.retain_true_false.return }}
+      category: "Female Elephants live in Family Groups"
+      mode: grouped
+      y_axis: null 
+      stack_column: null 
+      agg_function: sum
+      stack_order: null 
+      ascending: true 
+      color_column: null 
+      plot_style: null 
+      bar_chart_configs:
+        - column: "id"
+          agg_func: count
+          label: "Count"
+          show_label: true
+          style:
+            marker_color: "#6495ed"
+            textposition": null
+            texttemplate": null
+      overlay_opacity: 0.6
+      category_order: null 
+      layout_style: 
+        bargap: 0.05
+        bargroupgap: 0.05 
+        title: null 
+        title_x: 0.01 
+        title_y: 0.95 
+        showlegend: false
+        font_size: 11
+        font_color: "#222222"
+        plot_bgcolor: "#f5f5f5"
+        xaxis:
+          title: "Female Elephants live in Family Groups"
+          range: null
+        yaxis:
+          title: "Count"
+          range: null 
+      widget_id: null
+
+  - name: Persist Female Elephants live in Family Groups
+    id: persist_female_groups
+    task: persist_text
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      text: ${{ workflow.female_family_groups.return }}
+      filename: "female_elephants_family_groups_bar_chart.html"
+
+  - name: Draw Have You ever been Involved in or Witnessed an Elephant being Harmed
+    id: witness_ele_harmed
+    task: ecoscope_workflows_ext_wwf_virunga.tasks.plot.draw_bar_chart
+    partial:
+      dataframe: ${{ workflow.retain_true_false.return }}
+      category: "Have You ever been Involved in or Witnessed an Elephant being Harmed"
+      mode: grouped
+      y_axis: null 
+      stack_column: null 
+      agg_function: sum
+      stack_order: null 
+      ascending: true 
+      color_column: null 
+      plot_style: null 
+      bar_chart_configs:
+        - column: "id"
+          agg_func: count
+          label: "Count"
+          show_label: true
+          style:
+            marker_color: "#6495ed"
+            textposition": null
+            texttemplate": null
+      overlay_opacity: 0.6
+      category_order: null 
+      layout_style: 
+        bargap: 0.05
+        bargroupgap: 0.05 
+        title: null 
+        title_x: 0.01 
+        title_y: 0.95 
+        showlegend: false
+        font_size: 11
+        font_color: "#222222"
+        plot_bgcolor: "#f5f5f5"
+        xaxis:
+          title: "Have You ever been Involved in or Witnessed an Elephant being Harmed"
+          range: null
+        yaxis:
+          title: "Count"
+          range: null 
+      widget_id: null
+
+  - name: Persist Have You ever been Involved in or Witnessed an Elephant being Harmed
+    id: persist_witness_ele
+    task: persist_text
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      text: ${{ workflow.witness_ele_harmed.return }}
+      filename: "witness_elephant_harm_bar_chart.html"
+
+# Agree-Disagree
+# Filter out only agree-disagree columns 
+  - name: Retain agree disagree columns
+    id: filter_agree_disagree 
+    task: map_columns
+    partial: 
+      df: ${{ workflow.retain_agree_disagree.return }}
+      drop_columns: []
+      retain_columns: [
+        "Elephants Hurt Members of my Community",
+        "Elephants Negatively Impact my Emotional Wellbeing",
+        "Elephants are Important for a Healthy Ecosystem",
+        "Elephants have a Negative Effect on my Income/Livelihood",
+        "Elephants should only Live Inside the Parks",
+
+        "It is Acceptable to Harm Elephants if they have Damaged Physical Property or Livestock",
+        "It is Acceptable to Harm Elephants if they have Hurt People",
+        "It is Important for Elephants to Live in this Area",
+        "It is Possible for both Humans and Elephants to Live Together in this Area",
+      ]
+      rename_columns: {}
+      raise_if_not_found: false
+
+  - name: Create agree-disagree likert chart 
+    id: agree_disgree_chart 
+    task: create_likert_chart 
+    partial: 
+      dataframe: ${{ workflow.filter_agree_disagree.return }}
+      response_order: [
+        "Strongly Disagree", 
+        "Disagree", 
+        "Neutral", 
+        "Agree", 
+        "Strongly Agree"
+      ]
+      likert_style: 
+        colors: {
+            "Strongly Disagree": "#2c5282",
+            "Disagree": "#4299e1",
+            "Neutral": "#a0aec0",
+            "No Response": "#a0aec0",
+            "I Don’t Know": "#a0aec0",
+            "Agree": "#ed8936",
+            "Strongly Agree": "#c05621",
+        }
+        neutral_categories: null 
+        show_percentage: true 
+        sort_questions: false
+        sort_by: positive 
+      layout_style: 
+        bargap: 0.05
+        bargapgroup: 0.05
+        title: null 
+        title_x: 0.01
+        title_y: 0.95
+        showlegend: true 
+        font_size: 10 
+        font_color: "#222222"
+        plot_bgcolor: "#f5f5f5"
+        xaxis:
+          title: ""
+          range: null
+        yaxis:
+          title: ""
+          range: null 
+        widget_id: null
+
+  - name: Persist agree disagree likert chart
+    id: persist_likert_chart
+    task: persist_text
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      text: ${{ workflow.agree_disgree_chart.return }}
+      filename: "ele_sentiment_chart.html"
