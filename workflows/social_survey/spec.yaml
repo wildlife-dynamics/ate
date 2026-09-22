@@ -2891,3 +2891,898 @@ workflow:
       root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
       text: ${{ workflow.agree_disgree_chart.return }}
       filename: "ele_sentiment_chart.html"
+  
+  - name: Replace agree disagree columns with negative values 
+    id: replace_negative
+    task: replace_column_values 
+    partial: 
+      df: ${{ workflow.retain_agree_disagree.return }}
+      columns: [
+        "Elephants Hurt Members of my Community",
+        "Elephants should only Live Inside the Parks",
+        "It is Acceptable to Harm Elephants if they have Damaged Physical Property or Livestock",
+        "It is Acceptable to Harm Elephants if they have Hurt People",
+        "Elephants have a Negative Effect on my Income/Livelihood",
+        "Elephants Negatively Impact my Emotional Wellbeing",
+      ]
+      value_map: {
+        "I Don’t Know": 0,
+        "No Response": 0,
+        "Strongly Disagree": 5,
+        "Disagree": 4,
+        "Neutral": 3,
+        "Agree": 2,
+        "Strongly Agree": 1,
+      }
+      inplace: true 
+      errors: ignore 
+
+  - name: Replace agree disagree columns with positive values 
+    id: replace_positive
+    task: replace_column_values 
+    partial: 
+      df: ${{ workflow.replace_negative.return }}
+      columns: [
+        "Elephants are Important for a Healthy Ecosystem",
+        "It is Important for Elephants to Live in this Area",
+        "It is Possible for both Humans and Elephants to Live Together in this Area",
+        
+      ]
+      value_map: {
+        "I Don’t Know": 0,
+        "No Response": 0,
+        "Strongly Disagree": 1,
+        "Disagree": 2,
+        "Neutral": 3,
+        "Agree": 4,
+        "Strongly Agree": 5,
+      }
+      inplace: true 
+      errors: ignore 
+  
+  - name: Convert elephant sentiment scores to int 
+    id: convt_ele_int 
+    task: convert_columns_to_int
+    partial: 
+      df: ${{ workflow.replace_positive.return }}
+      columns: [
+        "Elephants Hurt Members of my Community",
+        "Elephants should only Live Inside the Parks",
+        "It is Acceptable to Harm Elephants if they have Damaged Physical Property or Livestock",
+        "It is Acceptable to Harm Elephants if they have Hurt People",
+        "Elephants have a Negative Effect on my Income/Livelihood",
+        "Elephants Negatively Impact my Emotional Wellbeing",
+
+        "Elephants are Important for a Healthy Ecosystem",
+        "It is Important for Elephants to Live in this Area",
+        "It is Possible for both Humans and Elephants to Live Together in this Area",
+      ]
+      errors: "coerce"
+      fill_value: 0
+
+  - name: Create sentiment score 
+    id: create_sentiment_score 
+    task: apply_arithmetic_operation_over_rows
+    partial: 
+      df: ${{ workflow.convt_ele_int.return }}
+      columns: [
+        "Elephants Hurt Members of my Community",
+        "Elephants should only Live Inside the Parks",
+        "It is Acceptable to Harm Elephants if they have Damaged Physical Property or Livestock",
+        "It is Acceptable to Harm Elephants if they have Hurt People",
+        "Elephants have a Negative Effect on my Income/Livelihood",
+        "Elephants Negatively Impact my Emotional Wellbeing",
+
+        "Elephants are Important for a Healthy Ecosystem",
+        "It is Important for Elephants to Live in this Area",
+        "It is Possible for both Humans and Elephants to Live Together in this Area",
+      ]
+      output_column: "sentiment_score"
+      operation: add
+
+  - name: Create sentiment score mean 
+    id: sentiment_score_mean 
+    task: apply_arithmetic_operation_over_rows
+    partial: 
+      df: ${{ workflow.create_sentiment_score.return }}
+      columns: [
+        "Elephants Hurt Members of my Community",
+        "Elephants should only Live Inside the Parks",
+        "It is Acceptable to Harm Elephants if they have Damaged Physical Property or Livestock",
+        "It is Acceptable to Harm Elephants if they have Hurt People",
+        "Elephants have a Negative Effect on my Income/Livelihood",
+        "Elephants Negatively Impact my Emotional Wellbeing",
+
+        "Elephants are Important for a Healthy Ecosystem",
+        "It is Important for Elephants to Live in this Area",
+        "It is Possible for both Humans and Elephants to Live Together in this Area",
+      ]
+      output_column: "sentiment_score_mean"
+      operation: add
+  
+  - name: Round sentiment score mean 
+    id: round_sentiment_score 
+    task: round_column_values 
+    partial: 
+      df: ${{ workflow.sentiment_score_mean.return }}
+      column: "sentiment_score_mean"
+      output_column: "sentiment_score_mean"
+      decimals: 1
+
+  - name: Apply bins to sentiment scores 
+    id: sentiment_bins 
+    task: apply_classification
+    partial: 
+      input_column_name: "sentiment_score_mean"
+      output_column_name: "sentiment_bins"
+      df: ${{ workflow.round_sentiment_score.return }}
+      label_options: 
+        label_ranges: true 
+        label_decimals: 0 
+      classification_options: 
+        scheme: "equal_interval"
+        k: 5
+  
+  - name: Replace sentiment bins with mapping 
+    id: replace_bins_mapping 
+    task: replace_column_values 
+    partial: 
+      df: ${{ workflow.sentiment_bins.return }}
+      columns: [
+        "sentiment_bins",
+        ]
+      value_map: {
+        "0 - 1":"Strongly Disagree",
+        "1 - 2":"Disagree",
+        "2 - 3":"Neutral",
+        "3 - 4":"Agree",
+        "4 - 5":"Strongly Agree",
+        }
+      inplace: true 
+      errors: "ignore"
+
+  - name: Persist sentiment table as geoparquet 
+    id: ele_sentiment 
+    task: persist_df 
+    partial:
+      df: ${{ workflow.replace_bins_mapping.return }}
+      filename: "elephant-sentiment-table"
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      filetype: "geoparquet"
+
+  - name: Gender of participant boxplot 
+    id: gender_boxplot 
+    task: ecoscope_workflows_ext_big_life.tasks.results.draw_boxplot
+    partial:
+      dataframe: ${{ workflow.sentiment_bins.return }}
+      y_column: "sentiment_score_mean"
+      x_column: "Gender of Participant"
+      color_column: null
+      orientation: "v"
+      boxmode: "group"
+      show_points: false 
+      plot_style:
+        marker_colors: [ "#7eb0d5" ]
+      layout_style:
+        bargap: 0.05
+        bargroupgap: 0.05 
+        title: null 
+        title_x: 0.01 
+        title_y: 0.95 
+        showlegend: false
+        font_size: 11
+        font_color: "#222222"
+        plot_bgcolor: "#f5f5f5"
+        xaxis:
+          title: "Gender"
+          range: null
+        yaxis:
+          title: "Sentiment Score"
+          range: null 
+      widget_id: null
+
+  - name: Persist gender boxplot as html text
+    id: persist_gender_boxplot
+    task: persist_text
+    partial:
+      text: ${{ workflow.gender_boxplot.return }}
+      filename: "gender_boxplot_chart.html"
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      filename_suffix: null # png
+
+  - name: Age group boxplot 
+    id: age_boxplot 
+    task: ecoscope_workflows_ext_big_life.tasks.results.draw_boxplot
+    partial:
+      dataframe: ${{ workflow.sentiment_bins.return }}
+      y_column: "sentiment_score_mean"
+      x_column: "What is your Age Group"
+      color_column: null
+      orientation: "v"
+      boxmode: "group"
+      show_points: false 
+      plot_style:
+        marker_colors: [ "#7eb0d5" ]
+      layout_style:
+        bargap: 0.05
+        bargroupgap: 0.05 
+        title: null 
+        title_x: 0.01 
+        title_y: 0.95 
+        showlegend: false
+        font_size: 11
+        font_color: "#222222"
+        plot_bgcolor: "#f5f5f5"
+        xaxis:
+          title: "Age Group"
+          range: null
+        yaxis:
+          title: "Sentiment Score"
+          range: null 
+      widget_id: null
+
+  - name: Persist age group boxplot as html text
+    id: persist_age_boxplot
+    task: persist_text
+    partial:
+      text: ${{ workflow.age_boxplot.return }}
+      filename:  "age_group_boxplot_chart.html"
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      filename_suffix: null # png
+
+  - name: Level of education boxplot 
+    id: education_boxplot 
+    task: ecoscope_workflows_ext_big_life.tasks.results.draw_boxplot
+    partial:
+      dataframe: ${{ workflow.sentiment_bins.return }}
+      y_column: "sentiment_score_mean"
+      x_column: "What is your Highest Level of Completed Education"
+      color_column: null
+      orientation: "v"
+      boxmode: "group"
+      show_points: false 
+      plot_style:
+        marker_colors: [ "#7eb0d5" ]
+      layout_style:
+        bargap: 0.05
+        bargroupgap: 0.05 
+        title: null 
+        title_x: 0.01 
+        title_y: 0.95 
+        showlegend: false
+        font_size: 11
+        font_color: "#222222"
+        plot_bgcolor: "#f5f5f5"
+        xaxis:
+          title: "Highest Level of Education"
+          range: null
+        yaxis:
+          title: "Sentiment Score"
+          range: null 
+      widget_id: null
+
+  - name: Persist level of education boxplot as html text
+    id: persist_education
+    task: persist_text
+    partial:
+      text: ${{ workflow.education_boxplot.return }}
+      filename:  "age_group_boxplot_chart.html"
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      filename_suffix: null # png
+
+  - name: Tribe boxplot 
+    id: tribe_boxplot 
+    task: ecoscope_workflows_ext_big_life.tasks.results.draw_boxplot
+    partial:
+      dataframe: ${{ workflow.sentiment_bins.return }}
+      y_column: "sentiment_score_mean"
+      x_column: "What is your Tribe"
+      color_column: null
+      orientation: "v"
+      boxmode: "group"
+      show_points: false 
+      plot_style:
+        marker_colors: [ "#7eb0d5" ]
+      layout_style:
+        bargap: 0.05
+        bargroupgap: 0.05 
+        title: null 
+        title_x: 0.01 
+        title_y: 0.95 
+        showlegend: false
+        font_size: 11
+        font_color: "#222222"
+        plot_bgcolor: "#f5f5f5"
+        xaxis:
+          title: "Tribe"
+          range: null
+        yaxis:
+          title: "Sentiment Score"
+          range: null 
+      widget_id: null
+
+  - name: Persist tribe boxplot as html text
+    id: persist_tribe
+    task: persist_text
+    partial:
+      text: ${{ workflow.tribe_boxplot.return }}
+      filename:  "tribe_boxplot_chart.html"
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      filename_suffix: null # png
+
+  - name: Marital Status boxplot 
+    id: marital_boxplot 
+    task: ecoscope_workflows_ext_big_life.tasks.results.draw_boxplot
+    partial:
+      dataframe: ${{ workflow.sentiment_bins.return }}
+      y_column: "sentiment_score_mean"
+      x_column: "What is your marital status"
+      color_column: null
+      orientation: "v"
+      boxmode: "group"
+      show_points: false 
+      plot_style:
+        marker_colors: [ "#7eb0d5" ]
+      layout_style:
+        bargap: 0.05
+        bargroupgap: 0.05 
+        title: null 
+        title_x: 0.01 
+        title_y: 0.95 
+        showlegend: false
+        font_size: 11
+        font_color: "#222222"
+        plot_bgcolor: "#f5f5f5"
+        xaxis:
+          title: "Marital Status"
+          range: null
+        yaxis:
+          title: "Sentiment Score"
+          range: null 
+      widget_id: null
+
+  - name: Persist marital status boxplot as html text
+    id: persist_marital
+    task: persist_text
+    partial:
+      text: ${{ workflow.marital_boxplot.return }}
+      filename:   "marital_status_boxplot_chart.html"
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      filename_suffix: null # png
+  
+  # Tukey plots 
+  - name: Gender Tukey comparison
+    id: gender_comparison  
+    task: compute_tukey_comparisons
+    partial: 
+      dataframe:  ${{ workflow.sentiment_bins.return }}
+      group_column: "Gender of Participant"
+      value_column: "sentiment_score_mean"
+      confidence_level: 0.95
+
+  - name: Gender tukey plot 
+    id: gender_tukey_plot 
+    task: draw_tukey_plot 
+    partial: 
+      comparisons: ${{ workflow.gender_comparison.return }}
+      tukey_style: 
+        significant_color: "#ff6b6b"
+        non_significant_color: "#4ecdc4"
+        marker_size: 8
+        line_width: 2
+      layout_style:
+        bargap: 0.05
+        bargroupgap: 0.05 
+        title: null 
+        title_x: 0.01 
+        title_y: 0.95 
+        showlegend: false
+        font_size: 11
+        font_color: "#222222"
+        plot_bgcolor: "#f5f5f5"
+        xaxis:
+          title: "Mean Difference"
+          range: null
+        yaxis:
+          title: "Gender Comparison"
+          range: null 
+      widget_id: null
+
+  - name: Persist gender tukey as html text
+    id: persist_gtukey
+    task: persist_text
+    partial:
+      text: ${{ workflow.gender_tukey_plot.return }}
+      filename: "gender_tukey_chart.html"
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      filename_suffix: null # png
+
+  - name: Marital Status Tukey comparison
+    id: marital_comparison  
+    task: compute_tukey_comparisons
+    partial: 
+      dataframe:  ${{ workflow.sentiment_bins.return }}
+      group_column: "What is your marital status"
+      value_column: "sentiment_score_mean"
+      confidence_level: 0.95
+
+  - name: Marital Status tukey plot 
+    id: marital_tukey_plot 
+    task: draw_tukey_plot 
+    partial: 
+      comparisons: ${{ workflow.marital_comparison.return }}
+      tukey_style: 
+        significant_color: "#ff6b6b"
+        non_significant_color: "#4ecdc4"
+        marker_size: 8
+        line_width: 2
+      layout_style:
+        bargap: 0.05
+        bargroupgap: 0.05 
+        title: null 
+        title_x: 0.01 
+        title_y: 0.95 
+        showlegend: false
+        font_size: 11
+        font_color: "#222222"
+        plot_bgcolor: "#f5f5f5"
+        xaxis:
+          title: "Mean Difference"
+          range: null
+        yaxis:
+          title: "Marital Status Comparison"
+          range: null 
+      widget_id: null
+
+  - name: Persist marital status tukey as html text
+    id: persist_mtukey
+    task: persist_text
+    partial:
+      text: ${{ workflow.marital_tukey_plot.return }}
+      filename: "marital_status_tukey_chart.html"
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      filename_suffix: null # png
+
+  - name: Age group Tukey comparison
+    id: age_g_comparison  
+    task: compute_tukey_comparisons
+    partial: 
+      dataframe:  ${{ workflow.sentiment_bins.return }}
+      group_column: "What is your Age Group"
+      value_column: "sentiment_score_mean"
+      confidence_level: 0.95
+
+  - name: Age Group tukey plot 
+    id: age_tukey_plot 
+    task: draw_tukey_plot 
+    partial: 
+      comparisons: ${{ workflow.age_g_comparison.return }}
+      tukey_style: 
+        significant_color: "#ff6b6b"
+        non_significant_color: "#4ecdc4"
+        marker_size: 8
+        line_width: 2
+      layout_style:
+        bargap: 0.05
+        bargroupgap: 0.05 
+        title: null 
+        title_x: 0.01 
+        title_y: 0.95 
+        showlegend: false
+        font_size: 11
+        font_color: "#222222"
+        plot_bgcolor: "#f5f5f5"
+        xaxis:
+          title: "Mean Difference"
+          range: null
+        yaxis:
+          title: "Age Group Comparison"
+          range: null 
+      widget_id: null
+
+  - name: Persist age group tukey as html text
+    id: persist_age_group
+    task: persist_text
+    partial:
+      text: ${{ workflow.age_tukey_plot.return }}
+      filename: "age_group_tukey_chart.html"
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      filename_suffix: null # png
+
+  - name: Highest level of education Tukey comparison
+    id: education_comparison  
+    task: compute_tukey_comparisons
+    partial: 
+      dataframe:  ${{ workflow.sentiment_bins.return }}
+      group_column: "What is your Highest Level of Completed Education"
+      value_column: "sentiment_score_mean"
+      confidence_level: 0.95
+
+  - name: Level of education tukey plot 
+    id: education_tukey_plot 
+    task: draw_tukey_plot 
+    partial: 
+      comparisons: ${{ workflow.education_comparison.return }}
+      tukey_style: 
+        significant_color: "#ff6b6b"
+        non_significant_color: "#4ecdc4"
+        marker_size: 8
+        line_width: 2
+      layout_style:
+        bargap: 0.05
+        bargroupgap: 0.05 
+        title: null 
+        title_x: 0.01 
+        title_y: 0.95 
+        showlegend: false
+        font_size: 11
+        font_color: "#222222"
+        plot_bgcolor: "#f5f5f5"
+        xaxis:
+          title: "Mean Difference"
+          range: null
+        yaxis:
+          title: "Level of Education Comparison"
+          range: null 
+      widget_id: null
+
+  - name: Persist age group tukey as html text
+    id: persist_age_group
+    task: persist_text
+    partial:
+      text: ${{ workflow.education_tukey_plot.return }}
+      filename: "education_tukey_chart.html"
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      filename_suffix: null # png
+
+  - name: Household sentiment score scatterplot 
+    id: household_scatter
+    task: draw_scatter_chart 
+    partial: 
+      dataframe: ${{ workflow.sentiment_bins.return }}
+      x_column: "How many People are there in your Household"
+      y_column: "sentiment_score_mean"
+      color_column: null 
+      size_column: null 
+      category_column: null 
+      scatter_style: 
+        marker_size: null 
+        marker_color: null 
+        marker_symbol: null 
+        marker_opacity: null 
+        mode: markers 
+      trendline_style: 
+        enabled: true 
+        type: ols 
+        color: red 
+        width: 2 
+        dash: solid 
+      layout_style:
+        bargap: 0.05
+        bargroupgap: 0.05 
+        title: null 
+        title_x: 0.01 
+        title_y: 0.95 
+        showlegend: false
+        font_size: 11
+        font_color: "#222222"
+        plot_bgcolor: "#f5f5f5"
+        xaxis:
+          title: "Household Size"
+          range: null
+        yaxis:
+          title: "Sentiment Score"
+          range: null 
+      widget_id: null
+
+  - name: Persist household scatterplot as html text
+    id: persist_house_scatter
+    task: persist_text
+    partial:
+      text: ${{ workflow.household_scatter.return }}
+      filename: "household_sentiment_scatter_chart.html"
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      filename_suffix: null # png
+
+  - name: Agesentiment score scatterplot 
+    id: age_scatter
+    task: draw_scatter_chart 
+    partial: 
+      dataframe: ${{ workflow.sentiment_bins.return }}
+      x_column: "What is your Age"
+      y_column: "sentiment_score_mean"
+      color_column: null 
+      size_column: null 
+      category_column: null 
+      scatter_style: 
+        marker_size: null 
+        marker_color: null 
+        marker_symbol: null 
+        marker_opacity: null 
+        mode: markers 
+      trendline_style: 
+        enabled: true 
+        type: ols 
+        color: red 
+        width: 2 
+        dash: solid 
+      layout_style:
+        bargap: 0.05
+        bargroupgap: 0.05 
+        title: null 
+        title_x: 0.01 
+        title_y: 0.95 
+        showlegend: false
+        font_size: 11
+        font_color: "#222222"
+        plot_bgcolor: "#f5f5f5"
+        xaxis:
+          title: "Age"
+          range: null
+        yaxis:
+          title: "Sentiment Score"
+          range: null 
+      widget_id: null
+
+  - name: Persist age scatterplot as html text
+    id: persist_age_scatter
+    task: persist_text
+    partial:
+      text: ${{ workflow.age_scatter.return }}
+      filename: "age_sentiment_scatter_chart.html"
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      filename_suffix: null # png
+
+# ${{ workflow.replace_bins_mapping.return }} -- draw 3 maps
+  - title: Map Zoom & Extent
+    type: task-group
+    description: Calculate the geographic extent of the movement tracks and determine an appropriate zoom level and center point for the map. This ensures that all tracks are visible and well-framed when the map is rendered.
+    tasks:
+      - name: null
+        id: zoom_to_envelope
+        task: ecoscope_workflows_ext_ste.tasks.spatial_operations.envelope_gdf
+        partial:
+          gdf: ${{ workflow.replace_bins_mapping.return }} 
+          expansion_factor: 1.05
+
+      - name: Zoom view to gdf extent
+        id: gdf_image_extent
+        task: ecoscope_workflows_ext_ste.tasks.spatial_operations.compute_view_state_from_gdf
+        partial:
+          pitch: 0
+          bearing: 0
+          max_zoom: 15
+          gdf: ${{ workflow.zoom_to_envelope.return }}
+
+  - name: Generate survey events scatterplot layer
+    id: generate_survey_layer
+    task: ecoscope_workflows_ext_custom.tasks.results.create_scatterplot_layer
+    skipif:
+      conditions: 
+        - any_is_empty_df
+        - any_dependency_skipped
+    partial:
+      data_url: null
+      layer_style:
+        get_fill_color: [220, 20, 60]
+        get_line_color: [220, 20, 60]
+        get_line_width: 0.25
+        get_radius : 4
+        opacity: 0.75
+        stroked: true
+      legend: 
+        title: "Legend"
+        values:
+          - label: "Survey Location"
+            color: "#dc143c"
+      geodataframe: ${{ workflow.replace_bins_mapping.return }} 
+
+  - name: Overlay survey eventson Amboseli Map
+    id: combine_surv_layers
+    task: ecoscope_workflows_ext_ste.tasks.spatial_operations.combine_deckgl_map_layers
+    partial:
+      static_layers:
+        - ${{ workflow.create_land_layer.return }}
+        - ${{ workflow.create_bound_layer.return }}
+        - ${{ workflow.create_fence_layer.return }}
+      grouped_layers: 
+        - ${{ workflow.generate_survey_layer.return }}
+
+  - name: Draw survey events map
+    id: draw_survey_map
+    task: ecoscope_workflows_ext_custom.tasks.results.draw_map
+    skipif:
+      conditions:
+        - any_is_empty_df
+        - any_dependency_skipped
+    partial:
+      tile_layers: ${{ workflow.configure_base_maps.return }}
+      static: false
+      title: null
+      max_zoom: 10
+      legend_style:
+        placement: "bottom-right"
+      geo_layers: ${{ workflow.combine_surv_layers.return }}
+      view_state: ${{ workflow.gdf_image_extent.return }} 
+
+  - name: Persist survey  event map
+    id: persist_survey_map
+    task: persist_text
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      text: ${{ workflow.draw_response_map.return }}
+      filename: survey_event_map.html  # -- convert this to png
+
+# Gender Map 
+  - name: Gender color mapping
+    id: gender_color_map
+    task: map_column_value
+    partial:
+      df: ${{ workflow.replace_bins_mapping.return }} 
+      col: "Gender of Participant"
+      mapping: 
+        "Female": "#e9967a"
+        "Male": "#ff0000"  
+        "No Response": "#cfcfc4"
+
+      new_col: "gender_colors"
+      default: "#cfcfc4"
+      keep_unmapped: false
+
+  - name: Add rgba column from gender_colors
+    id: gender_rgba
+    task: add_rgba_columns_from_hex
+    partial: 
+      df: ${{ workflow.gender_color_map.return }}
+      columns: [
+        "gender_colors",
+        
+        ]
+
+  - name: Generate gender event scatterplot layer
+    id: generate_gender_layer
+    task: ecoscope_workflows_ext_custom.tasks.results.create_scatterplot_layer
+    skipif:
+      conditions: 
+        - any_is_empty_df
+        - any_dependency_skipped
+    partial:
+      data_url: null
+      layer_style:
+        get_fill_color: gender_colors_rgba
+        get_line_color: [0, 0, 0]
+        get_line_width: 0.25
+        get_radius : 4
+        opacity: 0.75
+        stroked: true
+      legend: 
+        title: "Gender"
+        label_column: "Gender of Participant"
+        color_column: "gender_colors_rgba"
+        sort: ascending
+        label_suffix: null
+      geodataframe: ${{ workflow.gender_rgba.return }}
+
+  - name: Overlay gender Events on Amboseli Map
+    id: combine_gender_layers
+    task: ecoscope_workflows_ext_ste.tasks.spatial_operations.combine_deckgl_map_layers
+    partial:
+      static_layers:
+        - ${{ workflow.create_land_layer.return }}
+        - ${{ workflow.create_bound_layer.return }}
+        - ${{ workflow.create_fence_layer.return }}
+      grouped_layers: 
+        - ${{ workflow.generate_gender_layer.return }}
+
+  - name: Draw gender event map
+    id: draw_gender_map
+    task: ecoscope_workflows_ext_custom.tasks.results.draw_map
+    skipif:
+      conditions:
+        - any_is_empty_df
+        - any_dependency_skipped
+    partial:
+      tile_layers: ${{ workflow.configure_base_maps.return }}
+      static: false
+      title: null
+      max_zoom: 10
+      legend_style:
+        placement: "bottom-right"
+      geo_layers: ${{ workflow.combine_gender_layers.return }}
+      view_state: ${{ workflow.gdf_image_extent.return }} 
+
+  - name: Persist gender event map
+    id: persist_gender_map
+    task: persist_text
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      text: ${{ workflow.draw_gender_map.return }}
+      filename: gender_event_map.html  # -- convert this to png
+
+# Gender Map 
+  - name: Sentiment color mapping
+    id: sentiment_map
+    task: map_column_value
+    partial:
+      df: ${{ workflow.replace_bins_mapping.return }} 
+      col: "sentiment_bins"
+      mapping: 
+          "Strongly Disagree": "#dc143c"
+          "Disagree": "#d2691e"
+          "Neutral": "#ffff00"
+          "Agree": "#7fff00"
+          "Strongly Agree": "#0000ff"
+
+      new_col: "sentiment_colors"
+      default: "#cfcfc4"
+      keep_unmapped: false
+
+  - name: Add rgba column from sentiment_colors
+    id: sentiment_rgba
+    task: add_rgba_columns_from_hex
+    partial: 
+      df: ${{ workflow.sentiment_map.return }}
+      columns: [
+        "sentiment_colors",
+        
+        ]
+
+  - name: Generate sentiment event scatterplot layer
+    id: generate_sent_layer
+    task: ecoscope_workflows_ext_custom.tasks.results.create_scatterplot_layer
+    skipif:
+      conditions: 
+        - any_is_empty_df
+        - any_dependency_skipped
+    partial:
+      data_url: null
+      layer_style:
+        get_fill_color: sentiment_colors_rgba
+        get_line_color: [0, 0, 0]
+        get_line_width: 0.25
+        get_radius : 4
+        opacity: 0.75
+        stroked: true
+      legend: 
+        title: "Attitude"
+        label_column: "sentiment_bins"
+        color_column: "sentiment_colors_rgba"
+        sort: ascending
+        label_suffix: null
+      geodataframe: ${{ workflow.sentiment_rgba.return }}
+
+  - name: Overlay sentiment Events on Amboseli Map
+    id: combine_sent_layers
+    task: ecoscope_workflows_ext_ste.tasks.spatial_operations.combine_deckgl_map_layers
+    partial:
+      static_layers:
+        - ${{ workflow.create_land_layer.return }}
+        - ${{ workflow.create_bound_layer.return }}
+        - ${{ workflow.create_fence_layer.return }}
+      grouped_layers: 
+        - ${{ workflow.generate_sent_layer.return }}
+
+  - name: Draw sentiment event map
+    id: draw_sent_map
+    task: ecoscope_workflows_ext_custom.tasks.results.draw_map
+    skipif:
+      conditions:
+        - any_is_empty_df
+        - any_dependency_skipped
+    partial:
+      tile_layers: ${{ workflow.configure_base_maps.return }}
+      static: false
+      title: null
+      max_zoom: 10
+      legend_style:
+        placement: "bottom-right"
+      geo_layers: ${{ workflow.combine_sent_layers.return }}
+      view_state: ${{ workflow.gdf_image_extent.return }} 
+
+  - name: Persist sentiment event map
+    id: persist_sent_map
+    task: persist_text
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      text: ${{ workflow.draw_sent_map.return }}
+      filename: sentiment_event_map.html  # -- convert this to png
