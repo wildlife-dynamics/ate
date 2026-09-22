@@ -1,4 +1,4 @@
-id: crop_raid_report
+id: social_survey
 requirements:
   - name: ecoscope-platform
     version: "2.18.0"
@@ -323,7 +323,7 @@ workflow:
     id: map_survey_columns 
     task: map_columns
     partial: 
-      df: ${{ workflow.drop_crop_prefix.return }}
+      df: ${{ workflow.drop_survey_prefix.return }}
       drop_columns: [
         "event_type_display",
         "event_type",
@@ -331,7 +331,7 @@ workflow:
       retain_columns: []
       rename_columns: {
         "A Male Elephant that has a Secretion on its Face and Dribbling Urine from his Penis may be More Aggressive? (Eitau olee lolkanjaoi enkare tenkomom neisirisir nkulak nepeiyu sii)": "A Male Elephant that has a Secretion on its Face and Dribbling Urine from his Penis may be More Aggressive",
-        "An Elephant is Aware of a Person's Presence when it Raises its Trunk Above its Head and Pointing in the Direction of the Person?  (Eyolou olkanjaoi entii oltung’ani teneilepie enkaina shumata elukunya enye ing’orie inaalo natii)": "An Elephant is Aware of a Person's Presence when it Raises its Trunk Above its Head and Pointing in the Direction of the Person",
+        "An Elephant is Aware of a Person\\'s Presence when it Raises its Trunk Above its Head and Pointing in the Direction of the Person?  (Eyolou olkanjaoi entii oltung’ani teneilepie enkaina shumata elukunya enye ing’orie inaalo natii)": "An Elephant is Aware of a Person's Presence when it Raises its Trunk Above its Head and Pointing in the Direction of the Person",
         "An Elephant may Shake its Head if it is Annoyed by your Presence? (Eipiripir olkanjaoi elukunya teneitagor etii ino)": "An Elephant may Shake its Head if it is Annoyed by your Presence",
         "Are there any Other Benefits from Elephants that were Not Said Yet? (Ketii enkae dupoto naata ilkanjaoni neitu kiimaki?)": "Are there any Other Benefits from Elephants that were Not Said Yet",
         "Are there any Other Costs from Elephants that were Not Said Yet? (Ketii enkae toroni naata ilkanjaoni neitukiimaki?)": "Are there any Other Costs from Elephants that were Not Said Yet",
@@ -350,7 +350,7 @@ workflow:
         "Elephants should only Live Inside the Parks (Peemany ilkanjaoni atua empaka ake)": "Elephants should only Live Inside the Parks",
         "Female Elephants are Protective over their Young (Erip supeni olkanjaoni nkera enye)": "Female Elephants are Protective over their Young",
         "Female Elephants live in Family Groups (Etoni supeni olkanjaoni enaa ilmareita)": "Female Elephants live in Family Groups",
-        "Have You Noticed any Signs or Symptoms of Illness in the Wild Animals (Elephant, Lion, Hyena, etc.)? (Etadua erbulabul le emoyian oo Ng'uesi)": "Have You Noticed any Signs or Symptoms of Illness in the Wild Animals (Elephant, Lion, Hyena, etc.)",
+        "Have You Noticed any Signs or Symptoms of Illness in the Wild Animals (Elephant, Lion, Hyena, etc.)? (Etadua erbulabul le emoyian oo Ng\\'uesi)": "Have You Noticed any Signs or Symptoms of Illness in the Wild Animals (Elephant, Lion, Hyena, etc.)",
         "Have You ever been Involved in or Witnessed an Elephant being Harmed? (Itaara arashu itadua olkanjaoi eariratai?)": "Have You ever been Involved in or Witnessed an Elephant being Harmed",
         "Having Elephants in this Area is (Entii olkanjaoni tena kutoto):": "Having Elephants in this Area is",
         "How do You Feel when you have Heard about or Witnessed an Elephant being Speared or Poisoned in Retaliation to Conflict? (Ishipakino  tenining’ arashu tenidol olkanjaoi otang’oroki, oishooki esaiyet eitauo enyamali?)": "How do You Feel when you have Heard about or Witnessed an Elephant being Speared or Poisoned in Retaliation to Conflict",
@@ -365,10 +365,10 @@ workflow:
         "How much Land do you Own (in Acres)? (Kebaa enkop niata?)": "How much Land do you Own (in Acres)",
         "I Receive Benefits from Elephants because I Enjoy Seeing Them (Atumito dupoto naing’uaa ilkanjaoni amuu ashipakino adolita)": "I Receive Benefits from Elephants because I Enjoy Seeing Them",
         "I Receive Monetary/Livelihood Benefits from Elephants through Tourism or Conservation (Atumito dupoto naing’uaa ilkanjaoni eimu esiai oolashumba arashu eramatara olmanyara)": "I Receive Monetary/Livelihood Benefits from Elephants through Tourism or Conservation",
-        "If 'Other' What is your Tribe? (Masai Translation)": "If 'Other' What is your Tribe",
-        "If 'Other' Which of these Threats do you Consider as the Greatest Threat to Successful Crop Production? (Masai Translation)": "If 'Other' Which of these Threats do you Consider as the Greatest Threat to Successful Crop Production",
-        "If 'Other', Which of the Following do You think Will Help you in the Future Deal with Elephants? (Masai Translation)": "If 'Other', Which of the Following do You think Will Help you in the Future Deal with Elephants",
-        "If 'Yes', Who do You Report this To? (Enaa ee, kang'ae ilikiki)": "If 'Yes', Who do You Report this To",
+        "If \\'Other\\' What is your Tribe? (Masai Translation)": "If 'Other' What is your Tribe",
+        "If \\'Other\\' Which of these Threats do you Consider as the Greatest Threat to Successful Crop Production? (Masai Translation)": "If 'Other' Which of these Threats do you Consider as the Greatest Threat to Successful Crop Production",
+        "If \\'Other\\', Which of the Following do You think Will Help you in the Future Deal with Elephants? (Masai Translation)": "If 'Other', Which of the Following do You think Will Help you in the Future Deal with Elephants",
+        "If \\'Yes\\', Who do You Report this To? (Enaa ee, kang\\'ae ilikiki)": "If 'Yes', Who do You Report this To",
         "If Yes, How? (Enaa ee, tia oitoi?)": "If Yes, How",
         "If Yes, Rate how Effective your Primary Method has been at Preventing Damage? (Enaa ee, keasisho ina oitoi?)": "If Yes, Rate how Effective your Primary Method has been at Preventing Damage",
         "If Yes, What Method(s) do You Use? (Enaa ee, Kakwa oitoi?)": "If Yes, What Method(s) do You Use",
@@ -410,7 +410,7 @@ workflow:
         "Which of the Following do You think Will Help you in the Future Deal with Elephants (Select One) (Kamaa tekuna, kakwa oitoi nidol kiret tenkibooroto olkanjaoni too ngolong’i naaponu):": "Which of the Following do You think Will Help you in the Future Deal with Elephants (Select One)",
         "Which of these Threats do you Consider as the Greatest Threat to Successful Crop Production? (kamaa tekuna, kanyoo naata batishu tenturore ino?)": "Which of these Threats do you Consider as the Greatest Threat to Successful Crop Production",
         "Which of these Threats do you Consider the Greatest Threat to your Livestock? (Kamaa tekuna, kanyoo naata batishu teramatare ino?)": "Which of these Threats do you Consider the Greatest Threat to your Livestock",
-        "if 'Other' What is your Arrangement for the Land that You are Farming On? (Kanyoo mbarakinot lilochamba liturito?)": "if 'Other' What is your Arrangement for the Land that You are Farming On",
+        "if \\'Other\\' What is your Arrangement for the Land that You are Farming On? (Kanyoo mbarakinot lilochamba liturito?)": "if 'Other' What is your Arrangement for the Land that You are Farming On",
       }
       raise_if_not_found: false
 
@@ -900,14 +900,14 @@ workflow:
       df: ${{ workflow.replace_marital_status.return }}
       filename: "survey-events"
       root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
-      filetype: "geoparquet"
+      filetype: "csv"
   
   # Draw Pie Charts 
   - name: Draw age group pie chart
     id: age_group_pie_chart
     task: ecoscope_workflows_ext_wwf_virunga.tasks.plot._plot.draw_pie_chart
     partial:
-      widget_id: null
+      widget_id: "0"
       dataframe: ${{ workflow.replace_marital_status.return }}
       value_column: "What is your Age Group"
       label_column: "What is your Age Group"
@@ -932,7 +932,7 @@ workflow:
     id: land_arrangement_chart
     task: ecoscope_workflows_ext_wwf_virunga.tasks.plot._plot.draw_pie_chart
     partial:
-      widget_id: null
+      widget_id: "1"
       dataframe: ${{ workflow.replace_marital_status.return }}
       value_column: "What is your Arrangement for the Land that You are Farming On"
       label_column: "What is your Arrangement for the Land that You are Farming On"
@@ -957,7 +957,7 @@ workflow:
     id: highest_education_chart
     task: ecoscope_workflows_ext_wwf_virunga.tasks.plot._plot.draw_pie_chart
     partial:
-      widget_id: null
+      widget_id: "2"
       dataframe: ${{ workflow.replace_marital_status.return }}
       value_column: "What is your Highest Level of Completed Education"
       label_column: "What is your Highest Level of Completed Education"
@@ -982,7 +982,7 @@ workflow:
     id: tribe_chart
     task: ecoscope_workflows_ext_wwf_virunga.tasks.plot._plot.draw_pie_chart
     partial:
-      widget_id: null
+      widget_id: "3"
       dataframe: ${{ workflow.replace_marital_status.return }}
       value_column: "What is your Tribe"
       label_column: "What is your Tribe"
@@ -1007,7 +1007,7 @@ workflow:
     id: crop_production_chart
     task: ecoscope_workflows_ext_wwf_virunga.tasks.plot._plot.draw_pie_chart
     partial:
-      widget_id: null
+      widget_id: "4"
       dataframe: ${{ workflow.replace_marital_status.return }}
       value_column: "Which of these Threats do you Consider as the Greatest Threat to Successful Crop Production"
       label_column: "Which of these Threats do you Consider as the Greatest Threat to Successful Crop Production"
@@ -1032,7 +1032,7 @@ workflow:
     id: livestock_threat_chart
     task: ecoscope_workflows_ext_wwf_virunga.tasks.plot._plot.draw_pie_chart
     partial:
-      widget_id: null
+      widget_id: "5"
       dataframe: ${{ workflow.replace_marital_status.return }}
       value_column: "Which of these Threats do you Consider the Greatest Threat to your Livestock"
       label_column: "Which of these Threats do you Consider the Greatest Threat to your Livestock"
@@ -1057,7 +1057,7 @@ workflow:
     id: marital_status_chart
     task: ecoscope_workflows_ext_wwf_virunga.tasks.plot._plot.draw_pie_chart
     partial:
-      widget_id: null
+      widget_id: "6"
       dataframe: ${{ workflow.replace_marital_status.return }}
       value_column: "What is your marital status"
       label_column: "What is your marital status"
@@ -1082,7 +1082,7 @@ workflow:
     id: overall_wildlife_chart
     task: ecoscope_workflows_ext_wwf_virunga.tasks.plot._plot.draw_pie_chart
     partial:
-      widget_id: null
+      widget_id: "7"
       dataframe: ${{ workflow.replace_marital_status.return }}
       value_column: "Overall, how would you describe your feelings about wildlife"
       label_column: "Overall, how would you describe your feelings about wildlife"
@@ -1107,7 +1107,7 @@ workflow:
     id: often_ele_seen_chart
     task: ecoscope_workflows_ext_wwf_virunga.tasks.plot._plot.draw_pie_chart
     partial:
-      widget_id: null
+      widget_id: "8"
       dataframe: ${{ workflow.replace_marital_status.return }}
       value_column: "In the Last Year, how Often have you Seen Elephants in this Area"
       label_column: "In the Last Year, how Often have you Seen Elephants in this Area"
@@ -1132,7 +1132,7 @@ workflow:
     id: ele_harmed_chart
     task: ecoscope_workflows_ext_wwf_virunga.tasks.plot._plot.draw_pie_chart
     partial:
-      widget_id: null
+      widget_id: "9"
       dataframe: ${{ workflow.replace_marital_status.return }}
       value_column: "How do You Feel when you have Heard about or Witnessed an Elephant being Speared or Poisoned in Retaliation to Conflict"
       label_column: "How do You Feel when you have Heard about or Witnessed an Elephant being Speared or Poisoned in Retaliation to Conflict"
@@ -1157,7 +1157,7 @@ workflow:
     id: gender_chart
     task: ecoscope_workflows_ext_wwf_virunga.tasks.plot._plot.draw_pie_chart
     partial:
-      widget_id: null
+      widget_id: "10"
       dataframe: ${{ workflow.replace_marital_status.return }}
       value_column: "Gender of Participant"
       label_column: "Gender of Participant"
@@ -1210,27 +1210,25 @@ workflow:
     id: dog_bins
     task: apply_classification 
     partial: 
-      input_column_name: "How many Cattle does Your Household Own"
+      input_column_name: "How many Dogs does Your Household Own"
       output_column_name: dog_bins
       df: ${{ workflow.cattle_bins.return }}
-      label_options: 
-        label_ranges: true 
-        label_decimals: 0 
+      label_options:
+        labels: ["0","0 - 1", "1 - 2", "2 - 4", "4 - 8"]
       classification_options: 
         scheme: "natural_breaks"
         k: 5
 
-  - name: Create dog bins classification 
+  - name: Create donkey bins classification
     id: donkey_bins
-    task: apply_classification 
-    partial: 
+    task: apply_classification
+    partial:
       input_column_name: "How many Donkey does Your Household Own"
       output_column_name: donkey_bins
       df: ${{ workflow.dog_bins.return }}
-      label_options: 
-        label_ranges: true 
-        label_decimals: 0 
-      classification_options: 
+      label_options:
+        labels: ["0","0 - 3", "3 - 7", "7 - 25", "25 - 56"]
+      classification_options:
         scheme: "natural_breaks"
         k: 5
 
@@ -1241,9 +1239,9 @@ workflow:
       input_column_name: "How many Other Animals does Your Household Own"
       output_column_name: other_animals_bins
       df: ${{ workflow.donkey_bins.return }}
-      label_options: 
-        label_ranges: true 
-        label_decimals: 0 
+      label_options:
+        label_ranges: true
+        label_decimals: 0
       classification_options: 
         scheme: "natural_breaks"
         k: 5
@@ -1255,9 +1253,9 @@ workflow:
       input_column_name: "How many People are there in your Household"
       output_column_name: other_people_bins
       df: ${{ workflow.other_animals_bins.return }}
-      label_options: 
-        label_ranges: true 
-        label_decimals: 0 
+      label_options:
+        label_ranges: true
+        label_decimals: 0
       classification_options: 
         scheme: "natural_breaks"
         k: 5
@@ -1269,9 +1267,9 @@ workflow:
       input_column_name: "How many Sheep/Goats does Your Household Own"
       output_column_name: sheep_goats_bins
       df: ${{ workflow.people_bins.return }}
-      label_options: 
-        label_ranges: true 
-        label_decimals: 0 
+      label_options:
+        label_ranges: true
+        label_decimals: 0
       classification_options: 
         scheme: "natural_breaks"
         k: 5
@@ -1314,7 +1312,7 @@ workflow:
         "cattle_bins",
         "dog_bins",
         "donkey_bins",
-        "other_animal_bins",
+        "other_animals_bins",
         "other_people_bins",
         "sheep_goats_bins",
         "land_grown_crops_bins",
@@ -1364,7 +1362,7 @@ workflow:
         yaxis:
           title: "Count"
           range: null 
-      widget_id: null
+      widget_id: "11"
 
   - name: Persist age bins bar chart
     id: persist_age_bins_bar
@@ -1415,7 +1413,7 @@ workflow:
         yaxis:
           title: "Count"
           range: null 
-      widget_id: null
+      widget_id: "12"
 
   - name: Persist cattle bins bar chart
     id: persist_cattle_bins_bar
@@ -1425,11 +1423,27 @@ workflow:
       text: ${{ workflow.draw_cattle_bins.return }}
       filename: "cattle_bins_bar_chart.html"
 
-  - name: Draw dog bins bar chart 
+  - name: Filter out households with zero dogs
+    id: filter_dog_bins_nonzero
+    task: filter_df
+    partial:
+      df: ${{ workflow.order_bins.return }}
+      column_name: dog_bins
+      op: ne
+      value: "0"
+
+  - name: Drop unused zero category from dog bins
+    id: uncategorize_dog_bins
+    task: convert_column_values_to_string
+    partial:
+      df: ${{ workflow.filter_dog_bins_nonzero.return }}
+      columns: [dog_bins]
+
+  - name: Draw dog bins bar chart
     id: draw_dog_bins
     task: ecoscope_workflows_ext_wwf_virunga.tasks.plot.draw_bar_chart
     partial:
-      dataframe: ${{ workflow.order_bins.return }}
+      dataframe: ${{ workflow.uncategorize_dog_bins.return }}
       category: dog_bins
       mode: grouped
       y_axis: null 
@@ -1466,7 +1480,7 @@ workflow:
         yaxis:
           title: "Count"
           range: null 
-      widget_id: null
+      widget_id: "13"
 
   - name: Persist dogs bins bar chart
     id: persist_dog_bins_bar
@@ -1476,12 +1490,28 @@ workflow:
       text: ${{ workflow.draw_dog_bins.return }}
       filename: "dog_bins_bar_chart.html"
 
-  - name: Draw donkey bins bar chart 
+  - name: Filter out households with zero donkeys
+    id: filter_donkey_bins_nonzero
+    task: filter_df
+    partial:
+      df: ${{ workflow.order_bins.return }}
+      column_name: donkey_bins
+      op: ne
+      value: "0"
+
+  - name: Drop unused zero category from donkey bins
+    id: uncategorize_donkey_bins
+    task: convert_column_values_to_string
+    partial:
+      df: ${{ workflow.filter_donkey_bins_nonzero.return }}
+      columns: [donkey_bins]
+
+  - name: Draw donkey bins bar chart
     id: draw_donkey_bins
     task: ecoscope_workflows_ext_wwf_virunga.tasks.plot.draw_bar_chart
     partial:
-      dataframe: ${{ workflow.order_bins.return }}
-      category: dog_bins
+      dataframe: ${{ workflow.uncategorize_donkey_bins.return }}
+      category: donkey_bins
       mode: grouped
       y_axis: null 
       stack_column: null 
@@ -1517,7 +1547,7 @@ workflow:
         yaxis:
           title: "Count"
           range: null 
-      widget_id: null
+      widget_id: "14"
 
   - name: Persist donkeys bins bar chart
     id: persist_donkey_bins_bar
@@ -1527,12 +1557,12 @@ workflow:
       text: ${{ workflow.draw_donkey_bins.return }}
       filename: "donkey_bins_bar_chart.html"
 
-  - name: Draw other animals bins bar chart 
+  - name: Draw other animals bins bar chart
     id: draw_other_bins
     task: ecoscope_workflows_ext_wwf_virunga.tasks.plot.draw_bar_chart
     partial:
       dataframe: ${{ workflow.order_bins.return }}
-      category: dog_bins
+      category: other_animals_bins
       mode: grouped
       y_axis: null 
       stack_column: null 
@@ -1568,7 +1598,7 @@ workflow:
         yaxis:
           title: "Count"
           range: null 
-      widget_id: null
+      widget_id: "15"
 
   - name: Persist other animals bins bar chart
     id: persist_other_bins_bar
@@ -1578,12 +1608,12 @@ workflow:
       text: ${{ workflow.draw_other_bins.return }}
       filename: "other_animal_bins_bar_chart.html"
 
-  - name: Draw household-people bins bar chart 
+  - name: Draw household-people bins bar chart
     id: draw_people_bins
     task: ecoscope_workflows_ext_wwf_virunga.tasks.plot.draw_bar_chart
     partial:
       dataframe: ${{ workflow.order_bins.return }}
-      category: dog_bins
+      category: other_people_bins
       mode: grouped
       y_axis: null 
       stack_column: null 
@@ -1619,7 +1649,7 @@ workflow:
         yaxis:
           title: "Count"
           range: null 
-      widget_id: null
+      widget_id: "16"
 
   - name: Persist household-size bins bar chart
     id: persist_household_bar
@@ -1670,7 +1700,7 @@ workflow:
         yaxis:
           title: "Count"
           range: null 
-      widget_id: null
+      widget_id: "17"
 
   - name: Persist sheep-goats bins bar chart
     id: persist_sheep_goats_bar
@@ -1721,7 +1751,7 @@ workflow:
         yaxis:
           title: "Count"
           range: null 
-      widget_id: null
+      widget_id: "18"
 
   - name: Persist land grown  bins bar chart
     id: persist_land_grown_bar
@@ -1736,7 +1766,7 @@ workflow:
     task: ecoscope_workflows_ext_wwf_virunga.tasks.plot.draw_bar_chart
     partial:
       dataframe: ${{ workflow.order_bins.return }}
-      category: "lland_owned_bins"
+      category: "land_owned_bins"
       mode: grouped
       y_axis: null 
       stack_column: null 
@@ -1772,7 +1802,7 @@ workflow:
         yaxis:
           title: "Count"
           range: null 
-      widget_id: null
+      widget_id: "19"
 
   - name: Persist land owned bins bar chart
     id: persist_land_owned_bar
@@ -1802,7 +1832,7 @@ workflow:
       df: ${{ workflow.format_demo_table.return }}
       filename: "demographic-data"
       root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
-      filetype: "geoparquet"
+      filetype: "csv"
 
 # Filter out only agree-disagree columns 
   - name: Retain agree disagree columns
@@ -1931,7 +1961,7 @@ workflow:
         yaxis:
           title: "Count"
           range: null 
-      widget_id: null
+      widget_id: "20"
 
   - name: Persist benefit from electric fence bar chart
     id: persist_benefit_electric_bar
@@ -1982,14 +2012,14 @@ workflow:
         yaxis:
           title: "Count"
           range: null 
-      widget_id: null
+      widget_id: "21"
 
   - name: Persist change route based on elephants bar chart
     id: persist_route_base_ele_bar
     task: persist_text
     partial:
       root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
-      text: ${{ workflow.benefit_from_fence.return }}
+      text: ${{ workflow.route_base_ele.return }}
       filename: "activities_altered_elephant_presence_bar_chart.html"
 
   - name: Draw protect water sight bar chart 
@@ -2033,7 +2063,7 @@ workflow:
         yaxis:
           title: "Count"
           range: null 
-      widget_id: null
+      widget_id: "22"
 
   - name: Persist protect water sight based on elephants bar chart
     id: persist_water_sight_bar
@@ -2085,7 +2115,7 @@ workflow:
         yaxis:
           title: "Count"
           range: null 
-      widget_id: null
+      widget_id: "23"
 
   - name: Persist see more elephants as before bar chart
     id: persist_see_eles_bar
@@ -2136,7 +2166,7 @@ workflow:
         yaxis:
           title: "Count"
           range: null 
-      widget_id: null
+      widget_id: "24"
 
   - name: Persist prevent elephant damage bar chart
     id: persist_ele_damage_bar
@@ -2188,7 +2218,7 @@ workflow:
         yaxis:
           title: "Count"
           range: null 
-      widget_id: null
+      widget_id: "25"
 
   - name: Persist Do you and your Family use any Measures to Prevent Injuring your Livestock
     id: persist_ele_livestock_bar
@@ -2240,7 +2270,7 @@ workflow:
         yaxis:
           title: "Count"
           range: null 
-      widget_id: null
+      widget_id: "26"
 
   - name: Persist Have You Noticed any Signs or Symptoms of Illness in the Wild Animals (Elephant, Lion, Hyena, etc.)
     id: persist_illness_wild
@@ -2251,7 +2281,7 @@ workflow:
       filename: "illness_wild_bar_chart.html"
 
 
-  - name: Draw Have You ever been Involved in or Witnessed an Elephant being Harmed"
+  - name: Draw Have You ever been Involved in or Witnessed an Elephant being Harmed
     id: harmed_elephant
     task: ecoscope_workflows_ext_wwf_virunga.tasks.plot.draw_bar_chart
     partial:
@@ -2292,9 +2322,9 @@ workflow:
         yaxis:
           title: "Count"
           range: null 
-      widget_id: null
+      widget_id: "27"
 
-  - name: Persist Have You ever been Involved in or Witnessed an Elephant being Harmed"
+  - name: Persist Have You ever been Involved in or Witnessed an Elephant being Harmed
     id: persist_harmed_ele
     task: persist_text
     partial:
@@ -2344,7 +2374,7 @@ workflow:
         yaxis:
           title: "Count"
           range: null 
-      widget_id: null
+      widget_id: "28"
 
   - name: Persist If you Experience Conflict with Elephants in this Area, do you Report it
     id: persist_ele_conflict
@@ -2395,7 +2425,7 @@ workflow:
         yaxis:
           title: "Count"
           range: null 
-      widget_id: null
+      widget_id: "29"
 
   - name: Persist In the Future, Would You be Interested in Sharing Your Experiences and Views on Elephants as Part of a Community Dialogue
     id: persist_ele_comm_bar
@@ -2447,7 +2477,7 @@ workflow:
         yaxis:
           title: "Count"
           range: null 
-      widget_id: null
+      widget_id: "30"
 
   - name: Persist A Male Elephant that has a Secretion on its Face and Dribbling Urine from his Penis may be More Aggressive
     id: persist_ele_secretion
@@ -2499,7 +2529,7 @@ workflow:
         yaxis:
           title: "Count"
           range: null 
-      widget_id: null
+      widget_id: "31"
 
   - name: Persist An Elephant is Aware of a Person's Presence when it Raises its Trunk Above its Head and Pointing in the Direction of the Person
     id: persist_ele_presence
@@ -2551,7 +2581,7 @@ workflow:
         yaxis:
           title: "Count"
           range: null 
-      widget_id: null
+      widget_id: "32"
 
   - name: Persist An Elephant may Shake its Head if it is Annoyed by your Presence
     id: persist_ele_annoyed
@@ -2603,10 +2633,10 @@ workflow:
         yaxis:
           title: "Count"
           range: null 
-      widget_id: null
+      widget_id: "33"
 
   - name: Persist Elephants can Smell and Hear from Very Far Away
-    id: persist_ele_secretion
+    id: persist_ele_smell_far_away
     task: persist_text
     partial:
       root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
@@ -2654,7 +2684,7 @@ workflow:
         yaxis:
           title: "Count"
           range: null 
-      widget_id: null
+      widget_id: "34"
 
   - name: Persist Elephants move to Different Areas depending on the Season for Food and Water
     id: persist_ele_seasonal
@@ -2705,7 +2735,7 @@ workflow:
         yaxis:
           title: "Count"
           range: null 
-      widget_id: null
+      widget_id: "35"
 
   - name: Persist Female Elephants are Protective over their Young
     id: persist_female_young
@@ -2756,7 +2786,7 @@ workflow:
         yaxis:
           title: "Count"
           range: null 
-      widget_id: null
+      widget_id: "36"
 
   - name: Persist Female Elephants live in Family Groups
     id: persist_female_groups
@@ -2807,7 +2837,7 @@ workflow:
         yaxis:
           title: "Count"
           range: null 
-      widget_id: null
+      widget_id: "37"
 
   - name: Persist Have You ever been Involved in or Witnessed an Elephant being Harmed
     id: persist_witness_ele
@@ -2842,9 +2872,10 @@ workflow:
 
   - name: Create agree-disagree likert chart 
     id: agree_disgree_chart 
-    task: create_likert_chart 
+    task: draw_likert_chart
     partial: 
       dataframe: ${{ workflow.filter_agree_disagree.return }}
+      title: null
       response_order: [
         "Strongly Disagree", 
         "Disagree", 
@@ -2882,7 +2913,7 @@ workflow:
         yaxis:
           title: ""
           range: null 
-        widget_id: null
+        widget_id: "38"
 
   - name: Persist agree disagree likert chart
     id: persist_likert_chart
@@ -2962,7 +2993,7 @@ workflow:
 
   - name: Create sentiment score 
     id: create_sentiment_score 
-    task: apply_arithmetic_operation_over_rows
+    task: ecoscope_workflows_ext_mnc.tasks.aggregation.apply_arithmetic_operation_over_rows
     partial: 
       df: ${{ workflow.convt_ele_int.return }}
       columns: [
@@ -2980,10 +3011,10 @@ workflow:
       output_column: "sentiment_score"
       operation: add
 
-  - name: Create sentiment score mean 
-    id: sentiment_score_mean 
-    task: apply_arithmetic_operation_over_rows
-    partial: 
+  - name: Create sentiment score mean
+    id: sentiment_score_mean
+    task: apply_arithmetic_operation_over_columns
+    partial:
       df: ${{ workflow.create_sentiment_score.return }}
       columns: [
         "Elephants Hurt Members of my Community",
@@ -2998,7 +3029,7 @@ workflow:
         "It is Possible for both Humans and Elephants to Live Together in this Area",
       ]
       output_column: "sentiment_score_mean"
-      operation: add
+      operation: mean
   
   - name: Round sentiment score mean 
     id: round_sentiment_score 
@@ -3048,7 +3079,7 @@ workflow:
       df: ${{ workflow.replace_bins_mapping.return }}
       filename: "elephant-sentiment-table"
       root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
-      filetype: "geoparquet"
+      filetype: "csv"
 
   - name: Gender of participant boxplot 
     id: gender_boxplot 
@@ -3079,7 +3110,7 @@ workflow:
         yaxis:
           title: "Sentiment Score"
           range: null 
-      widget_id: null
+      widget_id: "39"
 
   - name: Persist gender boxplot as html text
     id: persist_gender_boxplot
@@ -3119,14 +3150,14 @@ workflow:
         yaxis:
           title: "Sentiment Score"
           range: null 
-      widget_id: null
+      widget_id: "40"
 
   - name: Persist age group boxplot as html text
     id: persist_age_boxplot
     task: persist_text
     partial:
       text: ${{ workflow.age_boxplot.return }}
-      filename:  "age_group_boxplot_chart.html"
+      filename: "age_group_boxplot_chart.html"
       root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
       filename_suffix: null # png
 
@@ -3159,7 +3190,7 @@ workflow:
         yaxis:
           title: "Sentiment Score"
           range: null 
-      widget_id: null
+      widget_id: "41"
 
   - name: Persist level of education boxplot as html text
     id: persist_education
@@ -3199,7 +3230,7 @@ workflow:
         yaxis:
           title: "Sentiment Score"
           range: null 
-      widget_id: null
+      widget_id: "42"
 
   - name: Persist tribe boxplot as html text
     id: persist_tribe
@@ -3239,7 +3270,7 @@ workflow:
         yaxis:
           title: "Sentiment Score"
           range: null 
-      widget_id: null
+      widget_id: "43"
 
   - name: Persist marital status boxplot as html text
     id: persist_marital
@@ -3262,7 +3293,7 @@ workflow:
 
   - name: Gender tukey plot 
     id: gender_tukey_plot 
-    task: draw_tukey_plot 
+    task: ecoscope_workflows_ext_ate.tasks.results.draw_tukey_chart 
     partial: 
       comparisons: ${{ workflow.gender_comparison.return }}
       tukey_style: 
@@ -3286,7 +3317,7 @@ workflow:
         yaxis:
           title: "Gender Comparison"
           range: null 
-      widget_id: null
+      widget_id: "44"
 
   - name: Persist gender tukey as html text
     id: persist_gtukey
@@ -3308,7 +3339,7 @@ workflow:
 
   - name: Marital Status tukey plot 
     id: marital_tukey_plot 
-    task: draw_tukey_plot 
+    task: ecoscope_workflows_ext_ate.tasks.results.draw_tukey_chart 
     partial: 
       comparisons: ${{ workflow.marital_comparison.return }}
       tukey_style: 
@@ -3332,7 +3363,7 @@ workflow:
         yaxis:
           title: "Marital Status Comparison"
           range: null 
-      widget_id: null
+      widget_id: "45"
 
   - name: Persist marital status tukey as html text
     id: persist_mtukey
@@ -3354,7 +3385,7 @@ workflow:
 
   - name: Age Group tukey plot 
     id: age_tukey_plot 
-    task: draw_tukey_plot 
+    task: ecoscope_workflows_ext_ate.tasks.results.draw_tukey_chart 
     partial: 
       comparisons: ${{ workflow.age_g_comparison.return }}
       tukey_style: 
@@ -3378,7 +3409,7 @@ workflow:
         yaxis:
           title: "Age Group Comparison"
           range: null 
-      widget_id: null
+      widget_id: "46"
 
   - name: Persist age group tukey as html text
     id: persist_age_group
@@ -3400,7 +3431,7 @@ workflow:
 
   - name: Level of education tukey plot 
     id: education_tukey_plot 
-    task: draw_tukey_plot 
+    task: ecoscope_workflows_ext_ate.tasks.results.draw_tukey_chart 
     partial: 
       comparisons: ${{ workflow.education_comparison.return }}
       tukey_style: 
@@ -3424,10 +3455,10 @@ workflow:
         yaxis:
           title: "Level of Education Comparison"
           range: null 
-      widget_id: null
+      widget_id: "47"
 
-  - name: Persist age group tukey as html text
-    id: persist_age_group
+  - name: Persist education tukey as html text
+    id: persist_education_tukey
     task: persist_text
     partial:
       text: ${{ workflow.education_tukey_plot.return }}
@@ -3437,7 +3468,7 @@ workflow:
 
   - name: Household sentiment score scatterplot 
     id: household_scatter
-    task: draw_scatter_chart 
+    task: ecoscope_workflows_ext_ate.tasks.results.draw_scatter_chart 
     partial: 
       dataframe: ${{ workflow.sentiment_bins.return }}
       x_column: "How many People are there in your Household"
@@ -3473,7 +3504,7 @@ workflow:
         yaxis:
           title: "Sentiment Score"
           range: null 
-      widget_id: null
+      widget_id: "48"
 
   - name: Persist household scatterplot as html text
     id: persist_house_scatter
@@ -3486,7 +3517,7 @@ workflow:
 
   - name: Agesentiment score scatterplot 
     id: age_scatter
-    task: draw_scatter_chart 
+    task: ecoscope_workflows_ext_ate.tasks.results.draw_scatter_chart 
     partial: 
       dataframe: ${{ workflow.sentiment_bins.return }}
       x_column: "What is your Age"
@@ -3522,7 +3553,7 @@ workflow:
         yaxis:
           title: "Sentiment Score"
           range: null 
-      widget_id: null
+      widget_id: "49"
 
   - name: Persist age scatterplot as html text
     id: persist_age_scatter
@@ -3542,7 +3573,7 @@ workflow:
         id: zoom_to_envelope
         task: ecoscope_workflows_ext_ste.tasks.spatial_operations.envelope_gdf
         partial:
-          gdf: ${{ workflow.replace_bins_mapping.return }} 
+          gdf:  ${{ workflow.filter_ambo_boundaries.return }} #${{ workflow.replace_bins_mapping.return }} 
           expansion_factor: 1.05
 
       - name: Zoom view to gdf extent
@@ -3565,7 +3596,7 @@ workflow:
       data_url: null
       layer_style:
         get_fill_color: [220, 20, 60]
-        get_line_color: [220, 20, 60]
+        get_line_color: [0, 0, 0]
         get_line_width: 0.25
         get_radius : 4
         opacity: 0.75
@@ -3610,7 +3641,7 @@ workflow:
     task: persist_text
     partial:
       root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
-      text: ${{ workflow.draw_response_map.return }}
+      text: ${{ workflow.draw_survey_map.return }}
       filename: survey_event_map.html  # -- convert this to png
 
 # Gender Map 
@@ -3622,7 +3653,7 @@ workflow:
       col: "Gender of Participant"
       mapping: 
         "Female": "#e9967a"
-        "Male": "#ff0000"  
+        "Male": "#0000ff"  
         "No Response": "#cfcfc4"
 
       new_col: "gender_colors"
@@ -3786,3 +3817,436 @@ workflow:
       root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
       text: ${{ workflow.draw_sent_map.return }}
       filename: sentiment_event_map.html  # -- convert this to png
+
+  - name: "Widget: Age group pie chart"
+    id: widget_0
+    task: create_plot_widget_single_view
+    partial:
+      title: "Age group pie chart"
+      data: ${{ workflow.persist_age_group_pie.return }}
+
+  - name: "Widget: Land arrangement pie chart"
+    id: widget_1
+    task: create_plot_widget_single_view
+    partial:
+      title: "Land arrangement pie chart"
+      data: ${{ workflow.persist_land_arrange_pie.return }}
+
+  - name: "Widget: Highest level of education pie chart"
+    id: widget_2
+    task: create_plot_widget_single_view
+    partial:
+      title: "Highest level of education pie chart"
+      data: ${{ workflow.highest_education_pie.return }}
+
+  - name: "Widget: Tribe pie chart"
+    id: widget_3
+    task: create_plot_widget_single_view
+    partial:
+      title: "Tribe pie chart"
+      data: ${{ workflow.tribe_pie.return }}
+
+  - name: "Widget: Greatest threat to crop production pie chart"
+    id: widget_4
+    task: create_plot_widget_single_view
+    partial:
+      title: "Greatest threat to crop production pie chart"
+      data: ${{ workflow.crop_production_pie.return }}
+
+  - name: "Widget: Greatest threat to livestock pie chart"
+    id: widget_5
+    task: create_plot_widget_single_view
+    partial:
+      title: "Greatest threat to livestock pie chart"
+      data: ${{ workflow.livestock_threat_pie.return }}
+
+  - name: "Widget: Marital status pie chart"
+    id: widget_6
+    task: create_plot_widget_single_view
+    partial:
+      title: "Marital status pie chart"
+      data: ${{ workflow.marital_status_pie.return }}
+
+  - name: "Widget: Overall feelings about wildlife pie chart"
+    id: widget_7
+    task: create_plot_widget_single_view
+    partial:
+      title: "Overall feelings about wildlife pie chart"
+      data: ${{ workflow.overall_wildlife_pie.return }}
+
+  - name: "Widget: How often do you see elephants in the area pie chart"
+    id: widget_8
+    task: create_plot_widget_single_view
+    partial:
+      title: "How often do you see elephants in the area pie chart"
+      data: ${{ workflow.often_seen_ele_pie.return }}
+
+  - name: "Widget: Witnessing ele harmed pie chart"
+    id: widget_9
+    task: create_plot_widget_single_view
+    partial:
+      title: "Witnessing ele harmed pie chart"
+      data: ${{ workflow.ele_harmed_pie.return }}
+
+  - name: "Widget: Gender pie chart"
+    id: widget_10
+    task: create_plot_widget_single_view
+    partial:
+      title: "Gender pie chart"
+      data: ${{ workflow.gender_pie.return }}
+
+  - name: "Widget: Age bins bar chart"
+    id: widget_11
+    task: create_plot_widget_single_view
+    partial:
+      title: "Age bins bar chart"
+      data: ${{ workflow.persist_age_bins_bar.return }}
+
+  - name: "Widget: Cattle bins bar chart"
+    id: widget_12
+    task: create_plot_widget_single_view
+    partial:
+      title: "Cattle bins bar chart"
+      data: ${{ workflow.persist_cattle_bins_bar.return }}
+
+  - name: "Widget: Dog bins bar chart"
+    id: widget_13
+    task: create_plot_widget_single_view
+    partial:
+      title: "Dog bins bar chart"
+      data: ${{ workflow.persist_dog_bins_bar.return }}
+
+  - name: "Widget: Donkey bins bar chart"
+    id: widget_14
+    task: create_plot_widget_single_view
+    partial:
+      title: "Donkey bins bar chart"
+      data: ${{ workflow.persist_donkey_bins_bar.return }}
+
+  - name: "Widget: Other animals bins bar chart"
+    id: widget_15
+    task: create_plot_widget_single_view
+    partial:
+      title: "Other animals bins bar chart"
+      data: ${{ workflow.persist_other_bins_bar.return }}
+
+  - name: "Widget: Household-people bins bar chart"
+    id: widget_16
+    task: create_plot_widget_single_view
+    partial:
+      title: "Household-people bins bar chart"
+      data: ${{ workflow.persist_household_bar.return }}
+
+  - name: "Widget: Sheep-goats bins bar chart"
+    id: widget_17
+    task: create_plot_widget_single_view
+    partial:
+      title: "Sheep-goats bins bar chart"
+      data: ${{ workflow.persist_sheep_goats_bar.return }}
+
+  - name: "Widget: Land-grown-crops bins bar chart"
+    id: widget_18
+    task: create_plot_widget_single_view
+    partial:
+      title: "Land-grown-crops bins bar chart"
+      data: ${{ workflow.persist_land_grown_bar.return }}
+
+  - name: "Widget: Land-owned-crops bins bar chart"
+    id: widget_19
+    task: create_plot_widget_single_view
+    partial:
+      title: "Land-owned-crops bins bar chart"
+      data: ${{ workflow.persist_land_owned_bar.return }}
+
+  - name: "Widget: Benefit from electric fence bar chart"
+    id: widget_20
+    task: create_plot_widget_single_view
+    partial:
+      title: "Benefit from electric fence bar chart"
+      data: ${{ workflow.persist_benefit_electric_bar.return }}
+
+  - name: "Widget: Change route based on elephants bar chart"
+    id: widget_21
+    task: create_plot_widget_single_view
+    partial:
+      title: "Change route based on elephants bar chart"
+      data: ${{ workflow.persist_route_base_ele_bar.return }}
+
+  - name: "Widget: Protect water sight bar chart"
+    id: widget_22
+    task: create_plot_widget_single_view
+    partial:
+      title: "Protect water sight bar chart"
+      data: ${{ workflow.persist_water_sight_bar.return }}
+
+  - name: "Widget: See more elephants bar chart"
+    id: widget_23
+    task: create_plot_widget_single_view
+    partial:
+      title: "See more elephants bar chart"
+      data: ${{ workflow.persist_see_eles_bar.return }}
+
+  - name: "Widget: Measures to prevent elephant damage bar chart"
+    id: widget_24
+    task: create_plot_widget_single_view
+    partial:
+      title: "Measures to prevent elephant damage bar chart"
+      data: ${{ workflow.persist_ele_damage_bar.return }}
+
+  - name: "Widget: Do you and your Family use any Measures to Prevent Injuring your Livestock"
+    id: widget_25
+    task: create_plot_widget_single_view
+    partial:
+      title: "Do you and your Family use any Measures to Prevent Injuring your Livestock"
+      data: ${{ workflow.persist_ele_livestock_bar.return }}
+
+  - name: "Widget: Have You Noticed any Signs or Symptoms of Illness in the Wild Animals (Elephant, Lion, Hyena, etc.)"
+    id: widget_26
+    task: create_plot_widget_single_view
+    partial:
+      title: "Have You Noticed any Signs or Symptoms of Illness in the Wild Animals (Elephant, Lion, Hyena, etc.)"
+      data: ${{ workflow.persist_illness_wild.return }}
+
+  - name: "Widget: Have You ever been Involved in or Witnessed an Elephant being Harmed"
+    id: widget_27
+    task: create_plot_widget_single_view
+    partial:
+      title: "Have You ever been Involved in or Witnessed an Elephant being Harmed"
+      data: ${{ workflow.persist_harmed_ele.return }}
+
+  - name: "Widget: If you Experience Conflict with Elephants in this Area, do you Report it"
+    id: widget_28
+    task: create_plot_widget_single_view
+    partial:
+      title: "If you Experience Conflict with Elephants in this Area, do you Report it"
+      data: ${{ workflow.persist_ele_conflict.return }}
+
+  - name: "Widget: In the Future, Would You be Interested in Sharing Your Experiences and Views on Elephants as Part of a Community Dialogue"
+    id: widget_29
+    task: create_plot_widget_single_view
+    partial:
+      title: "In the Future, Would You be Interested in Sharing Your Experiences and Views on Elephants as Part of a Community Dialogue"
+      data: ${{ workflow.persist_ele_comm_bar.return }}
+
+  - name: "Widget: A Male Elephant that has a Secretion on its Face and Dribbling Urine from his Penis may be More Aggressive"
+    id: widget_30
+    task: create_plot_widget_single_view
+    partial:
+      title: "A Male Elephant that has a Secretion on its Face and Dribbling Urine from his Penis may be More Aggressive"
+      data: ${{ workflow.persist_ele_secretion.return }}
+
+  - name: "Widget: An Elephant is Aware of a Person's Presence when it Raises its Trunk Above its Head and Pointing in the Direction of the Person"
+    id: widget_31
+    task: create_plot_widget_single_view
+    partial:
+      title: "An Elephant is Aware of a Person's Presence when it Raises its Trunk Above its Head and Pointing in the Direction of the Person"
+      data: ${{ workflow.persist_ele_presence.return }}
+
+  - name: "Widget: An Elephant may Shake its Head if it is Annoyed by your Presence"
+    id: widget_32
+    task: create_plot_widget_single_view
+    partial:
+      title: "An Elephant may Shake its Head if it is Annoyed by your Presence"
+      data: ${{ workflow.persist_ele_annoyed.return }}
+
+  - name: "Widget: Elephants can Smell and Hear from Very Far Away"
+    id: widget_33
+    task: create_plot_widget_single_view
+    partial:
+      title: "Elephants can Smell and Hear from Very Far Away"
+      data: ${{ workflow.persist_ele_smell_far_away.return }}
+
+  - name: "Widget: Elephants move to Different Areas depending on the Season for Food and Water"
+    id: widget_34
+    task: create_plot_widget_single_view
+    partial:
+      title: "Elephants move to Different Areas depending on the Season for Food and Water"
+      data: ${{ workflow.persist_ele_seasonal.return }}
+
+  - name: "Widget: Female Elephants are Protective over their Young"
+    id: widget_35
+    task: create_plot_widget_single_view
+    partial:
+      title: "Female Elephants are Protective over their Young"
+      data: ${{ workflow.persist_female_young.return }}
+
+  - name: "Widget: Female Elephants live in Family Groups"
+    id: widget_36
+    task: create_plot_widget_single_view
+    partial:
+      title: "Female Elephants live in Family Groups"
+      data: ${{ workflow.persist_female_groups.return }}
+
+  - name: "Widget: Have You ever been Involved in or Witnessed an Elephant being Harmed"
+    id: widget_37
+    task: create_plot_widget_single_view
+    partial:
+      title: "Have You ever been Involved in or Witnessed an Elephant being Harmed"
+      data: ${{ workflow.persist_witness_ele.return }}
+
+  - name: "Widget: Agree-disagree likert chart"
+    id: widget_38
+    task: create_plot_widget_single_view
+    partial:
+      title: "Agree-disagree likert chart"
+      data: ${{ workflow.persist_likert_chart.return }}
+
+  - name: "Widget: Gender of participant boxplot"
+    id: widget_39
+    task: create_plot_widget_single_view
+    partial:
+      title: "Gender of participant boxplot"
+      data: ${{ workflow.persist_gender_boxplot.return }}
+
+  - name: "Widget: Age group boxplot"
+    id: widget_40
+    task: create_plot_widget_single_view
+    partial:
+      title: "Age group boxplot"
+      data: ${{ workflow.persist_age_boxplot.return }}
+
+  - name: "Widget: Level of education boxplot"
+    id: widget_41
+    task: create_plot_widget_single_view
+    partial:
+      title: "Level of education boxplot"
+      data: ${{ workflow.persist_education.return }}
+
+  - name: "Widget: Tribe boxplot"
+    id: widget_42
+    task: create_plot_widget_single_view
+    partial:
+      title: "Tribe boxplot"
+      data: ${{ workflow.persist_tribe.return }}
+
+  - name: "Widget: Marital Status boxplot"
+    id: widget_43
+    task: create_plot_widget_single_view
+    partial:
+      title: "Marital Status boxplot"
+      data: ${{ workflow.persist_marital.return }}
+
+  - name: "Widget: Gender tukey plot"
+    id: widget_44
+    task: create_plot_widget_single_view
+    partial:
+      title: "Gender tukey plot"
+      data: ${{ workflow.persist_gtukey.return }}
+
+  - name: "Widget: Marital Status tukey plot"
+    id: widget_45
+    task: create_plot_widget_single_view
+    partial:
+      title: "Marital Status tukey plot"
+      data: ${{ workflow.persist_mtukey.return }}
+
+  - name: "Widget: Age Group tukey plot"
+    id: widget_46
+    task: create_plot_widget_single_view
+    partial:
+      title: "Age Group tukey plot"
+      data: ${{ workflow.persist_age_group.return }}
+
+  - name: "Widget: Level of education tukey plot"
+    id: widget_47
+    task: create_plot_widget_single_view
+    partial:
+      title: "Level of education tukey plot"
+      data: ${{ workflow.persist_education_tukey.return }}
+
+  - name: "Widget: Household sentiment score scatterplot"
+    id: widget_48
+    task: create_plot_widget_single_view
+    partial:
+      title: "Household sentiment score scatterplot"
+      data: ${{ workflow.persist_house_scatter.return }}
+
+  - name: "Widget: Agesentiment score scatterplot"
+    id: widget_49
+    task: create_plot_widget_single_view
+    partial:
+      title: "Agesentiment score scatterplot"
+      data: ${{ workflow.persist_age_scatter.return }}
+
+  - name: "Widget: Survey events map"
+    id: widget_50
+    task: create_map_widget_single_view
+    partial:
+      title: "Survey events map"
+      data: ${{ workflow.persist_survey_map.return }}
+
+  - name: "Widget: Gender event map"
+    id: widget_51
+    task: create_map_widget_single_view
+    partial:
+      title: "Gender event map"
+      data: ${{ workflow.persist_gender_map.return }}
+
+  - name: "Widget: Sentiment event map"
+    id: widget_52
+    task: create_map_widget_single_view
+    partial:
+      title: "Sentiment event map"
+      data: ${{ workflow.persist_sent_map.return }}
+
+  - name: Social Survey Dashboard
+    id: survey_dashboard
+    task: gather_dashboard
+    partial:
+      details: ${{ workflow.workflow_details.return}}
+      widgets:
+        - ${{ workflow.widget_0.return }}
+        - ${{ workflow.widget_1.return }}
+        - ${{ workflow.widget_2.return }}
+        - ${{ workflow.widget_3.return }}
+        - ${{ workflow.widget_4.return }}
+        - ${{ workflow.widget_5.return }}
+        - ${{ workflow.widget_6.return }}
+        - ${{ workflow.widget_7.return }}
+        - ${{ workflow.widget_8.return }}
+        - ${{ workflow.widget_9.return }}
+        - ${{ workflow.widget_10.return }}
+        - ${{ workflow.widget_11.return }}
+        - ${{ workflow.widget_12.return }}
+        - ${{ workflow.widget_13.return }}
+        - ${{ workflow.widget_14.return }}
+        - ${{ workflow.widget_15.return }}
+        - ${{ workflow.widget_16.return }}
+        - ${{ workflow.widget_17.return }}
+        - ${{ workflow.widget_18.return }}
+        - ${{ workflow.widget_19.return }}
+        - ${{ workflow.widget_20.return }}
+        - ${{ workflow.widget_21.return }}
+        - ${{ workflow.widget_22.return }}
+        - ${{ workflow.widget_23.return }}
+        - ${{ workflow.widget_24.return }}
+        - ${{ workflow.widget_25.return }}
+        - ${{ workflow.widget_26.return }}
+        - ${{ workflow.widget_27.return }}
+        - ${{ workflow.widget_28.return }}
+        - ${{ workflow.widget_29.return }}
+        - ${{ workflow.widget_30.return }}
+        - ${{ workflow.widget_31.return }}
+        - ${{ workflow.widget_32.return }}
+        - ${{ workflow.widget_33.return }}
+        - ${{ workflow.widget_34.return }}
+        - ${{ workflow.widget_35.return }}
+        - ${{ workflow.widget_36.return }}
+        - ${{ workflow.widget_37.return }}
+        - ${{ workflow.widget_38.return }}
+        - ${{ workflow.widget_39.return }}
+        - ${{ workflow.widget_40.return }}
+        - ${{ workflow.widget_41.return }}
+        - ${{ workflow.widget_42.return }}
+        - ${{ workflow.widget_43.return }}
+        - ${{ workflow.widget_44.return }}
+        - ${{ workflow.widget_45.return }}
+        - ${{ workflow.widget_46.return }}
+        - ${{ workflow.widget_47.return }}
+        - ${{ workflow.widget_48.return }}
+        - ${{ workflow.widget_49.return }}
+        - ${{ workflow.widget_50.return }}
+        - ${{ workflow.widget_51.return }}
+        - ${{ workflow.widget_52.return }}
+      time_range: ${{ workflow.time_range.return}}
+      groupers: ${{ workflow.groupers.return }}

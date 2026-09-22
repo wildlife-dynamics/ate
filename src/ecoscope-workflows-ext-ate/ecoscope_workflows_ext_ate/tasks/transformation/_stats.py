@@ -22,10 +22,8 @@ def compute_tukey_comparisons(
         Field(description="The name of the dataframe column containing the group categories."),
     ],
     confidence_level: Annotated[
-        float | SkipJsonSchema[None],
+        Annotated[float, Field(ge=0.0, le=1.0)] | SkipJsonSchema[None],
         AdvancedField(
-            ge=0.0,
-            le=1.0,
             default=0.95,
             description="Confidence level for the pairwise comparison intervals.",
         ),

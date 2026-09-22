@@ -18,7 +18,7 @@
       ],
       "type": "object",
       "description": "Add information that will help to differentiate this workflow from another.",
-      "title": "Set workflow details"
+      "title": "Workflow Details"
     },
     "time_range": {
       "additionalProperties": false,
@@ -58,7 +58,7 @@
       ],
       "type": "object",
       "description": "Choose the period of time to analyze.",
-      "title": "Set time range"
+      "title": "Time Range"
     },
     "er_client_name": {
       "additionalProperties": false,
@@ -73,7 +73,35 @@
         "data_source"
       ],
       "type": "object",
-      "title": "Connect to ER"
+      "title": "Connect to EarthRanger"
+    },
+    "filter_dog_bins_nonzero": {
+      "additionalProperties": false,
+      "properties": {
+        "reset_index": {
+          "default": false,
+          "title": "Reset Index",
+          "type": "boolean",
+          "description": "If reset index, default is False"
+        }
+      },
+      "required": [],
+      "type": "object",
+      "title": "Filter out households with zero dogs"
+    },
+    "filter_donkey_bins_nonzero": {
+      "additionalProperties": false,
+      "properties": {
+        "reset_index": {
+          "default": false,
+          "title": "Reset Index",
+          "type": "boolean",
+          "description": "If reset index, default is False"
+        }
+      },
+      "required": [],
+      "type": "object",
+      "title": "Filter out households with zero donkeys"
     }
   },
   "$defs": {
@@ -137,7 +165,9 @@
     "ui:order": [
       "workflow_details",
       "time_range",
-      "er_client_name"
+      "er_client_name",
+      "filter_dog_bins_nonzero",
+      "filter_donkey_bins_nonzero"
     ]
   },
   "additionalProperties": false

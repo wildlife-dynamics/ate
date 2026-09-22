@@ -18,7 +18,7 @@ classifiers = [
 ]
 license = { text = "BSD-3-Clause" }
 
-[project.entry-points."ecoscope_workflows"]
+[project.entry-points."wt_registry"]
 tasks = "ecoscope_workflows_ext_ate.tasks"
 
 

@@ -27,7 +27,9 @@ class ScatterStyle(BaseModel):
     marker_size: Annotated[int | SkipJsonSchema[None], AdvancedField(default=None)] = None
     marker_color: Annotated[str | SkipJsonSchema[None], AdvancedField(default=None)] = None
     marker_symbol: Annotated[str | SkipJsonSchema[None], AdvancedField(default=None)] = None
-    marker_opacity: Annotated[float | SkipJsonSchema[None], AdvancedField(ge=0.0, le=1.0, default=None)] = None
+    marker_opacity: Annotated[
+        Annotated[float, Field(ge=0.0, le=1.0)] | SkipJsonSchema[None], AdvancedField(default=None)
+    ] = None
     mode: Annotated[str | SkipJsonSchema[None], AdvancedField(default="markers")] = "markers"
 
 
