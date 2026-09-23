@@ -4866,10 +4866,10 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .call()
     )
 
-    agree_disgree_chart = (
+    agree_disagree_chart = (
         task(draw_likert_chart)
         .validate()
-        .set_task_instance_id("agree_disgree_chart")
+        .set_task_instance_id("agree_disagree_chart")
         .handle_errors()
         .with_tracing()
         .skipif(
@@ -4918,7 +4918,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
                 "yaxis": {"title": "", "range": None},
                 "widget_id": "38",
             },
-            **(params.get("agree_disgree_chart") or {}),
+            **(params.get("agree_disagree_chart") or {}),
         )
         .call()
     )
@@ -4938,7 +4938,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         )
         .partial(
             root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
-            text=agree_disgree_chart,
+            text=agree_disagree_chart,
             filename="ele_sentiment_chart.html",
             **(params.get("persist_likert_chart") or {}),
         )
@@ -5539,6 +5539,30 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .call()
     )
 
+    filter_gender_tukey = (
+        task(filter_df)
+        .validate()
+        .set_task_instance_id("filter_gender_tukey")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(
+            df=sentiment_bins,
+            column_name="Gender of Participant",
+            op="ne",
+            value="No Response",
+            reset_index=True,
+            **(params.get("filter_gender_tukey") or {}),
+        )
+        .call()
+    )
+
     gender_comparison = (
         task(compute_tukey_comparisons)
         .validate()
@@ -5553,7 +5577,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             unpack_depth=1,
         )
         .partial(
-            dataframe=sentiment_bins,
+            dataframe=filter_gender_tukey,
             group_column="Gender of Participant",
             value_column="sentiment_score_mean",
             confidence_level=0.95,
@@ -5625,6 +5649,30 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .call()
     )
 
+    filter_marital_tukey = (
+        task(filter_df)
+        .validate()
+        .set_task_instance_id("filter_marital_tukey")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(
+            df=sentiment_bins,
+            column_name="What is your marital status",
+            op="ne",
+            value="No Response",
+            reset_index=True,
+            **(params.get("filter_marital_tukey") or {}),
+        )
+        .call()
+    )
+
     marital_comparison = (
         task(compute_tukey_comparisons)
         .validate()
@@ -5639,7 +5687,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             unpack_depth=1,
         )
         .partial(
-            dataframe=sentiment_bins,
+            dataframe=filter_marital_tukey,
             group_column="What is your marital status",
             value_column="sentiment_score_mean",
             confidence_level=0.95,
@@ -5711,6 +5759,30 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .call()
     )
 
+    filter_age_g_tukey = (
+        task(filter_df)
+        .validate()
+        .set_task_instance_id("filter_age_g_tukey")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(
+            df=sentiment_bins,
+            column_name="What is your Age Group",
+            op="ne",
+            value="No Response",
+            reset_index=True,
+            **(params.get("filter_age_g_tukey") or {}),
+        )
+        .call()
+    )
+
     age_g_comparison = (
         task(compute_tukey_comparisons)
         .validate()
@@ -5725,7 +5797,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             unpack_depth=1,
         )
         .partial(
-            dataframe=sentiment_bins,
+            dataframe=filter_age_g_tukey,
             group_column="What is your Age Group",
             value_column="sentiment_score_mean",
             confidence_level=0.95,
@@ -5797,6 +5869,30 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .call()
     )
 
+    filter_education_tukey = (
+        task(filter_df)
+        .validate()
+        .set_task_instance_id("filter_education_tukey")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(
+            df=sentiment_bins,
+            column_name="What is your Highest Level of Completed Education",
+            op="ne",
+            value="No Response",
+            reset_index=True,
+            **(params.get("filter_education_tukey") or {}),
+        )
+        .call()
+    )
+
     education_comparison = (
         task(compute_tukey_comparisons)
         .validate()
@@ -5811,7 +5907,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             unpack_depth=1,
         )
         .partial(
-            dataframe=sentiment_bins,
+            dataframe=filter_education_tukey,
             group_column="What is your Highest Level of Completed Education",
             value_column="sentiment_score_mean",
             confidence_level=0.95,

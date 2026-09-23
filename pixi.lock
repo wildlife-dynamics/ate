@@ -552,7 +552,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zlib-1.3.2-h25fd6f3_3.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zlib-ng-2.3.3-hce19668_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstd-1.5.7-hb78ec9c_7.conda
-      - conda: /tmp/ecoscope-workflows-custom/release/artifacts/noarch/ecoscope-workflows-ext-ate-0.0.4.dev7+gcf7cf8b91.d20260923-pyh4616a5c_0.conda
+      - conda: /tmp/ecoscope-workflows-custom/release/artifacts/noarch/ecoscope-workflows-ext-ate-1.0.1.dev0+gd8d38c3bc.d20260923-pyh4616a5c_0.conda
       osx-arm64:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/_openmp_mutex-4.5-8_kmp_llvm.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/_python_abi3_support-1.0-hd8ed1ab_3.conda
@@ -1067,7 +1067,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zlib-1.3.2-h8088a28_3.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zlib-ng-2.3.3-h31dac16_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstd-1.5.7-hf451053_7.conda
-      - conda: /tmp/ecoscope-workflows-custom/release/artifacts/noarch/ecoscope-workflows-ext-ate-0.0.4.dev7+gcf7cf8b91.d20260923-pyh4616a5c_0.conda
+      - conda: /tmp/ecoscope-workflows-custom/release/artifacts/noarch/ecoscope-workflows-ext-ate-1.0.1.dev0+gd8d38c3bc.d20260923-pyh4616a5c_0.conda
       win-64:
       - conda: https://conda.anaconda.org/conda-forge/win-64/_openmp_mutex-4.5-20_gnu.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/_python_abi3_support-1.0-hd8ed1ab_3.conda
@@ -1568,7 +1568,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/zlib-1.3.2-hfd05255_3.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zlib-ng-2.3.3-h0261ad2_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstd-1.5.7-h534d264_7.conda
-      - conda: /tmp/ecoscope-workflows-custom/release/artifacts/noarch/ecoscope-workflows-ext-ate-0.0.4.dev7+gcf7cf8b91.d20260923-pyh4616a5c_0.conda
+      - conda: /tmp/ecoscope-workflows-custom/release/artifacts/noarch/ecoscope-workflows-ext-ate-1.0.1.dev0+gd8d38c3bc.d20260923-pyh4616a5c_0.conda
   default:
     channels:
     - url: file:///tmp/ecoscope-workflows-custom/release/artifacts/
@@ -4812,10 +4812,10 @@ packages:
   license: BSD-3-Clause
   size: 3771
   timestamp: 1789724597093
-- conda: /tmp/ecoscope-workflows-custom/release/artifacts/noarch/ecoscope-workflows-ext-ate-0.0.4.dev7+gcf7cf8b91.d20260923-pyh4616a5c_0.conda
+- conda: /tmp/ecoscope-workflows-custom/release/artifacts/noarch/ecoscope-workflows-ext-ate-1.0.1.dev0+gd8d38c3bc.d20260923-pyh4616a5c_0.conda
   subdir: noarch
-  sha256: 98e46d29ecb5c11dfd79a00d5f4d469746a9872f3176787d4bc2669b4047a404
-  md5: 99dba5c29dc8ae4c009d97912379dc29
+  sha256: d942b157e77cc72c53af5ca8a84dc266b50622883a56f5bfdb3e37484c28b1cd
+  md5: 85bea6f6167d5c0c8098a29923add4ee
   depends:
   - python
   - wt-registry >=0.2.0,<0.3.0
@@ -4833,8 +4833,8 @@ packages:
   - statsmodels
   channel: file:///tmp/ecoscope-workflows-custom/release/artifacts
   license: BSD-3-Clause
-  size: 19244
-  timestamp: 1790146517658
+  size: 19231
+  timestamp: 1790151163022
 - conda: https://repo.prefix.dev/ecoscope-workflows-custom/noarch/ecoscope-workflows-ext-big-life-1.0.2-pyh4616a5c_0.conda
   sha256: e6d3866b2d23fdd0c10f095a9a7a097f2bb3d55015e86d03857a85a3733a4e2a
   md5: d2b1e3e40d2dace4c39f9aab3f4fe745

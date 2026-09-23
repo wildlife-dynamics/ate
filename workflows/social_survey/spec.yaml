@@ -3282,12 +3282,22 @@ workflow:
       root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
       filename_suffix: null # png
   
-  # Tukey plots 
+  # Tukey plots
+  - name: Exclude No Response from gender for Tukey comparison
+    id: filter_gender_tukey
+    task: filter_df
+    partial:
+      df: ${{ workflow.sentiment_bins.return }}
+      column_name: "Gender of Participant"
+      op: ne
+      value: "No Response"
+      reset_index: true
+
   - name: Gender Tukey comparison
-    id: gender_comparison  
+    id: gender_comparison
     task: compute_tukey_comparisons
-    partial: 
-      dataframe:  ${{ workflow.sentiment_bins.return }}
+    partial:
+      dataframe:  ${{ workflow.filter_gender_tukey.return }}
       group_column: "Gender of Participant"
       value_column: "sentiment_score_mean"
       confidence_level: 0.95
@@ -3329,11 +3339,21 @@ workflow:
       root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
       filename_suffix: null # png
 
+  - name: Exclude No Response from marital status for Tukey comparison
+    id: filter_marital_tukey
+    task: filter_df
+    partial:
+      df: ${{ workflow.sentiment_bins.return }}
+      column_name: "What is your marital status"
+      op: ne
+      value: "No Response"
+      reset_index: true
+
   - name: Marital Status Tukey comparison
-    id: marital_comparison  
+    id: marital_comparison
     task: compute_tukey_comparisons
-    partial: 
-      dataframe:  ${{ workflow.sentiment_bins.return }}
+    partial:
+      dataframe:  ${{ workflow.filter_marital_tukey.return }}
       group_column: "What is your marital status"
       value_column: "sentiment_score_mean"
       confidence_level: 0.95
@@ -3375,11 +3395,21 @@ workflow:
       root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
       filename_suffix: null # png
 
+  - name: Exclude No Response from age group for Tukey comparison
+    id: filter_age_g_tukey
+    task: filter_df
+    partial:
+      df: ${{ workflow.sentiment_bins.return }}
+      column_name: "What is your Age Group"
+      op: ne
+      value: "No Response"
+      reset_index: true
+
   - name: Age group Tukey comparison
-    id: age_g_comparison  
+    id: age_g_comparison
     task: compute_tukey_comparisons
-    partial: 
-      dataframe:  ${{ workflow.sentiment_bins.return }}
+    partial:
+      dataframe:  ${{ workflow.filter_age_g_tukey.return }}
       group_column: "What is your Age Group"
       value_column: "sentiment_score_mean"
       confidence_level: 0.95
@@ -3421,11 +3451,21 @@ workflow:
       root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
       filename_suffix: null # png
 
+  - name: Exclude No Response from education level for Tukey comparison
+    id: filter_education_tukey
+    task: filter_df
+    partial:
+      df: ${{ workflow.sentiment_bins.return }}
+      column_name: "What is your Highest Level of Completed Education"
+      op: ne
+      value: "No Response"
+      reset_index: true
+
   - name: Highest level of education Tukey comparison
-    id: education_comparison  
+    id: education_comparison
     task: compute_tukey_comparisons
-    partial: 
-      dataframe:  ${{ workflow.sentiment_bins.return }}
+    partial:
+      dataframe:  ${{ workflow.filter_education_tukey.return }}
       group_column: "What is your Highest Level of Completed Education"
       value_column: "sentiment_score_mean"
       confidence_level: 0.95
