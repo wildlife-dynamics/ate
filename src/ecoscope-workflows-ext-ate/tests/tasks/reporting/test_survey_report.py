@@ -15,10 +15,8 @@ directly, since most of the interesting edge-case behavior lives there.
 
 from __future__ import annotations
 
-import math
 from pathlib import Path
 
-import docx
 import pandas as pd
 import pytest
 from docx.opc.exceptions import PackageNotFoundError
@@ -233,9 +231,7 @@ class TestGenerateSurveyReport:
         self, tmp_path, make_png, make_docx_template, read_docx_text
     ):
         make_png(tmp_path / "what_is_your_age_group_pie_chart.png")
-        template_path = make_docx_template(
-            ["{% if what_is_your_age_group_pie_chart %}HAS_CHART{% endif %}"]
-        )
+        template_path = make_docx_template(["{% if what_is_your_age_group_pie_chart %}HAS_CHART{% endif %}"])
 
         result_path = generate_survey_report(template_path=str(template_path), output_dir=str(tmp_path))
 
@@ -246,9 +242,7 @@ class TestGenerateSurveyReport:
         self, tmp_path, make_png, make_docx_template, read_docx_text
     ):
         make_png(tmp_path / "subdir" / "what_is_your_age_group_pie_chart.png")
-        template_path = make_docx_template(
-            ["{% if what_is_your_age_group_pie_chart %}HAS_CHART{% endif %}"]
-        )
+        template_path = make_docx_template(["{% if what_is_your_age_group_pie_chart %}HAS_CHART{% endif %}"])
 
         result_path = generate_survey_report(template_path=str(template_path), output_dir=str(tmp_path))
 
@@ -289,9 +283,7 @@ class TestGenerateSurveyReport:
         assert "CAT:F" in texts
         assert "TOTAL:[6]" in texts
 
-    def test_nan_to_empty_filter_is_available_in_the_template(
-        self, tmp_path, make_docx_template, read_docx_text
-    ):
+    def test_nan_to_empty_filter_is_available_in_the_template(self, tmp_path, make_docx_template, read_docx_text):
         pd.DataFrame(
             {
                 "Demographic Variable": ["Gender", ""],
@@ -328,17 +320,13 @@ class TestGenerateSurveyReport:
     def test_file_scheme_prefixed_paths_are_accepted(self, tmp_path, make_docx_template):
         template_path = make_docx_template(["{{ prepared_by }}"])
 
-        result_path = generate_survey_report(
-            template_path=f"file://{template_path}", output_dir=f"file://{tmp_path}"
-        )
+        result_path = generate_survey_report(template_path=f"file://{template_path}", output_dir=f"file://{tmp_path}")
 
         assert Path(result_path).exists()
 
     def test_missing_template_path_raises(self, tmp_path):
         with pytest.raises(PackageNotFoundError):
-            generate_survey_report(
-                template_path=str(tmp_path / "missing_template.docx"), output_dir=str(tmp_path)
-            )
+            generate_survey_report(template_path=str(tmp_path / "missing_template.docx"), output_dir=str(tmp_path))
 
     def test_output_dir_that_does_not_exist_yet_raises(self, tmp_path, make_docx_template):
         # Unlike the demographic-table/image lookups (which tolerate a

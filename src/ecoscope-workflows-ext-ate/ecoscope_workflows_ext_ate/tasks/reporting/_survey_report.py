@@ -83,7 +83,7 @@ def generate_survey_report(
     """
     template_path = remove_file_scheme(template_path)
     output_dir = remove_file_scheme(output_dir)
-    
+
     jinja_env = jinja2.Environment()
     jinja_env.filters["nan_to_empty"] = nan_to_empty
 
