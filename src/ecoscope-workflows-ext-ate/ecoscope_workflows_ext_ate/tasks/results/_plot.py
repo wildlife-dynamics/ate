@@ -5,7 +5,7 @@ from pydantic import Field, BaseModel
 from typing_extensions import Literal
 from typing import List, Dict, Annotated
 from pydantic.json_schema import SkipJsonSchema
-from ecoscope.platform.tasks.results._ecoplot import ExportArgs,LayoutStyle
+from ecoscope.platform.tasks.results._ecoplot import ExportArgs, LayoutStyle
 from ecoscope.platform.annotations import (
     AdvancedField,
     AnyDataFrame,
@@ -373,6 +373,7 @@ def draw_likert_chart(
 
     return fig.to_html(**ExportArgs(div_id=widget_id).model_dump(exclude_none=True))
 
+
 @register()
 def draw_scatter_chart(
     dataframe: DataFrame[JsonSerializableDataFrameModel],
@@ -546,7 +547,6 @@ def draw_scatter_chart(
     final_layout = _merge_layout(default_layout, layout_kwargs)
     fig.update_layout(**final_layout)
     return fig.to_html(**ExportArgs(div_id=widget_id).model_dump(exclude_none=True))
-
 
 
 @register()

@@ -1,9 +1,10 @@
 from ._format_table import format_demographic_table
 from ._stats import compute_tukey_comparisons
-from ._tabular import round_column_values,apply_arithmetic_operation_over_columns
-__all__=[
+from ._tabular import round_column_values, apply_arithmetic_operation_over_columns
+
+__all__ = [
     "format_demographic_table",
     "compute_tukey_comparisons",
     "round_column_values",
-    "apply_arithmetic_operation_over_columns"
+    "apply_arithmetic_operation_over_columns",
 ]

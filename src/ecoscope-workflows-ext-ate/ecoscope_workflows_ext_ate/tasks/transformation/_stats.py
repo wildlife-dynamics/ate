@@ -3,12 +3,8 @@ from pydantic import Field
 from typing import Annotated
 from wt_registry import register
 from pydantic.json_schema import SkipJsonSchema
-from ecoscope.platform.annotations import (
-    AdvancedField, 
-    AnyDataFrame,
-    DataFrame,
-    JsonSerializableDataFrameModel
-)
+from ecoscope.platform.annotations import AdvancedField, AnyDataFrame, DataFrame, JsonSerializableDataFrameModel
+
 
 @register()
 def compute_tukey_comparisons(
@@ -41,9 +37,7 @@ def compute_tukey_comparisons(
         raise ValueError("value_column and group_column must be different columns")
 
     if not pd.api.types.is_numeric_dtype(dataframe[value_column]):
-        raise ValueError(
-            f"value_column '{value_column}' must be numeric, got dtype {dataframe[value_column].dtype}"
-        )
+        raise ValueError(f"value_column '{value_column}' must be numeric, got dtype {dataframe[value_column].dtype}")
 
     clean_df = dataframe[[value_column, group_column]].dropna()
     if clean_df.empty:

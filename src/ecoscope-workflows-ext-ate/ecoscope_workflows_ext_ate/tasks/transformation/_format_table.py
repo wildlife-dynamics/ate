@@ -1,7 +1,8 @@
-import numpy as np 
-import pandas as pd 
+import numpy as np
+import pandas as pd
 from wt_registry import register
 from ecoscope.platform.annotations import AnyDataFrame
+
 
 @register()
 def format_demographic_table(

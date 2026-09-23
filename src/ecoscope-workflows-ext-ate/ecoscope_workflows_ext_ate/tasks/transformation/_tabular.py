@@ -1,8 +1,8 @@
 from pydantic import Field
 from functools import reduce
 from wt_registry import register
-from typing import Annotated, cast,Literal
-from ecoscope.platform.annotations import  AnyDataFrame
+from typing import Annotated, cast, Literal
+from ecoscope.platform.annotations import AnyDataFrame
 from operator import add, floordiv, mod, mul, pow, sub, truediv
 
 # Genuine binary operators — folded left-to-right with reduce
@@ -35,6 +35,7 @@ Operations = Literal[
     "max",
     "mean",
 ]
+
 
 @register()
 def round_column_values(

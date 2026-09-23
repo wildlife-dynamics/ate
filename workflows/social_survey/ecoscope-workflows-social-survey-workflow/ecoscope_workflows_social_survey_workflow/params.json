@@ -74,34 +74,6 @@
       ],
       "type": "object",
       "title": "Connect to EarthRanger"
-    },
-    "filter_dog_bins_nonzero": {
-      "additionalProperties": false,
-      "properties": {
-        "reset_index": {
-          "default": false,
-          "title": "Reset Index",
-          "type": "boolean",
-          "description": "If reset index, default is False"
-        }
-      },
-      "required": [],
-      "type": "object",
-      "title": "Filter out households with zero dogs"
-    },
-    "filter_donkey_bins_nonzero": {
-      "additionalProperties": false,
-      "properties": {
-        "reset_index": {
-          "default": false,
-          "title": "Reset Index",
-          "type": "boolean",
-          "description": "If reset index, default is False"
-        }
-      },
-      "required": [],
-      "type": "object",
-      "title": "Filter out households with zero donkeys"
     }
   },
   "$defs": {
@@ -165,9 +137,7 @@
     "ui:order": [
       "workflow_details",
       "time_range",
-      "er_client_name",
-      "filter_dog_bins_nonzero",
-      "filter_donkey_bins_nonzero"
+      "er_client_name"
     ]
   },
   "additionalProperties": false

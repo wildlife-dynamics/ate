@@ -1431,6 +1431,7 @@ workflow:
       column_name: dog_bins
       op: ne
       value: "0"
+      reset_index: false
 
   - name: Drop unused zero category from dog bins
     id: uncategorize_dog_bins
@@ -1498,6 +1499,7 @@ workflow:
       column_name: donkey_bins
       op: ne
       value: "0"
+      reset_index: false
 
   - name: Drop unused zero category from donkey bins
     id: uncategorize_donkey_bins
@@ -4288,6 +4290,25 @@ workflow:
         device_scale_factor: 2.0
         wait_for_timeout: 40000
         max_concurrent_pages: 1
+
+  - name: Download survey-word-doc template 
+    id: download_word_template 
+    task: ecoscope_workflows_ext_ste.tasks.io.fetch_and_persist_file
+    partial:
+      url: https://www.dropbox.com/scl/fi/lfel9mpddf9fkcyt9qufe/ate_survey_template_280857_updated.docx?rlkey=7p823vb378gqf6mde4pz0diq1&st=lvuy8t3p&dl=0
+      output_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      overwrite_existing: false
+      retries: 3 
+      unzip: false 
+    
+  - name: Generate survey word doc report 
+    id: generate_survey_doc 
+    task: generate_survey_report 
+    partial: 
+      template_path: ${{ workflow.download_word_template.return }}
+      output_dir: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      time_period: ${{ workflow.time_range.return}}
+      prepared_by: Ecoscope 
 
   - name: Social Survey Dashboard
     id: survey_dashboard

@@ -73,6 +73,9 @@ from ecoscope.platform.tasks.transformation import map_columns as map_columns
 from ecoscope.platform.tasks.transformation import (
     normalize_json_column as normalize_json_column,
 )
+from ecoscope_workflows_ext_ate.tasks.reporting import (
+    generate_survey_report as generate_survey_report,
+)
 from ecoscope_workflows_ext_ate.tasks.results import (
     draw_likert_chart as draw_likert_chart,
 )
@@ -2549,6 +2552,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             column_name="dog_bins",
             op="ne",
             value="0",
+            reset_index=False,
             **(params.get("filter_dog_bins_nonzero") or {}),
         )
         .call()
@@ -2673,6 +2677,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             column_name="donkey_bins",
             op="ne",
             value="0",
+            reset_index=False,
             **(params.get("filter_donkey_bins_nonzero") or {}),
         )
         .call()
@@ -7766,6 +7771,53 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
                 "max_concurrent_pages": 1,
             },
             **(params.get("convert_sent_map_png") or {}),
+        )
+        .call()
+    )
+
+    download_word_template = (
+        task(fetch_and_persist_file)
+        .validate()
+        .set_task_instance_id("download_word_template")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(
+            url="https://www.dropbox.com/scl/fi/lfel9mpddf9fkcyt9qufe/ate_survey_template_280857_updated.docx?rlkey=7p823vb378gqf6mde4pz0diq1&st=lvuy8t3p&dl=0",
+            output_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
+            overwrite_existing=False,
+            retries=3,
+            unzip=False,
+            **(params.get("download_word_template") or {}),
+        )
+        .call()
+    )
+
+    generate_survey_doc = (
+        task(generate_survey_report)
+        .validate()
+        .set_task_instance_id("generate_survey_doc")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(
+            template_path=download_word_template,
+            output_dir=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
+            time_period=time_range,
+            prepared_by="Ecoscope",
+            **(params.get("generate_survey_doc") or {}),
         )
         .call()
     )
