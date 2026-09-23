@@ -36,6 +36,4 @@ jobs:
         with:
           pixi-version: v0.60.0
       - name: Publish to prefix.dev
-        env:
-          PREFIX_API_KEY: ${{ secrets.PREFIX_API_KEY }}
         run: pixi run --manifest-path pixi.toml -e default bash -c "./publish/push.sh"
