@@ -63,6 +63,7 @@ from ecoscope_workflows_ext_big_life.tasks.results import draw_boxplot as draw_b
 from ecoscope_workflows_ext_big_life.tasks.transformation import (
     add_rgba_columns_from_hex as add_rgba_columns_from_hex,
 )
+from ecoscope_workflows_ext_custom.tasks.io import html_to_png as html_to_png
 from ecoscope_workflows_ext_custom.tasks.io import load_df as load_df
 from ecoscope_workflows_ext_custom.tasks.io import (
     process_events_details as process_events_details_1,
@@ -1543,10 +1544,10 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .call()
     )
 
-    events_geoparquet = (
+    events_gpkg = (
         task(persist_df)
         .validate()
-        .set_task_instance_id("events_geoparquet")
+        .set_task_instance_id("events_gpkg")
         .handle_errors()
         .with_tracing()
         .skipif(
@@ -1560,8 +1561,8 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             df=replace_marital_status,
             filename="survey-events",
             root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
-            filetype="csv",
-            **(params.get("events_geoparquet") or {}),
+            filetype="gpkg",
+            **(params.get("events_gpkg") or {}),
         )
         .call()
     )
@@ -3205,7 +3206,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             df=format_demo_table,
             filename="demographic-data",
             root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
-            filetype="csv",
+            filetype="geoparquet",
             **(params.get("persist_demo_table") or {}),
         )
         .call()
@@ -3575,7 +3576,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .partial(
             root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
             text=protect_water_sight,
-            filename="activities_altered_elephant_presence_bar_chart.html",
+            filename="protect_water_from_elephants_bar_chart.html",
             **(params.get("persist_water_sight_bar") or {}),
         )
         .call()
@@ -4571,7 +4572,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .partial(
             root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
             text=ele_seasonal,
-            filename="male_elephant_secretion_bar_chart.html",
+            filename="elephants_move_seasonally_bar_chart.html",
             **(params.get("persist_ele_seasonal") or {}),
         )
         .call()
@@ -5207,7 +5208,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             df=replace_bins_mapping,
             filename="elephant-sentiment-table",
             root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
-            filetype="csv",
+            filetype="gpkg",
             **(params.get("ele_sentiment") or {}),
         )
         .call()
@@ -5397,7 +5398,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         )
         .partial(
             text=education_boxplot,
-            filename="age_group_boxplot_chart.html",
+            filename="education_level_boxplot_chart.html",
             root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
             filename_suffix=None,
             **(params.get("persist_education") or {}),
@@ -7586,6 +7587,168 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             title="Sentiment event map",
             data=persist_sent_map,
             **(params.get("widget_52") or {}),
+        )
+        .call()
+    )
+
+    convert_charts_to_png = (
+        task(html_to_png)
+        .validate()
+        .set_task_instance_id("convert_charts_to_png")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(
+            html_path=[
+                persist_age_group_pie,
+                persist_land_arrange_pie,
+                highest_education_pie,
+                tribe_pie,
+                crop_production_pie,
+                livestock_threat_pie,
+                marital_status_pie,
+                overall_wildlife_pie,
+                often_seen_ele_pie,
+                ele_harmed_pie,
+                gender_pie,
+                persist_age_bins_bar,
+                persist_cattle_bins_bar,
+                persist_dog_bins_bar,
+                persist_donkey_bins_bar,
+                persist_other_bins_bar,
+                persist_household_bar,
+                persist_sheep_goats_bar,
+                persist_land_grown_bar,
+                persist_land_owned_bar,
+                persist_benefit_electric_bar,
+                persist_route_base_ele_bar,
+                persist_water_sight_bar,
+                persist_see_eles_bar,
+                persist_ele_damage_bar,
+                persist_ele_livestock_bar,
+                persist_illness_wild,
+                persist_harmed_ele,
+                persist_ele_conflict,
+                persist_ele_comm_bar,
+                persist_ele_secretion,
+                persist_ele_presence,
+                persist_ele_annoyed,
+                persist_ele_smell_far_away,
+                persist_ele_seasonal,
+                persist_female_young,
+                persist_female_groups,
+                persist_witness_ele,
+                persist_likert_chart,
+                persist_gender_boxplot,
+                persist_age_boxplot,
+                persist_education,
+                persist_tribe,
+                persist_marital,
+                persist_gtukey,
+                persist_mtukey,
+                persist_age_group,
+                persist_education_tukey,
+                persist_house_scatter,
+                persist_age_scatter,
+            ],
+            output_dir=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
+            config={
+                "width": 1280,
+                "height": 720,
+                "full_page": False,
+                "device_scale_factor": 2.0,
+                "wait_for_timeout": 1,
+                "timeout": 0,
+                "max_concurrent_pages": 10,
+            },
+            **(params.get("convert_charts_to_png") or {}),
+        )
+        .call()
+    )
+
+    convert_survey_map_png = (
+        task(html_to_png)
+        .validate()
+        .set_task_instance_id("convert_survey_map_png")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(
+            html_path=persist_survey_map,
+            output_dir=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
+            config={
+                "full_page": False,
+                "device_scale_factor": 2.0,
+                "wait_for_timeout": 40000,
+                "max_concurrent_pages": 1,
+            },
+            **(params.get("convert_survey_map_png") or {}),
+        )
+        .call()
+    )
+
+    convert_gender_map_png = (
+        task(html_to_png)
+        .validate()
+        .set_task_instance_id("convert_gender_map_png")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(
+            html_path=persist_gender_map,
+            output_dir=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
+            config={
+                "full_page": False,
+                "device_scale_factor": 2.0,
+                "wait_for_timeout": 40000,
+                "max_concurrent_pages": 1,
+            },
+            **(params.get("convert_gender_map_png") or {}),
+        )
+        .call()
+    )
+
+    convert_sent_map_png = (
+        task(html_to_png)
+        .validate()
+        .set_task_instance_id("convert_sent_map_png")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(
+            html_path=persist_sent_map,
+            output_dir=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
+            config={
+                "full_page": False,
+                "device_scale_factor": 2.0,
+                "wait_for_timeout": 40000,
+                "max_concurrent_pages": 1,
+            },
+            **(params.get("convert_sent_map_png") or {}),
         )
         .call()
     )

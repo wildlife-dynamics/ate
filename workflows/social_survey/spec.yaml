@@ -893,14 +893,14 @@ workflow:
       inplace: true 
       errors: "ignore"
 
-  - name: Persist events as geoparquet 
-    id: events_geoparquet 
+  - name: Persist events as geopackage
+    id: events_gpkg
     task: persist_df 
     partial:
       df: ${{ workflow.replace_marital_status.return }}
       filename: "survey-events"
       root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
-      filetype: "csv"
+      filetype: "gpkg"
   
   # Draw Pie Charts 
   - name: Draw age group pie chart
@@ -1832,7 +1832,7 @@ workflow:
       df: ${{ workflow.format_demo_table.return }}
       filename: "demographic-data"
       root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
-      filetype: "csv"
+      filetype: "geoparquet"
 
 # Filter out only agree-disagree columns 
   - name: Retain agree disagree columns
@@ -2071,8 +2071,7 @@ workflow:
     partial:
       root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
       text: ${{ workflow.protect_water_sight.return }}
-      filename: "activities_altered_elephant_presence_bar_chart.html"
-
+      filename: "protect_water_from_elephants_bar_chart.html"
 
   - name: Draw see more elephants bar chart 
     id: see_more_eles
@@ -2692,7 +2691,7 @@ workflow:
     partial:
       root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
       text: ${{ workflow.ele_seasonal.return }}
-      filename: "male_elephant_secretion_bar_chart.html"
+      filename: "elephants_move_seasonally_bar_chart.html"
 
   - name: Draw Female Elephants are Protective over their Young
     id: female_young
@@ -3072,14 +3071,14 @@ workflow:
       inplace: true 
       errors: "ignore"
 
-  - name: Persist sentiment table as geoparquet 
+  - name: Persist sentiment table as gpkg
     id: ele_sentiment 
     task: persist_df 
     partial:
       df: ${{ workflow.replace_bins_mapping.return }}
       filename: "elephant-sentiment-table"
       root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
-      filetype: "csv"
+      filetype: "gpkg"
 
   - name: Gender of participant boxplot 
     id: gender_boxplot 
@@ -3197,7 +3196,7 @@ workflow:
     task: persist_text
     partial:
       text: ${{ workflow.education_boxplot.return }}
-      filename:  "age_group_boxplot_chart.html"
+      filename:  "education_level_boxplot_chart.html"
       root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
       filename_suffix: null # png
 
@@ -4188,6 +4187,107 @@ workflow:
     partial:
       title: "Sentiment event map"
       data: ${{ workflow.persist_sent_map.return }}
+
+  - name: Convert all chart HTML outputs to PNG
+    id: convert_charts_to_png
+    task: html_to_png
+    partial:
+      html_path:
+        - ${{ workflow.persist_age_group_pie.return }}
+        - ${{ workflow.persist_land_arrange_pie.return }}
+        - ${{ workflow.highest_education_pie.return }}
+        - ${{ workflow.tribe_pie.return }}
+        - ${{ workflow.crop_production_pie.return }}
+        - ${{ workflow.livestock_threat_pie.return }}
+        - ${{ workflow.marital_status_pie.return }}
+        - ${{ workflow.overall_wildlife_pie.return }}
+        - ${{ workflow.often_seen_ele_pie.return }}
+        - ${{ workflow.ele_harmed_pie.return }}
+        - ${{ workflow.gender_pie.return }}
+        - ${{ workflow.persist_age_bins_bar.return }}
+        - ${{ workflow.persist_cattle_bins_bar.return }}
+        - ${{ workflow.persist_dog_bins_bar.return }}
+        - ${{ workflow.persist_donkey_bins_bar.return }}
+        - ${{ workflow.persist_other_bins_bar.return }}
+        - ${{ workflow.persist_household_bar.return }}
+        - ${{ workflow.persist_sheep_goats_bar.return }}
+        - ${{ workflow.persist_land_grown_bar.return }}
+        - ${{ workflow.persist_land_owned_bar.return }}
+        - ${{ workflow.persist_benefit_electric_bar.return }}
+        - ${{ workflow.persist_route_base_ele_bar.return }}
+        - ${{ workflow.persist_water_sight_bar.return }}
+        - ${{ workflow.persist_see_eles_bar.return }}
+        - ${{ workflow.persist_ele_damage_bar.return }}
+        - ${{ workflow.persist_ele_livestock_bar.return }}
+        - ${{ workflow.persist_illness_wild.return }}
+        - ${{ workflow.persist_harmed_ele.return }}
+        - ${{ workflow.persist_ele_conflict.return }}
+        - ${{ workflow.persist_ele_comm_bar.return }}
+        - ${{ workflow.persist_ele_secretion.return }}
+        - ${{ workflow.persist_ele_presence.return }}
+        - ${{ workflow.persist_ele_annoyed.return }}
+        - ${{ workflow.persist_ele_smell_far_away.return }}
+        - ${{ workflow.persist_ele_seasonal.return }}
+        - ${{ workflow.persist_female_young.return }}
+        - ${{ workflow.persist_female_groups.return }}
+        - ${{ workflow.persist_witness_ele.return }}
+        - ${{ workflow.persist_likert_chart.return }}
+        - ${{ workflow.persist_gender_boxplot.return }}
+        - ${{ workflow.persist_age_boxplot.return }}
+        - ${{ workflow.persist_education.return }}
+        - ${{ workflow.persist_tribe.return }}
+        - ${{ workflow.persist_marital.return }}
+        - ${{ workflow.persist_gtukey.return }}
+        - ${{ workflow.persist_mtukey.return }}
+        - ${{ workflow.persist_age_group.return }}
+        - ${{ workflow.persist_education_tukey.return }}
+        - ${{ workflow.persist_house_scatter.return }}
+        - ${{ workflow.persist_age_scatter.return }}
+      output_dir: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      config: 
+        width: 1280          
+        height: 720          
+        full_page: false
+        device_scale_factor: 2.0 
+        wait_for_timeout: 1
+        timeout: 0 
+        max_concurrent_pages: 10
+
+  - name: Convert survey events map to PNG
+    id: convert_survey_map_png
+    task: html_to_png
+    partial:
+      html_path: ${{ workflow.persist_survey_map.return }}
+      output_dir: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      config:
+        full_page: false
+        device_scale_factor: 2.0
+        wait_for_timeout: 40000
+        max_concurrent_pages: 1
+
+  - name: Convert gender event map to PNG
+    id: convert_gender_map_png
+    task: html_to_png
+    partial:
+      html_path: ${{ workflow.persist_gender_map.return }}
+      output_dir: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      config:
+        full_page: false
+        device_scale_factor: 2.0
+        wait_for_timeout: 40000
+        max_concurrent_pages: 1
+
+  - name: Convert sentiment event map to PNG
+    id: convert_sent_map_png
+    task: html_to_png
+    partial:
+      html_path: ${{ workflow.persist_sent_map.return }}
+      output_dir: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      config:
+        full_page: false
+        device_scale_factor: 2.0
+        wait_for_timeout: 40000
+        max_concurrent_pages: 1
 
   - name: Social Survey Dashboard
     id: survey_dashboard
