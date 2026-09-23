@@ -5,29 +5,38 @@
 
 ```yaml
 # fingerprint:
-artifacts_sha256_basic: 64b3bc3339f74444f6c8d0250238925225524c515f6e781da97ada47c88d32f9
-artifacts_sha256_strict: 5e9248fd7eda0c1e7ac7e56103e1457d19edea4085ad77ed29a5dab5b77607af
+artifacts_sha256_basic: 598e8d17f0ba18e597c45d63845df10477f212b798ea97d24a85c65a388b8776
+artifacts_sha256_strict: 90a70a0a8da4fb2d7897fbfe2eb66a0bcda3e00fc2c71e62c510e8a4e47e6edb
 installed_requirements:
 - channel: https://repo.prefix.dev/ecoscope-workflows/
-  name: ecoscope-workflows-core
-  version: {version: ==0.22.17}
-- channel: https://repo.prefix.dev/ecoscope-workflows/
-  name: ecoscope-workflows-ext-ecoscope
-  version: {version: ==0.22.17}
+  name: ecoscope-platform
+  version: {version: ==2.18.0}
 - channel: https://repo.prefix.dev/ecoscope-workflows-custom/
   name: ecoscope-workflows-ext-custom
-  version: {version: ==0.0.39}
+  version: {version: ==0.1.0rc14}
 - channel: https://repo.prefix.dev/ecoscope-workflows-custom/
   name: ecoscope-workflows-ext-ste
-  version: {version: ==0.0.17}
+  version: {version: ==0.0.0rc1}
 - channel: https://repo.prefix.dev/ecoscope-workflows-custom/
   name: ecoscope-workflows-ext-mnc
-  version: {version: ==0.0.7}
+  version: {version: ==1.0.5}
 - channel: https://repo.prefix.dev/ecoscope-workflows-custom/
+  name: ecoscope-workflows-ext-wwf-virunga
+  version: {version: ==0.0.0rc9}
+- channel: https://repo.prefix.dev/ecoscope-workflows-custom/
+  name: ecoscope-workflows-ext-big-life
+  version: {version: ==1.0.2}
+- channel: file:///tmp/ecoscope-workflows-custom/release/artifacts/
   name: ecoscope-workflows-ext-ate
-  version: {version: ==0.0.3}
+  version: {version: ==0.0.4.dev7+gcf7cf8b91.d20260923}
+- channel: conda-forge
+  name: pydeck
+  version: {version: ==0.9.2}
+- channel: conda-forge
+  name: opentelemetry-sdk
+  version: {version: ==1.44.0}
 params_sha256: 3ab4c0f59c459fe3feea277da14ef6a8b3d0dfc0f958f3f015ddd4d700bcc5f8
-spec_sha256: 39aeba7e31f4bfd7a59a857c5464d574fb6ddaa6c761d283fea725bcc63ad653
+spec_sha256: 1c2449aae25e948997697846e4f060a7e2e1b995534bc449228a8a8fa9737d66
 
 ```
 
