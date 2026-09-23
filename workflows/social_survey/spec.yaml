@@ -2872,7 +2872,7 @@ workflow:
       raise_if_not_found: false
 
   - name: Create agree-disagree likert chart 
-    id: agree_disgree_chart 
+    id: agree_disagree_chart 
     task: draw_likert_chart
     partial: 
       dataframe: ${{ workflow.filter_agree_disagree.return }}
@@ -2921,7 +2921,7 @@ workflow:
     task: persist_text
     partial:
       root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
-      text: ${{ workflow.agree_disgree_chart.return }}
+      text: ${{ workflow.agree_disagree_chart.return }}
       filename: "ele_sentiment_chart.html"
   
   - name: Replace agree disagree columns with negative values 
